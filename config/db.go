@@ -9,6 +9,7 @@ import (
 )
 
 func SetupDB(config *Config) (*gorm.DB, error) {
+	fmt.Println("Connecting to DB")
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.DBUsername,
 		config.DBPassword,
@@ -16,12 +17,11 @@ func SetupDB(config *Config) (*gorm.DB, error) {
 		config.DBPort,
 		config.DBName,
 	)
-	println(dsn)
+	
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		println(dsn)
 		log.Fatalf("failed to connect to database: %v", err)
 	}
-
+	
 	return db, nil
 }

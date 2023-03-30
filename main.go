@@ -5,23 +5,22 @@ import (
 	"amacoonservices/handlers"
 	"amacoonservices/repositories"
 	"amacoonservices/routes"
-	//"amacoonservices/models"
 	"fmt"
+
+	//"amacoonservices/models"
+
 	"log"
-	"net/http"
 )
 
 func main() {
 	// Load configuration file
 	cfg := config.LoadConfig()
-	
+
 	// Connect to database
-	fmt.Println("Connecting to DB")
 	db, err := config.SetupDB(cfg)
 	if err != nil {
 		panic(err.Error())
 	}
-
 	// Testa a conexão com o banco de dados
 	sqlDB, err := db.DB()
 	if err != nil {
@@ -33,9 +32,7 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-
 	fmt.Println("DB Connected")
-	
 	// Migrate database schema
 	/* if err := db.AutoMigrate(
 		&models.Litter{},
@@ -51,7 +48,6 @@ func main() {
 	litterRepo := repositories.LitterRepository{DB: db}
 	breedRepo := &repositories.BreedRepository{DB: db}
 	countryRepo := &repositories.CountryRepository{DB: db}
-	
 
 	// Initialize handlers
 	catHandler := &handlers.CatHandler{CatRepo: catRepo}
@@ -62,13 +58,10 @@ func main() {
 	countryHandler := &handlers.CountryHandler{CountryRepo: countryRepo}
 
 	// Initialize router and routes
-	router := routes.NewRouter(catHandler, ownerHandler, colorHandler, litterHandler, breedHandler, countryHandler)
+	echo := routes.NewRouter(catHandler, ownerHandler, colorHandler, litterHandler, breedHandler, countryHandler)
 
 	// Start server
-	addr := fmt.Sprintf("%s:%s", "", cfg.ServerPort)
-	log.Printf("Starting server at %s", addr)
-
-	if err := http.ListenAndServe(addr, router); err != nil {
+	if err := echo.Start(":" + "8080"); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }

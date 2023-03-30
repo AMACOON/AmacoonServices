@@ -12,7 +12,7 @@ type CatRepository struct {
 }
 
 func (r *CatRepository) GetCatsByExhibitorAndSex(idExhibitor int, sex int) ([]models.Cat, error) {
-	fmt.Println("Entrou REPO Cats", sex)
+	fmt.Println("Repo Cats All")
 
 	var cats []models.Cat
 
@@ -26,10 +26,12 @@ func (r *CatRepository) GetCatsByExhibitorAndSex(idExhibitor int, sex int) ([]mo
 	if err := query.Error; err != nil {
 		return nil, err
 	}
+	fmt.Println("Repo Cats All OK")
 	return cats, nil
 }
 
 func (r *CatRepository) GetCatByRegistration(registration string) (*models.Cat, error) {
+	fmt.Println("Repo Cats ID")
 	var cat models.Cat
 
 	query := r.DB.Unscoped().Joins("JOIN racas ON gatos.id_raca = racas.id_racas").
@@ -42,12 +44,12 @@ func (r *CatRepository) GetCatByRegistration(registration string) (*models.Cat, 
 	if err := query.Error; err != nil {
 		return nil, err
 	}
-
+	fmt.Println("Repo Cats ID OK")
 	return &cat, nil
 }
 
 func (r *CatRepository) GetCatsByExhibitorAndSexService(idExhibitor int, sex int) ([]models.CatService, error) {
-	fmt.Println("Entrou REPO Cats", sex)
+	fmt.Println("Repo CatsService All")
 
 	var cats []models.CatService
 
@@ -69,11 +71,12 @@ func (r *CatRepository) GetCatsByExhibitorAndSexService(idExhibitor int, sex int
 	if err := query.Error; err != nil {
 		return nil, err
 	}
+	fmt.Println("Repo CatsService All OK")
 	return cats, nil
 }
 
 func (r *CatRepository) GetCatByRegistrationService(registration string) ([]models.CatService, error) {
-	
+	fmt.Println("Repo CatsService ID")
 
 	var cats []models.CatService
 
@@ -95,5 +98,6 @@ func (r *CatRepository) GetCatByRegistrationService(registration string) ([]mode
 	if err := query.Error; err != nil {
 		return nil, err
 	}
+	fmt.Println("Repo CatsService All OK")
 	return cats, nil
 }
