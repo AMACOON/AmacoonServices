@@ -49,3 +49,34 @@ type Cat struct {
 func (c *Cat) TableName() string {
 	return "gatos"
 }
+
+type CatService struct {
+	*gorm.Model
+	CatID        int    `gorm:"column:id_gatos;primaryKey"`
+	Name         string `gorm:"column:nome_do_gato;index:idx_1"`
+	Registration string `gorm:"column:registro"`
+	Microchip    string `gorm:"column:microchip"`
+	BreedName    string `gorm:"column:nome_raca"`
+	BreedID      string `gorm:"column:id_raca"`
+	ColorID      int    `gorm:"column:id_cor"`
+	ColorName    string `gorm:"column:nome_cor"`
+	EmsCode      string `gorm:"column:id_emscode"`
+	Sex          string `gorm:"column:sexo"`
+	Birthdate    string `gorm:"column:nascimento"`
+	//Country      string `gorm:"column:pais_do_gato"`
+	FatherName   string `gorm:"column:nome_do_pai"`
+	MotherName   string `gorm:"column:nome_da_mae"`
+	BreederName  string `gorm:"column:nome_gatil"`
+	BreederOwner string `gorm:"column:criador"`
+	BreederID    int    `gorm:"column:id_gatil"`
+	OwnerID      int    `gorm:"column:id_expositor;index:idx_1"`
+	OwnerName    string `gorm:"column:nome_expositor"`
+	Address      string `gorm:"column:endereco"`
+	ZipCode      string `gorm:"column:cep"`
+	City         string `gorm:"column:cidade"`
+	State        string `gorm:"column:estado"`
+	Phone        string `gorm:"column:telefone"`
+}
+func (c *CatService) TableName() string {
+	return "gatos"
+}

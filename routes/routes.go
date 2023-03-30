@@ -24,6 +24,8 @@ func NewRouter(catHandler *handlers.CatHandler,
 	// Cats endpoints
 	e.GET("/cats", catHandler.GetCatsByExhibitorAndSex)
 	e.GET("/cats/:registration", catHandler.GetCatByRegistration)
+	e.GET("/catsservice", catHandler.GetCatsByExhibitorAndSexService)
+	e.GET("/catsservice/:registration", catHandler.GetCatByRegistrationService)
 
 	
 	// Owners endpoints
