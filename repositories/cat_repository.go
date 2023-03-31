@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"amacoonservices/models"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -12,7 +11,6 @@ type CatRepository struct {
 }
 
 func (r *CatRepository) GetCatsByExhibitorAndSex(idExhibitor int, sex int) ([]models.Cat, error) {
-	fmt.Println("Repo Cats All")
 
 	var cats []models.Cat
 
@@ -26,12 +24,12 @@ func (r *CatRepository) GetCatsByExhibitorAndSex(idExhibitor int, sex int) ([]mo
 	if err := query.Error; err != nil {
 		return nil, err
 	}
-	fmt.Println("Repo Cats All OK")
+
 	return cats, nil
 }
 
 func (r *CatRepository) GetCatByRegistration(registration string) (*models.Cat, error) {
-	fmt.Println("Repo Cats ID")
+
 	var cat models.Cat
 
 	query := r.DB.Unscoped().Joins("JOIN racas ON gatos.id_raca = racas.id_racas").
@@ -44,12 +42,11 @@ func (r *CatRepository) GetCatByRegistration(registration string) (*models.Cat, 
 	if err := query.Error; err != nil {
 		return nil, err
 	}
-	fmt.Println("Repo Cats ID OK")
+
 	return &cat, nil
 }
 
 func (r *CatRepository) GetCatsByExhibitorAndSexService(idExhibitor int, sex int) ([]models.CatService, error) {
-	fmt.Println("Repo CatsService All")
 
 	var cats []models.CatService
 
@@ -57,7 +54,7 @@ func (r *CatRepository) GetCatsByExhibitorAndSexService(idExhibitor int, sex int
 		Joins("JOIN cores ON gatos.id_cor = cores.id_cores").
 		Joins("JOIN gatis ON gatos.id_gatil = gatis.id_gatis").
 		Joins("JOIN expositores ON gatos.id_expositor= expositores.id_expositores").
-		Select(`gatos.id_gatos, gatos.nome_do_gato, gatos.registro,
+		Select(`gatos.id_gatos, gatos.nome_do_gato, gatos.registro, gatos.pais_do_gato,
 				gatos.microchip, racas.nome AS nome_raca, gatos.id_raca,
 				gatos.id_cor, cores.descricao AS nome_cor, cores.id_emscode AS id_emscode,
 				gatos.sexo, gatos.nascimento,
@@ -65,18 +62,17 @@ func (r *CatRepository) GetCatsByExhibitorAndSexService(idExhibitor int, sex int
 				gatis.criador_gatil, gatos.id_gatil, gatos.id_expositor,
 				gatos.criador, expositores.nome AS nome_expositor, expositores.endereco, expositores.cep,
 				expositores.cidade, expositores.estado, expositores.telefone`).
-				Where("gatos.id_expositor = ? AND gatos.sexo = ?", idExhibitor, sex).
-				Find(&cats)
+		Where("gatos.id_expositor = ? AND gatos.sexo = ?", idExhibitor, sex).
+		Find(&cats)
 
 	if err := query.Error; err != nil {
 		return nil, err
 	}
-	fmt.Println("Repo CatsService All OK")
+
 	return cats, nil
 }
 
 func (r *CatRepository) GetCatByRegistrationService(registration string) ([]models.CatService, error) {
-	fmt.Println("Repo CatsService ID")
 
 	var cats []models.CatService
 
@@ -92,12 +88,12 @@ func (r *CatRepository) GetCatByRegistrationService(registration string) ([]mode
 				gatis.criador_gatil, gatos.id_gatil, gatos.id_expositor,
 				gatos.criador, expositores.nome AS nome_expositor, expositores.endereco, expositores.cep,
 				expositores.cidade, expositores.estado, expositores.telefone`).
-				Where("registro = ?", registration).
-				Find(&cats)
+		Where("registro = ?", registration).
+		Find(&cats)
 
 	if err := query.Error; err != nil {
 		return nil, err
 	}
-	fmt.Println("Repo CatsService All OK")
+
 	return cats, nil
 }

@@ -26,7 +26,7 @@ func getSexAsInt(sex string) (int, error) {
 }
 
 func (h *CatHandler) GetCatsByExhibitorAndSex(c echo.Context) error {
-	fmt.Println("Handler Cats All")
+	
 	
 	idExhibitor, err := strconv.Atoi(c.QueryParam("id_exhibitor"))
 	if err != nil {
@@ -52,7 +52,7 @@ func (h *CatHandler) GetCatsByExhibitorAndSex(c echo.Context) error {
 }
 
 func (h *CatHandler) GetCatByRegistration(c echo.Context) error {
-    fmt.Println("Handler Cats ID")
+  
 	registration := c.Param("registration")
 
     cat, err := h.CatRepo.GetCatByRegistration(registration)
@@ -68,7 +68,7 @@ func (h *CatHandler) GetCatByRegistration(c echo.Context) error {
 }
 
 func (h *CatHandler) GetCatsByExhibitorAndSexService(c echo.Context) error {
-	fmt.Println("Handler CatsService All")
+	
 	
 	idExhibitor, err := strconv.Atoi(c.QueryParam("id_exhibitor"))
 	if err != nil {
@@ -94,7 +94,7 @@ func (h *CatHandler) GetCatsByExhibitorAndSexService(c echo.Context) error {
 }
 
 func (h *CatHandler) GetCatByRegistrationService(c echo.Context) error {
-    fmt.Println("Handler CatsService ID")
+    
 	registration := c.Param("registration")
 
     cat, err := h.CatRepo.GetCatByRegistrationService(registration)

@@ -23,8 +23,22 @@ func (h *LitterHandler) GetAllLitters(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, litters)
+	var litterDatas []models.LitterData
+
+	// Transform each Litter and its Kittens into a LitterData struct
+	for _, litter := range litters {
+		kittens, err := h.LitterRepo.GetKittensByLitterID(litter.ID)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+
+		litterData := converter.TransformLitterAndKittensToLitterData(&litter, kittens)
+		litterDatas = append(litterDatas, *litterData)
+	}
+
+	return c.JSON(http.StatusOK, litterDatas)
 }
+
 
 func (h *LitterHandler) GetLitterByID(c echo.Context) error {
 	// Parse the LitterID from the request params

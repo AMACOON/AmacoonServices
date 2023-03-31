@@ -63,7 +63,7 @@ type CatService struct {
 	EmsCode      string `gorm:"column:id_emscode"`
 	Sex          string `gorm:"column:sexo"`
 	Birthdate    string `gorm:"column:nascimento"`
-	//Country      string `gorm:"column:pais_do_gato"`
+	CountryCode  string `gorm:"column:pais_do_gato"`
 	FatherName   string `gorm:"column:nome_do_pai"`
 	MotherName   string `gorm:"column:nome_da_mae"`
 	BreederName  string `gorm:"column:nome_gatil"`
@@ -77,6 +77,7 @@ type CatService struct {
 	State        string `gorm:"column:estado"`
 	Phone        string `gorm:"column:telefone"`
 }
+
 func (c *CatService) TableName() string {
 	return "gatos"
 }

@@ -6,10 +6,12 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	
+
 )
 
 func SetupDB(config *Config) (*gorm.DB, error) {
-	fmt.Println("Connecting to DB")
+	
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.DBUsername,
 		config.DBPassword,

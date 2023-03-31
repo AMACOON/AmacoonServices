@@ -3,7 +3,7 @@ package handlers
 import (
 	"amacoonservices/repositories"
 	"net/http"
-"fmt"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,13 +20,14 @@ func (h *BreedHandler) GetAllBreeds(c echo.Context) error {
 	return c.JSON(http.StatusOK, breeds)
 }
 func (h *BreedHandler) GetCompatibleBreeds(c echo.Context, BreedID string) error {
+	logger := c.Logger()
 	breeds, err := h.BreedRepo.GetCompatibleBreeds(BreedID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	 if len(breeds) == 0 {
-        fmt.Println("raça", BreedID, "não tem raças compatíveis")	
-    }
+	if len(breeds) == 0 {
+		logger.Info("raça", BreedID, "não tem raças compatíveis")
+	}
 
 	return c.JSON(http.StatusOK, breeds)
 }
