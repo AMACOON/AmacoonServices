@@ -4,6 +4,7 @@ import (
 	"amacoonservices/models"
 
 	"gorm.io/gorm"
+	"fmt"
 )
 
 type LitterRepository struct {
@@ -25,7 +26,7 @@ func (r *LitterRepository) GetLitterByID(id uint) (*models.Litter, []*models.Kit
     }
     
     var kittens []*models.Kitten
-    if err := r.DB.Where("litter_id = ?", id).Find(&kittens).Error; err != nil {
+    if err := r.DB.Where("id_ninhadas = ?", id).Find(&kittens).Error; err != nil {
         return nil, nil, err
     }
 
@@ -33,6 +34,16 @@ func (r *LitterRepository) GetLitterByID(id uint) (*models.Litter, []*models.Kit
 }
 
 func (r *LitterRepository) CreateLitter(litter *models.Litter, kittens []*models.Kitten) (uint, error) {
+	fmt.Println("Repo Litter Create")
+	
+	// Define o status da ninhada como "Pending"
+	litter.Status = "Pending"
+
+	// Define o status dos filhotes como "Pending"
+	for _, kitten := range kittens {
+		kitten.Status = "Pending"
+	}
+
 	tx := r.DB.Begin()
 
 	// Cria a ninhada
@@ -43,7 +54,7 @@ func (r *LitterRepository) CreateLitter(litter *models.Litter, kittens []*models
 
 	// Define o LitterID
 	for i, kitten := range kittens {
-		kitten.LitterID = litter.LitterID
+		kitten.LitterID = litter.ID
 		kittens[i] = kitten
 	}
 
@@ -57,9 +68,10 @@ func (r *LitterRepository) CreateLitter(litter *models.Litter, kittens []*models
 		tx.Rollback()
 		return 0, err
 	}
-
-	return litter.LitterID, nil
+	fmt.Println("Repo Litter Create - OK")
+	return litter.ID, nil
 }
+
 
 
 func (r *LitterRepository) UpdateLitter(litter *models.Litter) error {

@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"amacoonservices/handlers/converter"
 	"amacoonservices/models"
 	"amacoonservices/repositories"
-	"amacoonservices/handlers/converter"
-	
+
 	"net/http"
 
+	"fmt"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -45,9 +46,9 @@ func (h *LitterHandler) GetLitterByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, litterData)
 }
 
-
-
 func (h *LitterHandler) CreateLitter(c echo.Context) error {
+	fmt.Println("Handler Litter Create")
+
 	// Parse the request body into a LitterData struct
 	var litterData models.LitterData
 	if err := c.Bind(&litterData); err != nil {
@@ -56,7 +57,7 @@ func (h *LitterHandler) CreateLitter(c echo.Context) error {
 
 	// Transform LitterData into a models.Litter struct
 	litter, kittens := converter.TransformLitterDataToLitterAndKittens(litterData)
-	
+
 	// Call the repository to create the litter and its kittens
 	litterID, err := h.LitterRepo.CreateLitter(&litter, kittens)
 	if err != nil {
@@ -64,6 +65,7 @@ func (h *LitterHandler) CreateLitter(c echo.Context) error {
 	}
 
 	// Return the LitterID as a response
+	fmt.Println("Handler Litter Create - OK")
 	return c.JSON(http.StatusOK, map[string]string{
 		"litter_id": strconv.Itoa(int(litterID)),
 	})
@@ -71,11 +73,11 @@ func (h *LitterHandler) CreateLitter(c echo.Context) error {
 }
 
 func (h *LitterHandler) UpdateLitter(c echo.Context) error {
-	
+
 	return c.JSON(http.StatusOK, "Testeupdate")
 }
 
 func (h *LitterHandler) DeleteLitter(c echo.Context) error {
-	
+
 	return c.NoContent(http.StatusOK)
 }

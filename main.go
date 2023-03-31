@@ -7,7 +7,7 @@ import (
 	"amacoonservices/routes"
 	"fmt"
 
-	//"amacoonservices/models"
+	"amacoonservices/models"
 
 	"log"
 )
@@ -34,12 +34,12 @@ func main() {
 	}
 	fmt.Println("DB Connected")
 	// Migrate database schema
-	/* if err := db.AutoMigrate(
+	 if err := db.AutoMigrate(
 		&models.Litter{},
 		&models.Kitten{},
 	); err != nil {
 		log.Fatalf("failed to migrate database schema: %v", err)
-	} */
+	} 
 
 	// Initialize repositories
 	catRepo := repositories.CatRepository{DB: db}
