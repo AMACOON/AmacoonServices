@@ -2,8 +2,9 @@ package models
 
 import "gorm.io/gorm"
 
-type Litter struct {
+type LitterDB struct {
 	gorm.Model
+	ID              uint   `gorm:"primaryKey;autoIncrement"`
 	FatherName      string `gorm:"column:nome_pai"`
 	FatherReg       string `gorm:"column:registro_pai"`
 	FatherMicro     string `gorm:"column:microchip_pai"`
@@ -34,21 +35,22 @@ type Litter struct {
 	MotherCountry   string `gorm:"column:pais_expositor_mae"`
 	MotherPhone     string `gorm:"column:telefone_expositor_mae"`
 
-	CatteryID   uint   `gorm:"column:id_gatis"`
-	CatteryName string `gorm:"column:nome_gatil"`
-	NumKittens  int    `gorm:"column:num_filhotes"`
-	BirthDate   string `gorm:"column:data_nascimento"`
-	Country     string `gorm:"column:pais_ninhada"`
+	CatteryID      uint   `gorm:"column:id_gatis"`
+	CatteryName    string `gorm:"column:nome_gatil"`
+	NumKittens     int    `gorm:"column:num_filhotes"`
+	BirthDate      string `gorm:"column:data_nascimento"`
+	Country        string `gorm:"column:pais_ninhada"`
 	ProtocolNumber string `gorm:"not null"`
-	Status string `gorm:"column:status"`
+	Status         string `gorm:"column:status"`
 }
 
-func (l *Litter) TableName() string {
+func (l *LitterDB) TableName() string {
 	return "ninhadas"
 }
 
-type Kitten struct {
+type KittenDB struct {
 	gorm.Model
+	ID         uint   `gorm:"primaryKey;autoIncrement"`
 	LitterID   uint   `gorm:"column:id_ninhadas"`
 	BreedName  string `gorm:"column:nome_raça"`
 	ColorName  string `gorm:"column:nome_cor"`
@@ -61,23 +63,24 @@ type Kitten struct {
 	Status     string `gorm:"column:status"`
 }
 
-func (k *Kitten) TableName() string {
+func (k *KittenDB) TableName() string {
 	return "filhotes"
 }
 
 //////////////////////////////
 // Models para Serviço
 
-type LitterData struct {
-	MotherData CatData
-	FatherData CatData
-	BirthData  BirthData
-	KittenData []KittenService
-	LitterID   uint
-	Status     string
+type Litter struct {
+	MotherData     CatLitter
+	FatherData     CatLitter
+	BirthData      BirthLitter
+	KittenData     []KittenLitter
+	LitterID       uint
+	Status         string
+	ProtocolNumber string
 }
 
-type CatData struct {
+type CatLitter struct {
 	Name         string
 	Registration string
 	Microchip    string
@@ -94,7 +97,7 @@ type CatData struct {
 	Phone        string
 }
 
-type BirthData struct {
+type BirthLitter struct {
 	CatteryID   uint
 	CatteryName string
 	NumKittens  int
@@ -102,9 +105,9 @@ type BirthData struct {
 	Country     string
 }
 
-type KittenService struct {
+type KittenLitter struct {
 	KittenID   *uint
-    LitterID   *uint
+	LitterID   *uint
 	BreedName  string
 	ColorName  string
 	EmsCodeID  string

@@ -1,13 +1,13 @@
 package converter
 
 import (
-	"amacoonservices/models/services"
+	models "amacoonservices/models/services"
 	"fmt"
 )
 
-func TransformLitterAndKittensToLitterData(litter *models.Litter, kittens []*models.Kitten) *models.LitterData {
-	litterData := &models.LitterData{
-		MotherData: models.CatData{
+func LitterDBToLitter(litter *models.LitterDB, kittens []*models.KittenDB) *models.Litter {
+	litterData := &models.Litter{
+		MotherData: models.CatLitter{
 			Name:         litter.MotherName,
 			Registration: litter.MotherReg,
 			Microchip:    litter.MotherMicro,
@@ -23,7 +23,7 @@ func TransformLitterAndKittensToLitterData(litter *models.Litter, kittens []*mod
 			Country:      litter.MotherCountry,
 			Phone:        litter.MotherPhone,
 		},
-		FatherData: models.CatData{
+		FatherData: models.CatLitter{
 			Name:         litter.FatherName,
 			Registration: litter.FatherReg,
 			Microchip:    litter.FatherMicro,
@@ -39,20 +39,21 @@ func TransformLitterAndKittensToLitterData(litter *models.Litter, kittens []*mod
 			Country:      litter.FatherCountry,
 			Phone:        litter.FatherPhone,
 		},
-		BirthData: models.BirthData{
+		BirthData: models.BirthLitter{
 			CatteryID:   litter.CatteryID,
 			CatteryName: litter.CatteryName,
 			NumKittens:  litter.NumKittens,
 			BirthDate:   litter.BirthDate,
 			Country:     litter.Country,
 		},
-		LitterID: litter.ID,
-		Status:   litter.Status,
+		LitterID:       litter.ID,
+		Status:         litter.Status,
+		ProtocolNumber: litter.ProtocolNumber,
 	}
 
-	kittenDataSlice := make([]models.KittenService, len(kittens))
+	kittenDataSlice := make([]models.KittenLitter, len(kittens))
 	for i, kitten := range kittens {
-		kittenData := models.KittenService{
+		kittenData := models.KittenLitter{
 			KittenID:   &kitten.ID,
 			LitterID:   &kitten.LitterID,
 			BreedName:  kitten.BreedName,
@@ -72,10 +73,10 @@ func TransformLitterAndKittensToLitterData(litter *models.Litter, kittens []*mod
 	return litterData
 }
 
-func TransformLitterDataToLitterAndKittens(litterData models.LitterData) (models.Litter, []*models.Kitten) {
-	fmt.Println("Convert Litter Create")
+func LitterToLitterDB(litterData models.Litter) (models.LitterDB, []*models.KittenDB) {
+
 	// Transform LitterData into a models.Litter struct
-	litter := models.Litter{
+	litter := models.LitterDB{
 		//LitterID: litterData.LitterID,
 		FatherName:      litterData.FatherData.Name,
 		FatherReg:       litterData.FatherData.Registration,
@@ -107,21 +108,21 @@ func TransformLitterDataToLitterAndKittens(litterData models.LitterData) (models
 		MotherCountry:   litterData.MotherData.Country,
 		MotherPhone:     litterData.MotherData.Phone,
 
-		CatteryID:   litterData.BirthData.CatteryID,
-		CatteryName: litterData.BirthData.CatteryName,
-		NumKittens:  litterData.BirthData.NumKittens,
-		BirthDate:   litterData.BirthData.BirthDate,
-		Country:     litterData.BirthData.Country,
-
-		Status: "Pending",
+		CatteryID:      litterData.BirthData.CatteryID,
+		CatteryName:    litterData.BirthData.CatteryName,
+		NumKittens:     litterData.BirthData.NumKittens,
+		BirthDate:      litterData.BirthData.BirthDate,
+		Country:        litterData.BirthData.Country,
+		ProtocolNumber: litterData.ProtocolNumber,
+		Status:         litterData.Status,
 	}
 
 	// Transform each KittenData into a models.Kitten struct
-	kittenPointers := make([]*models.Kitten, 0)
+	kittenPointers := make([]*models.KittenDB, 0)
 	for _, kittenData := range litterData.KittenData {
-		kitten := models.Kitten{
-			//LitterID:     litterID,
-			//KittenID:    0,
+		kitten := models.KittenDB{
+			LitterID:   *kittenData.LitterID,
+			ID:         *kittenData.KittenID,
 			BreedName:  kittenData.BreedName,
 			ColorName:  kittenData.ColorName,
 			EmsCodeID:  kittenData.EmsCodeID,

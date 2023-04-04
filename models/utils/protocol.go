@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Protocol struct {
+type ProtocolDB struct {
 	ID            uint           `gorm:"primary_key"`
 	ProtocolNumber string         `gorm:"unique;not null"`
 	CreatedAt     time.Time
@@ -13,6 +13,6 @@ type Protocol struct {
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
 }
 
-func (P *Protocol) TableName() string {
+func (P *ProtocolDB) TableName() string {
 	return "protocolos"
 }

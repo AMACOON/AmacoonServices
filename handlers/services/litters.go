@@ -33,9 +33,9 @@ func (h *LitterHandler) GetAllLitters(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	var litterDatas []models.LitterData
+	var litterDatas []models.Litter
 
-	// Transform each Litter and its Kittens into a LitterData struct
+	// Transform each LitterDB and its KittensDB into a Litter struct
 	for _, litter := range litters {
 		kittens, err := h.LitterRepo.GetKittensByLitterID(litter.ID)
 		if err != nil {
@@ -43,7 +43,7 @@ func (h *LitterHandler) GetAllLitters(c echo.Context) error {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 
-		litterData := converter.TransformLitterAndKittensToLitterData(&litter, kittens)
+		litterData := converter.LitterDBToLitter(&litter, kittens)
 		litterDatas = append(litterDatas, *litterData)
 	}
 	h.Logger.Info("Handler GetAllLitters OK")
@@ -51,7 +51,7 @@ func (h *LitterHandler) GetAllLitters(c echo.Context) error {
 }
 
 func (h *LitterHandler) GetLitterByID(c echo.Context) error {
-	litterIDStr := c.Param("litterID")
+	litterIDStr := c.Param("id")
 	h.Logger.Infof("Handler GetLitterByID - litter ID: %s", litterIDStr)
 
 	litterID, err := strconv.ParseUint(litterIDStr, 10, 64)
@@ -68,7 +68,7 @@ func (h *LitterHandler) GetLitterByID(c echo.Context) error {
 	}
 
 	// Transform the models.Litter and []*models.Kitten into a models.LitterData struct
-	litterData := converter.TransformLitterAndKittensToLitterData(litter, kittens)
+	litterData := converter.LitterDBToLitter(litter, kittens)
 
 	// Return the LitterData as a response
 	h.Logger.Info("Handler GetLitterByID OK")
@@ -80,14 +80,14 @@ func (h *LitterHandler) CreateLitter(c echo.Context) error {
 	h.Logger.Info("Handler CreateLitter")
 
 	// Parse the request body into a LitterData struct
-	var litterData models.LitterData
+	var litterData models.Litter
 	if err := c.Bind(&litterData); err != nil {
 		h.Logger.Error("Failed to parse request body:", err)
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
 	// Transform LitterData into a models.Litter struct
-	litter, kittens := converter.TransformLitterDataToLitterAndKittens(litterData)
+	litter, kittens := converter.LitterToLitterDB(litterData)
 
 	// Call the repository to create the litter and its kittens
 	litterID, protocolNumber, err := h.LitterRepo.CreateLitter(&litter, kittens)
@@ -105,7 +105,8 @@ func (h *LitterHandler) CreateLitter(c echo.Context) error {
 }
 
 func (h *LitterHandler) UpdateLitter(c echo.Context) error {
-	litterIDStr := c.Param("litterID")
+	
+	litterIDStr := c.Param("id")
 	h.Logger.Infof("Handler UpdateLitter - litter ID: %s", litterIDStr)
 
 	// Parse the LitterID from the request params
@@ -115,14 +116,14 @@ func (h *LitterHandler) UpdateLitter(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Invalid litter ID")
 	}
 	// Parse the request body into a LitterData struct
-	var litterData models.LitterData
+	var litterData models.Litter
 	if err := c.Bind(&litterData); err != nil {
 		h.Logger.Error("Failed to parse request body:", err)
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
-	// Transform LitterData into a models.Litter struct
-	litter, kittens := converter.TransformLitterDataToLitterAndKittens(litterData)
+	// Transform Litter into a models.LitterDB struct
+	litter, kittens := converter.LitterToLitterDB(litterData)
 
 	// Call the repository to update the litter and its kittens
 	err = h.LitterRepo.UpdateLitter(uint(litterID), &litter, kittens)
@@ -137,7 +138,7 @@ func (h *LitterHandler) UpdateLitter(c echo.Context) error {
 }
 
 func (h *LitterHandler) DeleteLitter(c echo.Context) error {
-	litterIDStr := c.Param("litterID")
+	litterIDStr := c.Param("id")
 	h.Logger.Infof("Handler DeleteLitter - litter ID: %s", litterIDStr)
 	// Parse the LitterID from the request params
 	litterID, err := strconv.ParseUint(litterIDStr, 10, 64)

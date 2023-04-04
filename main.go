@@ -87,9 +87,9 @@ func setupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 	}
 
 	if err := db.AutoMigrate(
-		&servicesModel.Litter{},
-		&servicesModel.Kitten{},
-		&utilsModel.Protocol{},
+		&servicesModel.LitterDB{},
+		&servicesModel.KittenDB{},
+		&utilsModel.ProtocolDB{},
 	); err != nil {
 		logger.Fatalf("Failed to migrate database schema: %v", err)
 	}

@@ -17,7 +17,7 @@ func NewProtocolService(db *gorm.DB) *ProtocolService {
 }
 
 func (ps *ProtocolService) GenerateProtocolNumber() (string, error) {
-	var protocol models.Protocol
+	var protocol models.ProtocolDB
 	var protocolNumber string
 
 	if err := ps.DB.Create(&protocol).Error; err != nil {

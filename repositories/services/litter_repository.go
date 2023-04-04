@@ -21,21 +21,21 @@ func NewLitterRepository(db *gorm.DB) *LitterRepository {
 }
 
 
-func (r *LitterRepository) GetAllLitters() ([]models.Litter, error) {
-	var litters []models.Litter
+func (r *LitterRepository) GetAllLitters() ([]models.LitterDB, error) {
+	var litters []models.LitterDB
 	if err := r.DB.Find(&litters).Error; err != nil {
 		return nil, err
 	}
 	return litters, nil
 }
 
-func (r *LitterRepository) GetLitterByID(id uint) (*models.Litter, []*models.Kitten, error) {
-	var litter models.Litter
+func (r *LitterRepository) GetLitterByID(id uint) (*models.LitterDB, []*models.KittenDB, error) {
+	var litter models.LitterDB
 	if err := r.DB.First(&litter, id).Error; err != nil {
 		return nil, nil, err
 	}
 
-	var kittens []*models.Kitten
+	var kittens []*models.KittenDB
 	if err := r.DB.Where("id_ninhadas = ?", id).Find(&kittens).Error; err != nil {
 		return nil, nil, err
 	}
@@ -43,7 +43,7 @@ func (r *LitterRepository) GetLitterByID(id uint) (*models.Litter, []*models.Kit
 	return &litter, kittens, nil
 }
 
-func (r *LitterRepository) CreateLitter(litter *models.Litter, kittens []*models.Kitten) (uint, string, error) {
+func (r *LitterRepository) CreateLitter(litter *models.LitterDB, kittens []*models.KittenDB) (uint, string, error) {
 	
 	// Gere o número do protocolo
 	protocolNumber, err := r.ProtocolService.GenerateProtocolNumber()
@@ -90,46 +90,47 @@ func (r *LitterRepository) CreateLitter(litter *models.Litter, kittens []*models
 	return litter.ID, protocolNumber,nil
 }
 
-func (r *LitterRepository) UpdateLitter(litterID uint, litter *models.Litter, kittens []*models.Kitten) error {
-	tx := r.DB.Begin()
+func (r *LitterRepository) UpdateLitter(litterID uint, litter *models.LitterDB, kittens []*models.KittenDB) error {
+    tx := r.DB.Begin()
 
-	// Atualiza a ninhada
-	if err := tx.Model(&models.Litter{}).Where("id_ninhadas = ?", litterID).Updates(litter).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
+    // Atualiza a ninhada
+    if err := tx.Model(&models.LitterDB{}).Where("id = ?", litterID).Updates(litter).Error; err != nil {
+        tx.Rollback()
+        return err
+    }
 
-	// Atualiza os filhotes
-	for _, kitten := range kittens {
-		if err := tx.Model(&models.Kitten{}).Where("id = ? AND litterID = ?", kitten.ID, litterID).Updates(kitten).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
+    // Atualiza os filhotes
+    for _, kitten := range kittens {
+        if err := tx.Model(&models.KittenDB{}).Where("id = ? AND id_ninhadas = ?", kitten.ID, litterID).Updates(kitten).Error; err != nil {
+            tx.Rollback()
+            return err
+        }
+    }
 
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	return nil
+    if err := tx.Commit().Error; err != nil {
+        tx.Rollback()
+        return err
+    }
+    return nil
 }
+
 
 
 func (r *LitterRepository) DeleteLitter(litterID uint) error {
 	// Exclui os filhotes associados à ninhada
-	if err := r.DB.Where("id_ninhadas = ?", litterID).Delete(&models.Kitten{}).Error; err != nil {
+	if err := r.DB.Where("id_ninhadas = ?", litterID).Delete(&models.KittenDB{}).Error; err != nil {
 		return err
 	}
 
 	// Exclui a ninhada
-	if err := r.DB.Delete(litterID).Error; err != nil {
+	if err := r.DB.Where("id = ?", litterID).Delete(&models.LitterDB{}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *LitterRepository) GetKittensByLitterID(litterID uint) ([]*models.Kitten, error) {
-	var kittens []*models.Kitten
+func (r *LitterRepository) GetKittensByLitterID(litterID uint) ([]*models.KittenDB, error) {
+	var kittens []*models.KittenDB
 	if err := r.DB.Where("id_ninhadas = ?", litterID).Find(&kittens).Error; err != nil {
 		return nil, err
 	}
