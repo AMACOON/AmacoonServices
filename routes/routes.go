@@ -3,6 +3,7 @@ package routes
 import (
 	servicesHandlers"amacoonservices/handlers/services"
 	informationHandlers"amacoonservices/handlers/information"
+	tranferHandler "amacoonservices/handlers/services"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
@@ -15,6 +16,7 @@ func NewRouter(catHandler *informationHandlers.CatHandler,
 	litterHandler *servicesHandlers.LitterHandler,
 	breedHandler *informationHandlers.BreedHandler,
 	countryHandler *informationHandlers.CountryHandler,
+	transferHandler *tranferHandler.TransferHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -80,3 +82,11 @@ func setupBreedRoutes(e *echo.Echo, breedHandler *informationHandlers.BreedHandl
 func setupCountryRoutes(e *echo.Echo, countryHandler *informationHandlers.CountryHandler) {
 	e.GET("/countries", countryHandler.GetAllCountry)
 }
+
+func setupTransferRoutes(e *echo.Echo, transferHandler *tranferHandler.TransferHandler) {
+    e.POST("/cat-transfer-ownership", transferHandler.CreateCatTransferOwnership)
+    e.GET("/cat-transfer-ownership/:id", transferHandler.GetCatTransferOwnershipByID)
+    e.PUT("/cat-transfer-ownership/:id", transferHandler.UpdateCatTransferOwnership)
+    e.DELETE("/cat-transfer-ownership/:id", transferHandler.DeleteCatTransferOwnership)
+}
+

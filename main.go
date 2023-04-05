@@ -89,6 +89,7 @@ func setupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 	if err := db.AutoMigrate(
 		&servicesModel.LitterDB{},
 		&servicesModel.KittenDB{},
+		&servicesModel.TransferDB{},
 		&utilsModel.ProtocolDB{},
 	); err != nil {
 		logger.Fatalf("Failed to migrate database schema: %v", err)
@@ -106,6 +107,7 @@ func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger) {
 	litterRepo := servicesRepo.NewLitterRepository(db)
 	breedRepo := informationRepo.NewBreedRepository(db)
 	countryRepo := informationRepo.NewCountryRepository(db)
+	transferepo := servicesRepo.NewTransferRepository(db)
 	logger.Info("Initialize Repositories OK")
 
 	// Initialize handlers
@@ -116,10 +118,11 @@ func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger) {
 	litterHandler := servicesHandlers.NewLitterHandler(litterRepo, logger)
 	breedHandler := informationHandlers.NewBreedHandler(breedRepo, logger)
 	countryHandler := informationHandlers.NewCountryHandler(countryRepo, logger)
+	transferHandler := servicesHandlers.NewTransferHandler(transferepo, logger)
 	logger.Info("Initialize Handlers OK")
 
 	// Initialize router and routes
 	logger.Info("Initialize Router and Routes")
-	routes.NewRouter(catHandler, ownerHandler, colorHandler, litterHandler, breedHandler, countryHandler, logger, e)
+	routes.NewRouter(catHandler, ownerHandler, colorHandler, litterHandler, breedHandler, countryHandler, transferHandler ,logger, e)
 	logger.Info("Initialize Router and Routes OK")
 }
