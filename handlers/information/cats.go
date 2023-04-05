@@ -39,19 +39,19 @@ func (h *CatHandler) GetCatsByExhibitorAndSex(c echo.Context) error {
 	exhibitorID, err := strconv.Atoi(c.QueryParam("id_exhibitor"))
 	if err != nil {
 		h.Logger.Warn("Invalid id_exhibitor parameter")
-		return c.String(http.StatusBadRequest, "invalid id_exhibitor parameter")
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid id_exhibitor parameter")
 	}
 
 	sex := c.QueryParam("sex")
 	if sex == "" {
 		h.Logger.Warn("Missing sex parameter")
-		return c.String(http.StatusBadRequest, "missing sex parameter")
+		return echo.NewHTTPError(http.StatusBadRequest, "missing sex parameter")
 	}
 
 	sexAsInt, err := getSexAsInt(sex)
 	if err != nil {
 		h.Logger.Warn("Invalid sex parameter")
-		return c.String(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	h.Logger.WithFields(logrus.Fields{
@@ -62,7 +62,7 @@ func (h *CatHandler) GetCatsByExhibitorAndSex(c echo.Context) error {
 	cats, err := h.CatRepo.GetCatsByExhibitorAndSex(exhibitorID, sexAsInt)
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to get cats by exhibitor and sex")
-		return c.String(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	h.Logger.Infof("Handler GetCatsByExhibitorAndSex OK")
 	return c.JSON(http.StatusOK, cats)
@@ -79,14 +79,14 @@ func (h *CatHandler) GetCatByRegistration(c echo.Context) error {
 	cat, err := h.CatRepo.GetCatByRegistration(registration)
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to get cat by registration")
-		return c.String(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	if cat == nil {
 		h.Logger.WithFields(logrus.Fields{
 			"registration": registration,
 		}).Warn("Cat not found by registration")
-		return c.String(http.StatusNotFound, "cat not found")
+		return echo.NewHTTPError(http.StatusNotFound, "cat not found")
 	}
 	h.Logger.Infof("Handler GetCatByRegistration OK")
 	return c.JSON(http.StatusOK, cat)
@@ -96,23 +96,23 @@ func (h *CatHandler) GetCatsByExhibitorAndSexService(c echo.Context) error {
 	h.Logger.Infof("Handler GetCatsByExhibitorAndSexService")
 	idExhibitor, err := strconv.Atoi(c.QueryParam("id_exhibitor"))
 	if err != nil {
-		return c.String(http.StatusBadRequest, "invalid id_exhibitor parameter")
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid id_exhibitor parameter")
 	}
 
 	sex := c.QueryParam("sex")
 	if sex == "" {
-		return c.String(http.StatusBadRequest, "missing sex parameter")
+		return echo.NewHTTPError(http.StatusBadRequest, "missing sex parameter")
 	}
 
 	sexAsInt, err := getSexAsInt(sex)
 	if err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	cats, err := h.CatRepo.GetCatsByExhibitorAndSexService(idExhibitor, sexAsInt)
 	if err != nil {
 		h.Logger.Errorf("Failed to get cats from repository: %v", err)
-		return c.String(http.StatusInternalServerError, "failed to get cats")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get cats from repository")
 	}
 
 	h.Logger.Infof("Got %d cats by exhibitor %d and sex %s from repository", len(cats), idExhibitor, sex)
@@ -127,12 +127,12 @@ func (h *CatHandler) GetCatByRegistrationService(c echo.Context) error {
 	cat, err := h.CatRepo.GetCatByRegistrationService(registration)
 	if err != nil {
 		h.Logger.Errorf("Failed to get cat from repository: %v", err)
-		return c.String(http.StatusInternalServerError, "failed to get cat")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get cat from repository")
 	}
 
 	if cat == nil {
 		h.Logger.Warnf("Cat with registration %s not found", registration)
-		return c.String(http.StatusNotFound, "cat not found")
+		return echo.NewHTTPError(http.StatusNotFound, "cat not found")
 	}
 
 	h.Logger.Infof("Got cat with registration %s from repository", registration)

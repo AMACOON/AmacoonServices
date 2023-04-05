@@ -27,13 +27,13 @@ func (h *OwnerHandler) GetOwnerByID(c echo.Context) error {
     ownerID, err := strconv.Atoi(id)
     if err != nil {
         h.Logger.Error("Failed to parse owner ID: ", err)
-        return c.String(http.StatusBadRequest, "invalid owner ID")
+        return echo.NewHTTPError(http.StatusBadRequest, "invalid owner ID")
     }
 	h.Logger.Info("Getting owner with ID:", ownerID)
     owner, err := h.OwnerRepo.GetOwnerByExhibitorID(uint(ownerID))
     if err != nil {
         h.Logger.Error("Failed to get owner from repository: ", err)
-        return c.String(http.StatusNotFound, "owner not found")
+        return echo.NewHTTPError(http.StatusNotFound, "owner not found")
     }
 
     h.Logger.Info("Successfully retrieved owner with ID ", ownerID)

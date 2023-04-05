@@ -32,7 +32,7 @@ func (h *ColorHandler) GetAllColorsByBreed(c echo.Context) error {
     colors, err := h.ColorRepo.GetAllColorsByBreed(breedID)
     if err != nil {
         h.Logger.WithError(err).Error("Failed to get colors by breed")
-        return c.String(http.StatusInternalServerError, err.Error())
+        return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
     }
     h.Logger.Infof("Handler GetAllColorsByBreed OK")
     return c.JSON(http.StatusOK, colors)

@@ -3,7 +3,6 @@ package routes
 import (
 	servicesHandlers"amacoonservices/handlers/services"
 	informationHandlers"amacoonservices/handlers/information"
-	tranferHandler "amacoonservices/handlers/services"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
@@ -16,7 +15,7 @@ func NewRouter(catHandler *informationHandlers.CatHandler,
 	litterHandler *servicesHandlers.LitterHandler,
 	breedHandler *informationHandlers.BreedHandler,
 	countryHandler *informationHandlers.CountryHandler,
-	transferHandler *tranferHandler.TransferHandler,
+	transferHandler *servicesHandlers.TransferHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -32,6 +31,7 @@ func NewRouter(catHandler *informationHandlers.CatHandler,
 	setupLitterRoutes(e, litterHandler)
 	setupBreedRoutes(e, breedHandler)
 	setupCountryRoutes(e, countryHandler)
+	setupTransferRoutes(e, transferHandler)
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -83,10 +83,10 @@ func setupCountryRoutes(e *echo.Echo, countryHandler *informationHandlers.Countr
 	e.GET("/countries", countryHandler.GetAllCountry)
 }
 
-func setupTransferRoutes(e *echo.Echo, transferHandler *tranferHandler.TransferHandler) {
-    e.POST("/cat-transfer-ownership", transferHandler.CreateCatTransferOwnership)
-    e.GET("/cat-transfer-ownership/:id", transferHandler.GetCatTransferOwnershipByID)
-    e.PUT("/cat-transfer-ownership/:id", transferHandler.UpdateCatTransferOwnership)
-    e.DELETE("/cat-transfer-ownership/:id", transferHandler.DeleteCatTransferOwnership)
+func setupTransferRoutes(e *echo.Echo, transferHandler *servicesHandlers.TransferHandler) {
+    e.POST("/transfer", transferHandler.CreateCatTransferOwnership)
+    e.GET("/transfer/:id", transferHandler.GetCatTransferOwnershipByID)
+    e.PUT("/transfer/:id", transferHandler.UpdateCatTransferOwnership)
+    e.DELETE("/transfer/:id", transferHandler.DeleteCatTransferOwnership)
 }
 

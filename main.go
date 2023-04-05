@@ -104,7 +104,7 @@ func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger) {
 	catRepo := informationRepo.NewCatRepository(db)
 	ownerRepo := informationRepo.NewOwnerRepository(db)
 	colorRepo := informationRepo.NewColorRepository(db)
-	litterRepo := servicesRepo.NewLitterRepository(db)
+	litterRepo := servicesRepo.NewLitterRepository(db, logger)
 	breedRepo := informationRepo.NewBreedRepository(db)
 	countryRepo := informationRepo.NewCountryRepository(db)
 	transferepo := servicesRepo.NewTransferRepository(db)
@@ -123,6 +123,6 @@ func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger) {
 
 	// Initialize router and routes
 	logger.Info("Initialize Router and Routes")
-	routes.NewRouter(catHandler, ownerHandler, colorHandler, litterHandler, breedHandler, countryHandler, transferHandler ,logger, e)
+	routes.NewRouter(catHandler, ownerHandler, colorHandler, litterHandler, breedHandler, countryHandler, transferHandler, logger, e)
 	logger.Info("Initialize Router and Routes OK")
 }

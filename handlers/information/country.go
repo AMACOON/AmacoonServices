@@ -25,7 +25,7 @@ func (h *CountryHandler) GetAllCountry(c echo.Context) error {
 	countries, err := h.CountryRepo.GetAllCountries()
 	if err != nil {
 		h.Logger.Errorf("Failed to get all countries: %v", err)
-		return c.String(http.StatusInternalServerError, err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	h.Logger.Infof("Retrieved %d countries", len(countries))

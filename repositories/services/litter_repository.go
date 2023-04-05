@@ -5,27 +5,32 @@ import (
 	"amacoonservices/utils"
 
 	"gorm.io/gorm"
+	"github.com/sirupsen/logrus"
 )
 
 type LitterRepository struct {
     DB             *gorm.DB
     ProtocolService *util.ProtocolService
+	Logger     *logrus.Logger
 }
 
-func NewLitterRepository(db *gorm.DB) *LitterRepository {
+func NewLitterRepository(db *gorm.DB, logger *logrus.Logger) *LitterRepository {
     protocolService := util.NewProtocolService(db)
     return &LitterRepository{
         DB:              db,
         ProtocolService: protocolService,
+		Logger:     logger,
     }
 }
 
 
 func (r *LitterRepository) GetAllLitters() ([]models.LitterDB, error) {
+	r.Logger.Info("Repo GetAllLitters")
 	var litters []models.LitterDB
 	if err := r.DB.Find(&litters).Error; err != nil {
 		return nil, err
 	}
+	r.Logger.Info("Repo GetAllLitters OK")
 	return litters, nil
 }
 

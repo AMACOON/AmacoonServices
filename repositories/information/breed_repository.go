@@ -37,8 +37,6 @@ func (r *BreedRepository) GetCompatibleBreeds(BreedID string) ([]string, error) 
         return nil, query.Error
     }
 
-    
-
     return compatibleRaces, nil
 }
 
