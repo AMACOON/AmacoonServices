@@ -1,4 +1,4 @@
-module amacoonservices
+module github.com/scuba13/AmacoonServices
 
 go 1.19
 
