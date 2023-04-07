@@ -27,8 +27,8 @@ func (h *BreedHandler) GetAllBreeds(c echo.Context) error {
 
 	breeds, err := h.BreedService.GetAllBreeds()
 	if err != nil {
-		h.Logger.Errorf("Erro ao obter todas as raças: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		h.Logger.WithError(err).Error("Failed to get all breeds")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get all breeds")
 	}
 
 	// Log de saída da função
@@ -43,14 +43,15 @@ func (h *BreedHandler) GetCompatibleBreeds(c echo.Context, breedID string) error
 
 	breeds, err := h.BreedService.GetCompatibleBreeds(breedID)
 	if err != nil {
-		h.Logger.Errorf("Erro ao obter raças compatíveis: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		h.Logger.WithError(err).Error("Failed to get compatible breeds")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get compatible breeds")
 	}
 	if len(breeds) == 0 {
-		h.Logger.Infof("A raça %s não tem raças compatíveis", breedID)
+		h.Logger.Infof("The breed %s has no compatible breeds", breedID)
 	}
 
 	// Log de saída da função
 	h.Logger.Infof("Handler GetCompatibleBreeds OK")
 	return c.JSON(http.StatusOK, breeds)
 }
+

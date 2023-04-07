@@ -1,12 +1,16 @@
 package breed
 
-
+import (
+	
+	"github.com/sirupsen/logrus"
+)
 
 type BreedService struct {
-	BreedRepo BreedRepository
+	BreedRepo *BreedRepository
+	Logger        *logrus.Logger
 }
 
-func NewBreedService(breedRepo BreedRepository) *BreedService {
+func NewBreedService(breedRepo *BreedRepository, logger *logrus.Logger) *BreedService {
 	return &BreedService{
 		BreedRepo: breedRepo,
 	}
@@ -14,9 +18,20 @@ func NewBreedService(breedRepo BreedRepository) *BreedService {
 
 
 func (s *BreedService) GetAllBreeds() ([]Breed, error) {
-	return s.BreedRepo.GetAllBreeds()
+    breeds, err := s.BreedRepo.GetAllBreeds()
+    if err != nil {
+        s.Logger.WithError(err).Error("Failed to get all breeds")
+        return nil, err
+    }
+    return breeds, nil
 }
 
 func (s *BreedService) GetCompatibleBreeds(breedID string) ([]string, error) {
-	return s.BreedRepo.GetCompatibleBreeds(breedID)
+    compatibleBreeds, err := s.BreedRepo.GetCompatibleBreeds(breedID)
+    if err != nil {
+        s.Logger.WithError(err).Errorf("Failed to get compatible breeds for breed with ID %s", breedID)
+        return nil, err
+    }
+    return compatibleBreeds, nil
 }
+

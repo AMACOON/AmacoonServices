@@ -85,6 +85,7 @@ func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
 
 func setupTransferRoutes(e *echo.Echo, transferHandler *handler.TransferHandler) {
     e.POST("/transfer", transferHandler.CreateTransfer)
+	e.GET("/transfer", transferHandler.GetAlltransfers)
     e.GET("/transfer/:id", transferHandler.GetTransferByID)
     e.PUT("/transfer/:id", transferHandler.UpdateTransfer)
     e.DELETE("/transfer/:id", transferHandler.DeleteTransfer)

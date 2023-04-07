@@ -1,30 +1,31 @@
 package handler
 
 import (
-	"github.com/scuba13/AmacoonServices/internal/country"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
+
+	"github.com/scuba13/AmacoonServices/internal/country"
 )
 
 type CountryHandler struct {
-	CountryRepo *country.CountryRepository
-	Logger      *logrus.Logger
+	CountryService *country.CountryService
+	Logger         *logrus.Logger
 }
 
-func NewCountryHandler(countryRepo *country.CountryRepository, logger *logrus.Logger) *CountryHandler {
+func NewCountryHandler(countryService *country.CountryService, logger *logrus.Logger) *CountryHandler {
 	return &CountryHandler{
-		CountryRepo: countryRepo,
-		Logger:      logger,
+		CountryService: countryService,
+		Logger:         logger,
 	}
 }
 
 func (h *CountryHandler) GetAllCountry(c echo.Context) error {
 	h.Logger.Infof("Handler GetAllCountry")
-	countries, err := h.CountryRepo.GetAllCountries()
+	countries, err := h.CountryService.GetAllCountries()
 	if err != nil {
-		h.Logger.Errorf("Failed to get all countries: %v", err)
+		h.Logger.WithError(err).Error("Failed to get all countries")
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -32,3 +33,4 @@ func (h *CountryHandler) GetAllCountry(c echo.Context) error {
 	h.Logger.Infof("Handler GetAllCountry OK")
 	return c.JSON(http.StatusOK, countries)
 }
+

@@ -1,29 +1,55 @@
 package cat
 
+import (
+	
+	"github.com/sirupsen/logrus"
+)
 
 
 type CatService struct {
-	CatRepo CatRepository
+	CatRepo *CatRepository
+	Logger        *logrus.Logger
 }
 
-func NewCatService(catRepo CatRepository) *CatService {
+func NewCatService(catRepo *CatRepository, logger *logrus.Logger) *CatService {
 	return &CatService{
 		CatRepo: catRepo,
 	}
 }
 
 func (s *CatService) GetCatsByExhibitorAndSexTable(idExhibitor int, sex int) ([]CatTable, error) {
-	return s.CatRepo.GetCatsByExhibitorAndSexTable(idExhibitor, sex)
+    cats, err := s.CatRepo.GetCatsByExhibitorAndSexTable(idExhibitor, sex)
+    if err != nil {
+        s.Logger.WithError(err).Error("Failed to get cats by exhibitor and sex from repo")
+        return nil, err
+    }
+    return cats, nil
 }
 
 func (s *CatService) GetCatByRegistrationTable(registration string) (*CatTable, error) {
-	return s.CatRepo.GetCatByRegistrationTable(registration)
+    cat, err := s.CatRepo.GetCatByRegistrationTable(registration)
+    if err != nil {
+        s.Logger.WithError(err).Errorf("Failed to get cat by registration '%s' from repo", registration)
+        return nil, err
+    }
+    return cat, nil
 }
 
 func (s *CatService) GetCatsByExhibitorAndSex(idExhibitor int, sex int) ([]Cat, error) {
-	return s.CatRepo.GetCatsByExhibitorAndSex(idExhibitor, sex)
+    cats, err := s.CatRepo.GetCatsByExhibitorAndSex(idExhibitor, sex)
+    if err != nil {
+        s.Logger.WithError(err).Error("Failed to get cats by exhibitor and sex from repo")
+        return nil, err
+    }
+    return cats, nil
 }
 
 func (s *CatService) GetCatByRegistration(registration string) (*Cat, error) {
-	return s.CatRepo.GetCatByRegistration(registration)
+    cat, err := s.CatRepo.GetCatByRegistration(registration)
+    if err != nil {
+        s.Logger.WithError(err).Errorf("Failed to get cat by registration '%s' from repo", registration)
+        return nil, err
+    }
+    return cat, nil
 }
+

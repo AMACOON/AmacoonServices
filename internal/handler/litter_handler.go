@@ -27,7 +27,7 @@ func (h *LitterHandler) GetAllLitters(c echo.Context) error {
 
 	litters, err := h.LitterService.GetAllLitters()
 	if err != nil {
-		h.Logger.Errorf("Failed to get all litters: %v", err)
+		h.Logger.WithError(err).Error("Failed to get all litters")
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -41,14 +41,14 @@ func (h *LitterHandler) GetLitterByID(c echo.Context) error {
 
 	litterID, err := strconv.ParseUint(litterIDStr, 10, 64)
 	if err != nil {
-		h.Logger.Errorf("Invalid litter ID: %v", err)
+		h.Logger.WithError(err).Error("Invalid litter ID")
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid litter ID")
 	}
 
 	// Call the service to get the litter data
 	litterData, err := h.LitterService.GetLitterByID(uint(litterID))
 	if err != nil {
-		h.Logger.Errorf("Failed to get litter by ID %v: %v", litterID, err)
+		h.Logger.WithError(err).Errorf("Failed to get litter by ID %v", litterID)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
@@ -57,18 +57,19 @@ func (h *LitterHandler) GetLitterByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, litterData)
 }
 
+
 func (h *LitterHandler) CreateLitter(c echo.Context) error {
     h.Logger.Info("Handler CreateLitter")
 
     var litterData litter.Litter
     if err := c.Bind(&litterData); err != nil {
-        h.Logger.Error("Failed to parse request body:", err)
+        h.Logger.WithError(err).Error("Failed to parse request body")
         return echo.NewHTTPError(http.StatusBadRequest, err.Error())
     }
 
     litterID, protocolNumber, err := h.LitterService.CreateLitter(litterData)
     if err != nil {
-        h.Logger.Error("Failed to create litter:", err)
+        h.Logger.WithError(err).Error("Failed to create litter")
         return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
     }
 
@@ -86,20 +87,20 @@ func (h *LitterHandler) UpdateLitter(c echo.Context) error {
     // Parse the LitterID from the request params
     litterID, err := strconv.ParseUint(litterIDStr, 10, 64)
     if err != nil {
-        h.Logger.Error("Failed to parse litter ID:", err)
+        h.Logger.WithError(err).Error("Failed to parse litter ID")
         return echo.NewHTTPError(http.StatusBadRequest, "Invalid litter ID")
     }
 
     // Parse the request body into a Litter struct
     var litter litter.Litter
     if err := c.Bind(&litter); err != nil {
-        h.Logger.Error("Failed to parse request body:", err)
+        h.Logger.WithError(err).Error("Failed to parse request body")
         return echo.NewHTTPError(http.StatusBadRequest, err.Error())
     }
 
     // Call the service to update the litter and its kittens
     if err := h.LitterService.UpdateLitter(uint(litterID), litter); err != nil {
-        h.Logger.Error("Failed to update litter:", err)
+        h.Logger.WithError(err).Error("Failed to update litter")
         return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
     }
 
@@ -109,25 +110,25 @@ func (h *LitterHandler) UpdateLitter(c echo.Context) error {
 }
 
 func (h *LitterHandler) DeleteLitter(c echo.Context) error {
-	litterIDStr := c.Param("id")
-	h.Logger.Infof("Handler DeleteLitter - litter ID: %s", litterIDStr)
-	// Parse the LitterID from the request params
-	litterID, err := strconv.ParseUint(litterIDStr, 10, 64)
-	if err != nil {
-		h.Logger.Error("Failed to parse litter ID:", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid litter ID")
-	}
+    litterIDStr := c.Param("id")
+    h.Logger.Infof("Handler DeleteLitter - litter ID: %s", litterIDStr)
 
-	// Call the service to delete the litter and its kittens
-	err = h.LitterService.DeleteLitter(uint(litterID))
-	if err != nil {
-		h.Logger.Error("Failed to delete litter:", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
+    // Parse the LitterID from the request params
+    litterID, err := strconv.ParseUint(litterIDStr, 10, 64)
+    if err != nil {
+        h.Logger.WithError(err).Error("Failed to parse litter ID")
+        return echo.NewHTTPError(http.StatusBadRequest, "Invalid litter ID")
+    }
 
-	// Return success response
-	h.Logger.Info("Handler DeleteLitter OK")
-	return c.NoContent(http.StatusOK)
+    // Call the service to delete the litter and its kittens
+    if err := h.LitterService.DeleteLitter(uint(litterID)); err != nil {
+        h.Logger.WithError(err).Error("Failed to delete litter")
+        return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+    }
+
+    // Return success response
+    h.Logger.Info("Handler DeleteLitter OK")
+    return c.NoContent(http.StatusOK)
 }
 
 

@@ -14,6 +14,8 @@ func NewColorRepository(db *gorm.DB) *ColorRepository {
 	}
 }
 
+
+
 func (r *ColorRepository) GetAllColorsByBreed(breedID string) ([]Color, error) {
 	var colors []Color
 	if err := r.DB.Unscoped().Where("id_raca = ?", breedID).Find(&colors).Error; err != nil {

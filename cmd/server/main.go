@@ -114,27 +114,31 @@ func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger) {
 	logger.Info("Initialize Repositories OK")
 
 	// Initialize converters
+	logger.Info("Initialize Converters")
 	litterConverter:= litter.NewLitterConverter(logger)
 	transferConverter:= transfer.NewTransferConverter(logger)
-	
+	logger.Info("Initialize Converters OK")
 	
 	// Initialize services
+	logger.Info("Initialize Services")
 	litterService := litter.NewLitterService(litterRepo, filesRepo,  logger, litterConverter)
-	catService := cat.NewCatService(*catRepo)
-	breedService:= breed.NewBreedService(*breedRepo)
-
-
-	
+	transferService := transfer.NewTransferService(transferepo, filesRepo,  logger, transferConverter)
+	catService := cat.NewCatService(catRepo, logger)
+	breedService:= breed.NewBreedService(breedRepo, logger)
+	colorService:= color.NewColorService(colorRepo, logger)
+	countryService:= country.NewCountryService(countryRepo, logger)
+	ownerService:= owner.NewOwnerService(ownerRepo, logger)
+	logger.Info("Initialize Services OK")
 
 	// Initialize handlers
 	logger.Info("Initialize Handlers")
 	catHandler := handler.NewCatHandler(catService, logger)
-	ownerHandler := handler.NewOwnerHandler(ownerRepo, logger)
-	colorHandler := handler.NewColorHandler(colorRepo, logger)
+	ownerHandler := handler.NewOwnerHandler(ownerService, logger)
+	colorHandler := handler.NewColorHandler(colorService, logger)
 	litterHandler := handler.NewLitterHandler(litterService, logger)
 	breedHandler := handler.NewBreedHandler(breedService, logger)
-	countryHandler := handler.NewCountryHandler(countryRepo, logger)
-	transferHandler := handler.NewTransferHandler(transferepo, filesRepo, logger, transferConverter)
+	countryHandler := handler.NewCountryHandler(countryService, logger)
+	transferHandler := handler.NewTransferHandler(transferService, filesRepo, logger, transferConverter)
 	logger.Info("Initialize Handlers OK")
 
 	// Initialize router and routes
