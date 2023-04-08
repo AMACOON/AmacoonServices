@@ -1,4 +1,4 @@
-name: Deploy to Windows
+name: Deploy to Linux
 
 on:
   workflow_dispatch:
@@ -12,23 +12,24 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ^1.19
-      - name: Build app for Windows
-        run: GOOS=windows GOARCH=amd64 go build -o amacoonServices.exe
-      - name: Upload binary to FTP
-        uses: SamKirkland/FTP-Deploy-Action@4.1.1
+      - name: Build app for Linux
+        run: go build -o amacoonServices
+      - name: Upload binary to Linux via SSH
+        uses: appleboy/scp-action@master
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: .
-          remote-dir: /amacoonServices
-      - name: Execute app on Windows
+          host: ftp.catclubsystem.com
+          username: catclubsystem
+          password: 2010mainecoon2010
+          port: 22
+          source: ./amacoonServices
+          target: /home/catclubsystem/amacoonservice
+      - name: Execute app on Linux via SSH
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: ${{ secrets.WINDOWS_MACHINE_IP }}
-          username: ${{ secrets.WINDOWS_MACHINE_USERNAME }}
-          password: ${{ secrets.WINDOWS_MACHINE_PASSWORD }}
+          host: ${{ secrets.LINUX_MACHINE_IP }}
+          username: ${{ secrets.LINUX_MACHINE_USERNAME }}
+          password: ${{ secrets.LINUX_MACHINE_PASSWORD }}
           port: 22
           script: |
-            cd /amacoonServices
-            start amacoonServices.exe
+            cd /home/catclubsystem/amacoonservice
+            ./amacoonServices
