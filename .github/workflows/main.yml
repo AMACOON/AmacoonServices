@@ -26,9 +26,9 @@ jobs:
       - name: Execute app on Linux via SSH
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: ${{ secrets.LINUX_MACHINE_IP }}
-          username: ${{ secrets.LINUX_MACHINE_USERNAME }}
-          password: ${{ secrets.LINUX_MACHINE_PASSWORD }}
+          host: ftp.catclubsystem.com
+          username: catclubsystem
+          password: 2010mainecoon2010
           port: 22
           script: |
             cd /home/catclubsystem/amacoonservice
