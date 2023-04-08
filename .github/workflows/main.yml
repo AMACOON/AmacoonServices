@@ -1,0 +1,34 @@
+name: Deploy to Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.19
+      - name: Build app for Windows
+        run: GOOS=windows GOARCH=amd64 go build -o myapp.exe
+      - name: Upload binary to FTP
+        uses: SamKirkland/FTP-Deploy-Action@4.1.1
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: .
+          remote-dir: /myapp
+      - name: Execute app on Windows
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.WINDOWS_MACHINE_IP }}
+          username: ${{ secrets.WINDOWS_MACHINE_USERNAME }}
+          password: ${{ secrets.WINDOWS_MACHINE_PASSWORD }}
+          port: 22
+          script: |
+            cd /myapp
+            start myapp.exe
