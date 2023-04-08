@@ -13,7 +13,7 @@ jobs:
         with:
           go-version: ^1.19
       - name: Build app for Windows
-        run: GOOS=windows GOARCH=amd64 go build -o myapp.exe
+        run: GOOS=windows GOARCH=amd64 go build -o amacoonServices.exe
       - name: Upload binary to FTP
         uses: SamKirkland/FTP-Deploy-Action@4.1.1
         with:
@@ -21,7 +21,7 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: .
-          remote-dir: /myapp
+          remote-dir: /amacoonServices
       - name: Execute app on Windows
         uses: appleboy/ssh-action@v0.1.4
         with:
@@ -30,5 +30,5 @@ jobs:
           password: ${{ secrets.WINDOWS_MACHINE_PASSWORD }}
           port: 22
           script: |
-            cd /myapp
-            start myapp.exe
+            cd /amacoonServices
+            start amacoonServices.exe
