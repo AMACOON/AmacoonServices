@@ -23,7 +23,7 @@ func LoadConfig() *Config {
 		DBName:     "amacoon01",
 		MongoDBUsername: "amacoonservice",
 		MongoDBPassword: "2010mainecoon2010",
-		MongoDBHost:     "localhost",
+		MongoDBHost:     "mongo",
 		MongoDBPort:     "27017",
 		MongoDBName:     "amacoon",
 		ServerPort: "8080",
