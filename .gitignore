@@ -1,0 +1,24 @@
+# Binários
+*.exe
+*.sh
+
+# Arquivos temporários do sistema
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+
+# Arquivos do sistema de controle de versão
+.git/
+
+# Diretórios de dependências e cache
+/vendor/
+/go.sum
+/go.mod
+
+# Arquivos e diretórios específicos do projeto
+#config.yaml
+*.log
+*.sqlite
+

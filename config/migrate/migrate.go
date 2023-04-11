@@ -1,4 +1,4 @@
-package config
+package migrate
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/scuba13/AmacoonServices/internal/country"
 	"github.com/scuba13/AmacoonServices/internal/breed"
+	"github.com/scuba13/AmacoonServices/internal/color"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gorm.io/gorm"
@@ -35,7 +36,6 @@ func PopulateCountries(db *gorm.DB, client *mongo.Client) error {
 	return nil
 }
 
-
 func MigrateBreeds(db *gorm.DB, client *mongo.Client) error {
 	var breeds []*breed.Breed
 	if err := db.Unscoped().Find(&breeds).Error; err != nil {
@@ -60,5 +60,37 @@ func MigrateBreeds(db *gorm.DB, client *mongo.Client) error {
 
 	return nil
 }
+
+func MigrateColors(db *gorm.DB, client *mongo.Client) error {
+	// Busque todos os registros da tabela "cores" usando GORM
+	var colors []*color.Color
+	if err := db.Unscoped().Find(&colors).Error; err != nil {
+		return err
+	}
+
+	// Converta os registros do GORM para o formato do MongoDB
+	colorMongos := make([]interface{}, len(colors))
+	for i, c := range colors {
+		colorMongos[i] = color.ColorMongo{
+			ID:        primitive.NewObjectID(),
+			BreedCode:   c.BreedID,
+			EmsCode:   c.EmsCode,
+			Name: c.ColorName,
+			Group:     c.Group,
+			SubGroup:  c.SubGroup,
+		}
+	}
+
+	// Insira os registros convertidos na coleção do MongoDB
+	_, err := client.Database("amacoon").Collection("colors").InsertMany(context.Background(), colorMongos)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
+
 
 

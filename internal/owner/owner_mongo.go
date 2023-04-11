@@ -7,14 +7,14 @@ type OwnerMongo struct {
 	Email        string             `bson:"email"`
 	PasswordHash string             `bson:"passwordHash"`
 	Name         string             `bson:"name"`
+	CPF          string             `bson:"cpf"`
 	Address      string             `bson:"address"`
 	City         string             `bson:"city"`
 	State        string             `bson:"state"`
 	ZipCode      string             `bson:"zipCode"`
-	CountryId    primitive.ObjectID `bson:"countryId"`
+	CountryID    primitive.ObjectID `bson:"countryId"`
 	Phone        string             `bson:"phone"`
 	Valid        bool               `bson:"valid"`
-	Observation  []byte             `bson:"observation"`
-	CPF          string             `bson:"cpf"`
+	ValidId      string             `bson:"validId"`
+	Observation  string             `bson:"observation"`
 }
-

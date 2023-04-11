@@ -1,38 +1,44 @@
 package config
 
+import (
+	"github.com/spf13/viper"
+)
+
 type Config struct {
-	DBUsername string
-	DBPassword string
-	DBHost     string
-	DBPort     string
-	DBName     string
+	DBUsername     string
+	DBPassword     string
+	DBHost         string
+	DBPort         string
+	DBName         string
 	MongoDBUsername string
 	MongoDBPassword string
 	MongoDBHost     string
 	MongoDBPort     string
 	MongoDBName     string
-	ServerPort string
+	ServerPort      string
 }
 
 func LoadConfig() *Config {
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.SetConfigType("yaml")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic("Falha ao ler o arquivo de configuração")
+	}
+
 	return &Config{
-		DBUsername: "amacoon001_add1",
-		DBPassword: "armin013",
-		DBHost:     "mysql.catclubsystem.com",
-		DBPort:     "3306",
-		DBName:     "amacoon01",
-		MongoDBUsername: "amacoonservice",
-		MongoDBPassword: "2010mainecoon2010",
-		//MongoDBHost:     "191.252.210.141",
-		MongoDBHost:     "mongo",
-		MongoDBPort:     "27017",
-		MongoDBName:     "amacoon",
-		ServerPort: "8080",
+		DBUsername:     viper.GetString("db.username"),
+		DBPassword:     viper.GetString("db.password"),
+		DBHost:         viper.GetString("db.host"),
+		DBPort:         viper.GetString("db.port"),
+		DBName:         viper.GetString("db.name"),
+		MongoDBUsername: viper.GetString("mongodb.username"),
+		MongoDBPassword: viper.GetString("mongodb.password"),
+		MongoDBHost:     viper.GetString("mongodb.host"),
+		MongoDBPort:     viper.GetString("mongodb.port"),
+		MongoDBName:     viper.GetString("mongodb.name"),
+		ServerPort:      viper.GetString("server.port"),
 	}
 }
-//"amacoon01:2010amacoon2010@tcp(mysql20-farm1.kinghost.net:3306)/amacoon01"
-
-//"amacoon001_add1:armin013@tcp(mysql20-farm1.kinghost.net:3306)/amacoon01"
-//mysql.catclubsystem.com
-
-//mongodb://amacoonservice:2010mainecoon2010@localhost:27017/amacoon

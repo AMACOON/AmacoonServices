@@ -1,0 +1,15 @@
+db:
+  username: amacoon001_add1
+  password: armin013
+  host: mysql.catclubsystem.com
+  port: 3306
+  name: amacoon01
+mongodb:
+  username: amacoonservice
+  password: 2010mainecoon2010
+  #host: mongo
+  host: 191.252.210.141
+  port: 27017
+  name: amacoon
+server:
+  port: 8080

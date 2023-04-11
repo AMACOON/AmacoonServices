@@ -1,7 +1,6 @@
 package cat
 
 import (
-	
 	"gorm.io/gorm"
 )
 
@@ -10,9 +9,9 @@ type CatRepository struct {
 }
 
 func NewCatRepository(db *gorm.DB) *CatRepository {
-    return &CatRepository{
-        DB: db,
-    }
+	return &CatRepository{
+		DB: db,
+	}
 }
 
 func (r *CatRepository) GetCatsByExhibitorAndSexTable(idExhibitor int, sex int) ([]CatTable, error) {
@@ -101,3 +100,5 @@ func (r *CatRepository) GetCatByRegistration(registration string) (*Cat, error) 
 
 	return &cat, nil
 }
+
+

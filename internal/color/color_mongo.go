@@ -6,10 +6,9 @@ import (
 
 type ColorMongo struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty"`
-	ColorID   int                `bson:"colorID"`
-	BreedID   string             `bson:"breedID"`
+	BreedCode string             `bson:"breedCode"`
 	EmsCode   string             `bson:"emsCode"`
-	ColorName string             `bson:"colorName"`
+	Name      string             `bson:"name"`
 	Group     int                `bson:"group"`
 	SubGroup  int                `bson:"subGroup"`
 }

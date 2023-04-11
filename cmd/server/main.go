@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/scuba13/AmacoonServices/config"
+	//"github.com/scuba13/AmacoonServices/config/migrate"
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
 	"github.com/scuba13/AmacoonServices/internal/color"
@@ -39,18 +40,20 @@ func main() {
 	// Connect to database
 	db := setupDatabase(cfg, logger)
 
-	// Connect to database
-	mongo := setupMongo(cfg, logger)
+	// Connect to Mongo
+	//mongo := setupMongo(cfg, logger)
 
-	teste := config.MigrateBreeds(db, mongo)
-	logger.Info(teste)
+	// logger.Info("Inicio Migração")
+	// go migrate.MigrateCats(db, mongo)
+	// logger.Info("Fim Migração")
+	
 
 	// Initialize repositories, handlers, and routes
 	initializeApp(e, db, logger)
 
 	// Start server
 	logger.Info("Starting Server")
-	if err := e.Start(":" + "8080"); err != nil {
+	if err := e.Start(":" + cfg.ServerPort); err != nil {
 		logger.Fatalf("Failed to start server: %v", err)
 	}
 }
