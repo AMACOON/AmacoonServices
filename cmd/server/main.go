@@ -1,25 +1,24 @@
 package main
 
 import (
-	
-
 	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/sirupsen/logrus"
-	"gorm.io/gorm"
-	"github.com/scuba13/AmacoonServices/internal/litter"
-	"github.com/scuba13/AmacoonServices/internal/transfer"
+	"github.com/scuba13/AmacoonServices/config"
+	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
-	"github.com/scuba13/AmacoonServices/internal/owner"
 	"github.com/scuba13/AmacoonServices/internal/color"
 	"github.com/scuba13/AmacoonServices/internal/country"
-	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/handler"
+	"github.com/scuba13/AmacoonServices/internal/litter"
+	"github.com/scuba13/AmacoonServices/internal/owner"
+	"github.com/scuba13/AmacoonServices/internal/transfer"
 	"github.com/scuba13/AmacoonServices/internal/utils"
-	"github.com/scuba13/AmacoonServices/pkg/server"
-	"github.com/scuba13/AmacoonServices/config"
+	routes "github.com/scuba13/AmacoonServices/pkg/server"
+	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -39,6 +38,12 @@ func main() {
 
 	// Connect to database
 	db := setupDatabase(cfg, logger)
+
+	// Connect to database
+	mongo := setupMongo(cfg, logger)
+
+	teste := config.MigrateBreeds(db, mongo)
+	logger.Info(teste)
 
 	// Initialize repositories, handlers, and routes
 	initializeApp(e, db, logger)
@@ -100,6 +105,16 @@ func setupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 	return db
 }
 
+func setupMongo(cfg *config.Config, logger *logrus.Logger) *mongo.Client {
+	logger.Info("Connecting Mongo")
+	db, err := config.SetupMongo(cfg)
+	if err != nil {
+		logger.Fatalf("Failed to initialize Mongo connection: %v", err)
+	}
+	logger.Info("Connected Mongo")
+	return db
+}
+
 func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger) {
 	// Initialize repositories
 	logger.Info("Initialize Repositories")
@@ -115,19 +130,19 @@ func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger) {
 
 	// Initialize converters
 	logger.Info("Initialize Converters")
-	litterConverter:= litter.NewLitterConverter(logger)
-	transferConverter:= transfer.NewTransferConverter(logger)
+	litterConverter := litter.NewLitterConverter(logger)
+	transferConverter := transfer.NewTransferConverter(logger)
 	logger.Info("Initialize Converters OK")
-	
+
 	// Initialize services
 	logger.Info("Initialize Services")
-	litterService := litter.NewLitterService(litterRepo, filesRepo,  logger, litterConverter)
-	transferService := transfer.NewTransferService(transferepo, filesRepo,  logger, transferConverter)
+	litterService := litter.NewLitterService(litterRepo, filesRepo, logger, litterConverter)
+	transferService := transfer.NewTransferService(transferepo, filesRepo, logger, transferConverter)
 	catService := cat.NewCatService(catRepo, logger)
-	breedService:= breed.NewBreedService(breedRepo, logger)
-	colorService:= color.NewColorService(colorRepo, logger)
-	countryService:= country.NewCountryService(countryRepo, logger)
-	ownerService:= owner.NewOwnerService(ownerRepo, logger)
+	breedService := breed.NewBreedService(breedRepo, logger)
+	colorService := color.NewColorService(colorRepo, logger)
+	countryService := country.NewCountryService(countryRepo, logger)
+	ownerService := owner.NewOwnerService(ownerRepo, logger)
 	logger.Info("Initialize Services OK")
 
 	// Initialize handlers

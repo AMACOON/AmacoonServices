@@ -1,6 +1,8 @@
 package cat
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type CatTable struct {
 	*gorm.Model
@@ -81,3 +83,4 @@ type Cat struct {
 func (c *Cat) TableName() string {
 	return "gatos"
 }
+

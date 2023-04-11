@@ -4,9 +4,6 @@ FROM golang:1.19
 # Definir o diretório de trabalho dentro do container
 WORKDIR /app
 
-# Baixar o código do repositório
-RUN git clone https://github.com/scuba13/AmacoonServices.git .
-
 # Copiar arquivos do diretório atual para o diretório de trabalho do container
 COPY . .
 

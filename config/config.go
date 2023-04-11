@@ -6,6 +6,11 @@ type Config struct {
 	DBHost     string
 	DBPort     string
 	DBName     string
+	MongoDBUsername string
+	MongoDBPassword string
+	MongoDBHost     string
+	MongoDBPort     string
+	MongoDBName     string
 	ServerPort string
 }
 
@@ -16,6 +21,11 @@ func LoadConfig() *Config {
 		DBHost:     "mysql.catclubsystem.com",
 		DBPort:     "3306",
 		DBName:     "amacoon01",
+		MongoDBUsername: "amacoonservice",
+		MongoDBPassword: "2010mainecoon2010",
+		MongoDBHost:     "localhost",
+		MongoDBPort:     "27017",
+		MongoDBName:     "amacoon",
 		ServerPort: "8080",
 	}
 }
@@ -23,3 +33,5 @@ func LoadConfig() *Config {
 
 //"amacoon001_add1:armin013@tcp(mysql20-farm1.kinghost.net:3306)/amacoon01"
 //mysql.catclubsystem.com
+
+//mongodb://amacoonservice:2010mainecoon2010@localhost:27017/amacoon
