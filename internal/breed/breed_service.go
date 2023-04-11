@@ -13,6 +13,7 @@ type BreedService struct {
 func NewBreedService(breedRepo *BreedRepository, logger *logrus.Logger) *BreedService {
 	return &BreedService{
 		BreedRepo: breedRepo,
+        Logger:       logger,
 	}
 }
 

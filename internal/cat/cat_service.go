@@ -14,6 +14,7 @@ type CatService struct {
 func NewCatService(catRepo *CatRepository, logger *logrus.Logger) *CatService {
 	return &CatService{
 		CatRepo: catRepo,
+        Logger:       logger,
 	}
 }
 

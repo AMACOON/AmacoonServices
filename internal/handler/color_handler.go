@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -23,7 +24,7 @@ func NewColorHandler(colorService *color.ColorService, logger *logrus.Logger) *C
 
 func (h *ColorHandler) GetAllColorsByBreed(c echo.Context) error {
 	h.Logger.Infof("Handler GetAllColorsByBreed")
-
+fmt.Println("Handler")
 	breedID := c.QueryParam("breedID")
 	h.Logger.WithField("breedID", breedID).Info("GetAllColorsByBreed called")
 
@@ -34,5 +35,6 @@ func (h *ColorHandler) GetAllColorsByBreed(c echo.Context) error {
 	}
 
 	h.Logger.Infof("Handler GetAllColorsByBreed OK")
+	fmt.Println("Handler OK")
 	return c.JSON(http.StatusOK, colors)
 }
