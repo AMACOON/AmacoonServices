@@ -6,15 +6,18 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/scuba13/AmacoonServices/config"
+
 	//"github.com/scuba13/AmacoonServices/config/migrate"
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
+	"github.com/scuba13/AmacoonServices/internal/cattery"
 	"github.com/scuba13/AmacoonServices/internal/color"
 	"github.com/scuba13/AmacoonServices/internal/country"
 	"github.com/scuba13/AmacoonServices/internal/handler"
 	"github.com/scuba13/AmacoonServices/internal/litter"
 	"github.com/scuba13/AmacoonServices/internal/owner"
 	"github.com/scuba13/AmacoonServices/internal/transfer"
+	"github.com/scuba13/AmacoonServices/internal/federation"
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	routes "github.com/scuba13/AmacoonServices/pkg/server"
 	"github.com/sirupsen/logrus"
@@ -41,15 +44,30 @@ func main() {
 	db := setupDatabase(cfg, logger)
 
 	// Connect to Mongo
-	//mongo := setupMongo(cfg, logger)
+	mongo := setupMongo(cfg, logger)
 
 	// logger.Info("Inicio Migração")
-	// go migrate.MigrateCats(db, mongo)
+	 
+	//   migrate.PopulateCountries(db,mongo)
+	//   migrate.MigrateBreeds(db,mongo)
+	//   migrate.MigrateColors(db,mongo)
+	//   migrate.MigrateOwners(db,mongo)
+	//   migrate.MigrateFederations(db,mongo)
+	//   migrate.MigrateCattery(db,mongo)
+
+	//   migrate.MigrateCats(db,mongo)
+	//  migrate.MigrateCatsPattentNameToCats1(db,mongo)
+	//  migrate.UpdateCatsTempWithPattensIDs2(mongo)
+	// migrate.UpdateCatsWithParentIDs3(mongo)
+	 
+
 	// logger.Info("Fim Migração")
+	 
+
 	
 
 	// Initialize repositories, handlers, and routes
-	initializeApp(e, db, logger)
+	initializeApp(e, db, logger, mongo)
 
 	// Start server
 	logger.Info("Starting Server")
@@ -69,25 +87,7 @@ func setupLogger() *logrus.Logger {
 	return logger
 }
 
-/*
-	 func setupLogger() *logrus.Logger {
-	    logger := logrus.New()
-	    logger.SetLevel(logrus.InfoLevel)
-	    logger.SetFormatter(&logrus.TextFormatter{
-	        FullTimestamp: true,
-	    })
-	    logger.SetOutput(os.Stdout)
 
-	    logFile, err := os.OpenFile("logs.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	    if err == nil {
-	        logger.SetOutput(io.MultiWriter(os.Stdout, logFile))
-	    } else {
-	        logger.Info("Failed to log to file, using default stderr")
-	    }
-
-	    return logger
-	}
-*/
 func setupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 	logger.Info("Connecting DB")
 	db, err := config.SetupDB(cfg)
@@ -118,17 +118,19 @@ func setupMongo(cfg *config.Config, logger *logrus.Logger) *mongo.Client {
 	return db
 }
 
-func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger) {
+func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger, mongo *mongo.Client) {
 	// Initialize repositories
 	logger.Info("Initialize Repositories")
-	catRepo := cat.NewCatRepository(db)
-	ownerRepo := owner.NewOwnerRepository(db)
-	colorRepo := color.NewColorRepository(db)
+	catRepo := cat.NewCatRepository(mongo,logger)
+	ownerRepo := owner.NewOwnerRepository(mongo, logger)
+	colorRepo := color.NewColorRepository(mongo, logger)
 	litterRepo := litter.NewLitterRepository(db, logger)
-	breedRepo := breed.NewBreedRepository(db)
-	countryRepo := country.NewCountryRepository(db)
+	breedRepo := breed.NewBreedRepository(mongo, logger)
+	countryRepo := country.NewCountryRepository(mongo, logger)
 	transferepo := transfer.NewTransferRepository(db, logger)
 	filesRepo := utils.NewFilesRepository(db)
+	catteryRepo:= cattery.NewCatteryRepository(mongo, logger)
+	federationRepo:= federation.NewFederationRepository(mongo, logger)
 	logger.Info("Initialize Repositories OK")
 
 	// Initialize converters
@@ -146,6 +148,8 @@ func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger) {
 	colorService := color.NewColorService(colorRepo, logger)
 	countryService := country.NewCountryService(countryRepo, logger)
 	ownerService := owner.NewOwnerService(ownerRepo, logger)
+	catteryService := cattery.NewCatteryService(catteryRepo, logger)
+	federationService:= federation.NewCatteryService(federationRepo, logger)
 	logger.Info("Initialize Services OK")
 
 	// Initialize handlers
@@ -157,11 +161,16 @@ func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger) {
 	breedHandler := handler.NewBreedHandler(breedService, logger)
 	countryHandler := handler.NewCountryHandler(countryService, logger)
 	transferHandler := handler.NewTransferHandler(transferService, filesRepo, logger, transferConverter)
+	catteryHandler:= handler.NewCatteryHandler(catteryService, logger)
+	federationHandler:= handler.NewFederationHandler(federationService, logger)
 	logger.Info("Initialize Handlers OK")
 
 	// Initialize router and routes
 	logger.Info("Initialize Router and Routes")
-	routes.NewRouter(catHandler, ownerHandler, colorHandler, litterHandler, breedHandler, countryHandler, transferHandler, logger, e)
+	routes.NewRouter(catHandler, ownerHandler, colorHandler,
+		 			litterHandler, breedHandler, countryHandler,
+		  			transferHandler,catteryHandler, federationHandler,
+					logger, e)
 	logger.Info("Initialize Router and Routes OK")
 
 }

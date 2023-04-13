@@ -10,11 +10,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gorm.io/gorm"
+	"github.com/scuba13/AmacoonServices/config/migrate/models/sql"
 )
 
 func PopulateCountries(db *gorm.DB, client *mongo.Client) error {
 	fmt.Println("Entrou Migrate")
-	var countries []*country.Country
+	var countries []*sql.Country
 	if err := db.Unscoped().Find(&countries).Error; err != nil {
 		return err
 	}
@@ -37,7 +38,7 @@ func PopulateCountries(db *gorm.DB, client *mongo.Client) error {
 }
 
 func MigrateBreeds(db *gorm.DB, client *mongo.Client) error {
-	var breeds []*breed.Breed
+	var breeds []*sql.Breed
 	if err := db.Unscoped().Find(&breeds).Error; err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func MigrateBreeds(db *gorm.DB, client *mongo.Client) error {
 
 func MigrateColors(db *gorm.DB, client *mongo.Client) error {
 	// Busque todos os registros da tabela "cores" usando GORM
-	var colors []*color.Color
+	var colors []*sql.Color
 	if err := db.Unscoped().Find(&colors).Error; err != nil {
 		return err
 	}

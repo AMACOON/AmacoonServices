@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -23,25 +22,41 @@ func NewOwnerHandler(ownerService *owner.OwnerService, logger *logrus.Logger) *O
 }
 
 func (h *OwnerHandler) GetOwnerByID(c echo.Context) error {
+	h.Logger.Infof("Handler GetOwnerByID")
+
 	id := c.Param("id")
-	ownerID, err := strconv.Atoi(id)
-	if err != nil {
-		h.Logger.WithError(err).Warn("Failed to parse owner ID")
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid owner ID")
-	}
+	h.Logger.WithFields(logrus.Fields{
+		"id": id,
+	}).Info("Getting Owner by ID")
 
-	h.Logger.WithField("ownerID", ownerID).Info("Getting owner by ID")
-
-	owner, err := h.OwnerService.GetOwnerByID(ownerID)
+	owner, err := h.OwnerService.GetOwnerByID(id)
 	if err != nil {
 		h.Logger.WithError(err).Warn("Failed to get owner from service")
-		return echo.NewHTTPError(http.StatusInternalServerError, "owner not found")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	if owner.OwnerName == "" {
-		h.Logger.Info("Owner not found")
-		 return c.JSON(http.StatusOK, "Owner not found")
+	if owner == nil {
+		h.Logger.WithFields(logrus.Fields{
+			"id": id,
+		}).Warn("Owner not found by ID")
+		return echo.NewHTTPError(http.StatusNotFound, "cattery not found")
 	}
 
-	h.Logger.WithField("ownerID", ownerID).Info("Successfully retrieved owner by ID")
+	h.Logger.Infof("Handler GetOwnerByID OK")
 	return c.JSON(http.StatusOK, owner)
+}
+
+func (h *OwnerHandler) GetAllOwners(c echo.Context) error {
+
+	// Log de entrada da função
+	h.Logger.Infof("Handler GetAllOwners")
+
+	owners, err := h.OwnerService.GetAllOwners()
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to get all owners")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get all owners")
+	}
+
+	// Log de saída da função
+	h.Logger.Infof("Handler GetAllOwners OK")
+	return c.JSON(http.StatusOK, owners)
 }

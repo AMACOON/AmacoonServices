@@ -8,12 +8,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
+	"github.com/scuba13/AmacoonServices/config/migrate/models/sql"
 )
-const batchSize = 20
+const batchSize = 100
 
 
 func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
-	var catMigrations []models.CatTable
+	var catMigrations []sql.CatTable
 	var err error
 	var offset int
 
@@ -157,8 +158,8 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 	return nil
 }
 
-func GetCatsMigrate(db *gorm.DB, offset, batchSize int) ([]models.CatTable, error) {
-	var cats []models.CatTable
+func GetCatsMigrate(db *gorm.DB, offset, batchSize int) ([]sql.CatTable, error) {
+	var cats []sql.CatTable
 
 	query := db.Unscoped().Joins("LEFT JOIN racas ON gatos.id_raca = racas.id_racas").
         Joins("LEFT JOIN cores ON gatos.id_cor = cores.id_cores").

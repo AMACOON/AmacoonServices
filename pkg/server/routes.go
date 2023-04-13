@@ -16,6 +16,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	breedHandler *handler.BreedHandler,
 	countryHandler *handler.CountryHandler,
 	transferHandler *handler.TransferHandler,
+	catteryHandler *handler.CatteryHandler,
+	federationHandler *handler.FederationHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -32,6 +34,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupBreedRoutes(e, breedHandler)
 	setupCountryRoutes(e, countryHandler)
 	setupTransferRoutes(e, transferHandler)
+	setupCatteryRoutes (e, catteryHandler)
+	setupFederationRoutes(e,federationHandler)
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -53,18 +57,19 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 }
 
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
-	e.GET("/cats", catHandler.GetCatsByExhibitorAndSexTable)
-	e.GET("/cats/:registration", catHandler.GetCatByRegistrationTable)
-	e.GET("/catsservice", catHandler.GetCatsByExhibitorAndSex)
-	e.GET("/catsservice/:registration", catHandler.GetCatByRegistration)
+	e.GET("/cats/:id", catHandler.GetCatsCompleteByID)
+	// e.GET("/cats/:registration", catHandler.GetCatByRegistrationTable)
+	// e.GET("/catsservice", catHandler.GetCatsByExhibitorAndSex)
+	// e.GET("/catsservice/:registration", catHandler.GetCatByRegistration)
 }
 
 func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
 	e.GET("/owners/:id", ownerHandler.GetOwnerByID)
+	e.GET("/owners", ownerHandler.GetAllOwners)
 }
 
 func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {
-	e.GET("/colors", colorHandler.GetAllColorsByBreed)
+	e.GET("/colors/:breedCode", colorHandler.GetAllColorsByBreed)
 }
 
 func setupLitterRoutes(e *echo.Echo, litterHandler *handler.LitterHandler) {
@@ -77,6 +82,17 @@ func setupLitterRoutes(e *echo.Echo, litterHandler *handler.LitterHandler) {
 
 func setupBreedRoutes(e *echo.Echo, breedHandler *handler.BreedHandler) {
 	e.GET("/breeds", breedHandler.GetAllBreeds)
+	e.GET("/breeds/:id", breedHandler.GetBreedByID)
+}
+
+func setupCatteryRoutes(e *echo.Echo, catteryHandler *handler.CatteryHandler) {
+	e.GET("/catteries", catteryHandler.GetAllCatteries)
+	e.GET("/catteries/:id", catteryHandler.GetCatteryByID)
+}
+
+func setupFederationRoutes(e *echo.Echo, federationHandler *handler.FederationHandler) {
+	e.GET("/federations", federationHandler.GetAllFederations)
+	e.GET("/federations/:id", federationHandler.GetFederationByID)
 }
 
 func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {

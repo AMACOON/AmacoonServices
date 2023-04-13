@@ -1,104 +1,109 @@
 package cat
 
 import (
-	"gorm.io/gorm"
+	"context"
+
+	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type CatRepository struct {
-	DB *gorm.DB
+	DB     *mongo.Client
+	Logger *logrus.Logger
 }
 
-func NewCatRepository(db *gorm.DB) *CatRepository {
+func NewCatRepository(db *mongo.Client, logger *logrus.Logger) *CatRepository {
 	return &CatRepository{
-		DB: db,
+		DB:     db,
+		Logger: logger,
 	}
 }
 
-func (r *CatRepository) GetCatsByExhibitorAndSexTable(idExhibitor int, sex int) ([]CatTable, error) {
+func (r *CatRepository) GetCatCompleteByID(id string) (*CatComplete, error) {
+	r.Logger.Infof("Repository GetCatCompleteByID")
 
-	var cats []CatTable
+	catCollection := r.DB.Database(database).Collection(catsCollection)
 
-	query := r.DB.Unscoped().Joins("JOIN racas ON gatos.id_raca = racas.id_racas").
-		Joins("JOIN cores ON gatos.id_cor = cores.id_cores").
-		Joins("JOIN gatis ON gatos.id_gatil = gatis.id_gatis").
-		Joins("JOIN expositores ON gatos.id_expositor= expositores.id_expositores").
-		Select("gatos.*, racas.nome AS nome_raca, cores.id_emscode AS id_emscode, cores.descricao AS nome_cor, gatis.nome_gatil AS nome_gatil , expositores.nome AS nome_expositor").
-		Where("gatos.id_expositor = ? AND gatos.sexo = ?", idExhibitor, sex).
-		Find(&cats)
-	if err := query.Error; err != nil {
+	cat := &CatMongo{}
+	catID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		r.Logger.WithError(err).Errorf("invalid cat ID: %v", id)
 		return nil, err
 	}
 
-	return cats, nil
-}
-
-func (r *CatRepository) GetCatByRegistrationTable(registration string) (*CatTable, error) {
-
-	var cat CatTable
-
-	query := r.DB.Unscoped().Joins("JOIN racas ON gatos.id_raca = racas.id_racas").
-		Joins("JOIN cores ON gatos.id_cor = cores.id_cores").
-		Joins("JOIN gatis ON gatos.id_gatil = gatis.id_gatis").
-		Joins("JOIN expositores ON gatos.id_expositor= expositores.id_expositores").
-		Select("gatos.*, racas.nome AS nome_raca, cores.id_emscode AS id_emscode, cores.descricao AS nome_cor, gatis.nome_gatil AS nome_gatil , expositores.nome AS nome_expositor").
-		Where("registro = ?", registration).
-		Find(&cat)
-	if err := query.Error; err != nil {
+	if err := catCollection.FindOne(context.Background(), bson.M{"_id": catID}).Decode(cat); err != nil {
+		if err == mongo.ErrNoDocuments {
+			r.Logger.WithField("id", id).Warn("Cat not found")
+			return nil, err
+		}
+		r.Logger.WithError(err).Errorf("error getting cat: %v", err)
 		return nil, err
 	}
 
-	return &cat, nil
-}
-
-func (r *CatRepository) GetCatsByExhibitorAndSex(idExhibitor int, sex int) ([]Cat, error) {
-
-	var cats []Cat
-
-	query := r.DB.Unscoped().Joins("JOIN racas ON gatos.id_raca = racas.id_racas").
-		Joins("JOIN cores ON gatos.id_cor = cores.id_cores").
-		Joins("JOIN gatis ON gatos.id_gatil = gatis.id_gatis").
-		Joins("JOIN expositores ON gatos.id_expositor= expositores.id_expositores").
-		Select(`gatos.id_gatos, gatos.nome_do_gato, gatos.registro, gatos.pais_do_gato,
-				gatos.microchip, racas.nome AS nome_raca, gatos.id_raca,
-				gatos.id_cor, cores.descricao AS nome_cor, cores.id_emscode AS id_emscode,
-				gatos.sexo, gatos.nascimento,
-				gatos.nome_do_pai, gatos.nome_da_mae, gatis.nome_gatil,
-				gatis.criador_gatil, gatos.id_gatil, gatos.id_expositor,
-				gatos.criador, expositores.nome AS nome_expositor, expositores.endereco, expositores.cep,
-				expositores.cidade, expositores.estado, expositores.telefone`).
-		Where("gatos.id_expositor = ? AND gatos.sexo = ?", idExhibitor, sex).
-		Find(&cats)
-
-	if err := query.Error; err != nil {
-		return nil, err
+	catComplete := &CatComplete{
+		ID:               cat.ID,
+		Name:             cat.Name,
+		Registration:     cat.Registration,
+		RegistrationType: cat.RegistrationType,
+		Microchip:        cat.Microchip,
+		Sex:              cat.Sex,
+		Birthdate:        cat.Birthdate,
+		Neutered:         cat.Neutered,
+		Validated:        cat.Validated,
+		Observation:      cat.Observation,
+		Fifecat:          cat.Fifecat,
+		Titles:           cat.Titles,
 	}
 
-	return cats, nil
-}
-
-func (r *CatRepository) GetCatByRegistration(registration string) (*Cat, error) {
-	var cat Cat
-
-	query := r.DB.Unscoped().Joins("JOIN racas ON gatos.id_raca = racas.id_racas").
-		Joins("JOIN cores ON gatos.id_cor = cores.id_cores").
-		Joins("JOIN gatis ON gatos.id_gatil = gatis.id_gatis").
-		Joins("JOIN expositores ON gatos.id_expositor= expositores.id_expositores").
-		Select(`gatos.id_gatos, gatos.nome_do_gato, gatos.registro,
-				gatos.microchip, racas.nome AS nome_raca, gatos.id_raca,
-				gatos.id_cor, cores.descricao AS nome_cor, cores.id_emscode AS id_emscode,
-				gatos.sexo, gatos.nascimento,
-				gatos.nome_do_pai, gatos.nome_da_mae, gatis.nome_gatil,
-				gatis.criador_gatil, gatos.id_gatil, gatos.id_expositor,
-				gatos.criador, expositores.nome AS nome_expositor, expositores.endereco, expositores.cep,
-				expositores.cidade, expositores.estado, expositores.telefone`).
-		Where("registro = ?", registration).
-		Find(&cat)
-
-	if err := query.Error; err != nil {
+	if fatherName, err := r.getFather(cat); err != nil {
 		return nil, err
+	} else {
+		catComplete.FatherName = fatherName
 	}
 
-	return &cat, nil
+	if country, err := r.getCountry(cat); err != nil {
+		return nil, err
+	} else {
+		catComplete.Country = *country
+	}
+
+	if motherName, err := r.getMother(cat); err != nil {
+		return nil, err
+	} else {
+		catComplete.MotherName = motherName
+	}
+
+	if breed, err := r.getBreed(cat); err != nil {
+		return nil, err
+	} else {
+		catComplete.Breed = *breed
+	}
+
+	if color, err := r.getColor(cat); err != nil {
+		return nil, err
+	} else {
+		catComplete.Color = *color
+	}
+
+	if cattery, err := r.getCattery(cat); err != nil {
+		return nil, err
+	} else {
+		catComplete.Cattery = *cattery
+	}
+
+	if owner, err := r.getOwner(cat); err != nil {
+		return nil, err
+	} else {
+		catComplete.Owner = *owner
+	}
+
+	if federation, err := r.getFederation(cat); err != nil {
+		return nil, err
+	} else {
+		catComplete.Federation = *federation
+	}
+
+	return catComplete, nil
 }
-
-

@@ -7,11 +7,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
+	"github.com/scuba13/AmacoonServices/config/migrate/models/sql"
 )
 
 func MigrateOwners(db *gorm.DB, client *mongo.Client) error {
 	// Busque todos os registros da tabela "expositores" usando GORM
-	var owners []*owner.Owner
+	var owners []*sql.Owner
 	if err := db.Unscoped().Find(&owners).Error; err != nil {
 		return err
 	}

@@ -6,25 +6,36 @@ import (
 )
 
 type OwnerService struct {
-	ExhibitorRepo *OwnerRepository
+	OwnerRepo *OwnerRepository
 	Logger        *logrus.Logger
 }
 
-func NewOwnerService(exhibitorRepo *OwnerRepository, logger *logrus.Logger) *OwnerService {
+func NewOwnerService(ownerRepo *OwnerRepository, logger *logrus.Logger) *OwnerService {
 	return &OwnerService{
-		ExhibitorRepo: exhibitorRepo,
+		OwnerRepo: ownerRepo,
 		Logger:        logger,
 	}
 }
 
-func (s *OwnerService) GetOwnerByID(ownerID int) (*Owner, error) {
-	s.Logger.Info("Getting owner with ID ", ownerID)
-	owner, err := s.ExhibitorRepo.GetOwnerByExhibitorID(uint(ownerID))
+func (s *OwnerService) GetOwnerByID(id string) (*OwnerMongo, error) {
+	s.Logger.Info("Service GetOwnerByID")
+	owner, err := s.OwnerRepo.GetOwnerByExhibitorID(id)
 	if err != nil {
-		s.Logger.WithError(err).Error("Failed to get owner from repository")
+		s.Logger.WithError(err).Error("Failed to get owner from repository: %v", err)
 		return nil, err
 	}
+	s.Logger.Info("Service GetOwnerByID OK")
+	return owner, nil
+}
 
-	return &owner, nil
+func (s *OwnerService) GetAllOwners() ([]OwnerMongo, error) {
+    s.Logger.Infof("Service GetAllOwners")
+    owners, err := s.OwnerRepo.GetAllOwners()
+    if err != nil {
+        s.Logger.WithError(err).Error("failed to get all owners")
+        return nil, err
+    }
+    s.Logger.Infof("Service GetAllOwners OK")
+    return owners, nil
 }
 

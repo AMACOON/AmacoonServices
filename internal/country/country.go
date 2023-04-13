@@ -1,14 +1,12 @@
 package country
 
-import "gorm.io/gorm"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
-type Country struct {
-	*gorm.Model
-	CountryCode      string `gorm:"primaryKey;column:code"`
-	CountryName string `gorm:"column:descricao"`
-	Activate   string `gorm:"column:visivel"`
-}
-
-func (c *Country) TableName() string {
-	return "country_codes"
+type CountryMongo struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
+	Code         string             `bson:"code"`
+	Name         string             `bson:"name"`
+	IsActivated  bool               `bson:"isActivated"`
 }

@@ -1,4 +1,4 @@
-package breed
+package sql
 
 import "gorm.io/gorm"
 

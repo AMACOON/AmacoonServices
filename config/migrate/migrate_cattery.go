@@ -7,11 +7,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
+	"github.com/scuba13/AmacoonServices/config/migrate/models/sql"
 )
 
 func MigrateCattery(db *gorm.DB, client *mongo.Client) error {
 	// Busque todos os registros da tabela "gatis" usando GORM
-	var breeders []*cattery.Cattery
+	var breeders []*sql.Cattery
 	if err := db.Unscoped().Find(&breeders).Error; err != nil {
 		return err
 	}

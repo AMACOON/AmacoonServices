@@ -36,22 +36,31 @@ func (h *BreedHandler) GetAllBreeds(c echo.Context) error {
 	return c.JSON(http.StatusOK, breeds)
 }
 
-func (h *BreedHandler) GetCompatibleBreeds(c echo.Context, breedID string) error {
+func (h *BreedHandler) GetBreedByID(c echo.Context) error {
 
 	// Log de entrada da função
-	h.Logger.Infof("Handler GetCompatibleBreeds")
+	h.Logger.Infof("Handler GetBreedByID")
+	id := c.Param("id")
 
-	breeds, err := h.BreedService.GetCompatibleBreeds(breedID)
+	h.Logger.WithFields(logrus.Fields{
+		"id": id,
+	}).Info("Getting Brred by ID")
+
+	breed, err := h.BreedService.GetBreedByID(id)
 	if err != nil {
-		h.Logger.WithError(err).Error("Failed to get compatible breeds")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get compatible breeds")
+		h.Logger.WithError(err).Error("Failed to get Breed by ID")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	if len(breeds) == 0 {
-		h.Logger.Infof("The breed %s has no compatible breeds", breedID)
+	
+	if breed == nil {
+		h.Logger.WithFields(logrus.Fields{
+			"id": id,
+		}).Warn("Breed not found by ID")
+		return echo.NewHTTPError(http.StatusNotFound, "breed not found")
 	}
 
 	// Log de saída da função
-	h.Logger.Infof("Handler GetCompatibleBreeds OK")
-	return c.JSON(http.StatusOK, breeds)
+	h.Logger.Infof("Handler GetBreedByID OK")
+	return c.JSON(http.StatusOK, breed)
 }
 

@@ -1,4 +1,4 @@
-package cattery
+package sql
 
 import "gorm.io/gorm"
 

@@ -1,4 +1,4 @@
-package cat
+package sql
 
 import (
 	"time"
@@ -87,3 +87,44 @@ func (c *Cat) TableName() string {
 	return "gatos"
 }
 
+type CatMigration struct {
+	ID            int       `gorm:"primaryKey;column:id_gatos"`
+	BreedID       string    `gorm:"column:id_raca"`
+	ExhibitorID   int       `gorm:"column:id_expositor"`
+	Registry      string    `gorm:"column:registro"`
+	RegistryType  string    `gorm:"column:registro_tipo"`
+	FederationID  int       `gorm:"column:registro_federacao"`
+	FIFECat       string    `gorm:"column:fifecat"`
+	Neutered      string    `gorm:"column:neutro"`
+	CatName       string    `gorm:"column:nome_do_gato"`
+	CatCountry    string    `gorm:"column:pais_do_gato"`
+	WW            string    `gorm:"column:ww"`
+	SW            string    `gorm:"column:sw"`
+	NW            string    `gorm:"column:nw"`
+	AdultTitle    string    `gorm:"column:titulo_adulto"`
+	NeuteredTitle string    `gorm:"column:titulo_castrado"`
+	JW            string    `gorm:"column:jw"`
+	DVM           string    `gorm:"column:dvm"`
+	DSM           string    `gorm:"column:dsm"`
+	DM            string    `gorm:"column:dm"`
+	ColorID       int       `gorm:"column:id_cor"`
+	FatherName    string    `gorm:"column:nome_do_pai"`
+	FatherBreed   string    `gorm:"column:raca_do_pai"`
+	FatherColorID int       `gorm:"column:cor_do_pai"`
+	MotherName    string    `gorm:"column:nome_da_mae"`
+	MotherBreed   string    `gorm:"column:raca_da_mae"`
+	MotherColorID int       `gorm:"column:cor_da_mae"`
+	Breeder       string    `gorm:"column:criador"`
+	Gender        string    `gorm:"column:sexo"`
+	BirthDate     time.Time `gorm:"column:nascimento"`
+	CatteryID     int       `gorm:"column:id_gatil"`
+	Microchip     string    `gorm:"column:microchip"`
+	Observation   []byte    `gorm:"column:observacao"`
+	Validated     string    `gorm:"column:validado"`
+	CreatedAt     time.Time `gorm:"column:datacadastro"`
+	BW            *string   `gorm:"column:bw"`
+}
+
+func (c *CatMigration) TableName() string {
+	return "gatos"
+}

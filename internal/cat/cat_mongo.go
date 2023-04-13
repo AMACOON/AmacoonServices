@@ -27,3 +27,5 @@ type CatMongo struct {
 	OwnerID                  primitive.ObjectID `bson:"ownerId"`
 	CountryID                primitive.ObjectID `bson:"countryId"`
 }
+
+

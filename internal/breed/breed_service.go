@@ -17,22 +17,25 @@ func NewBreedService(breedRepo *BreedRepository, logger *logrus.Logger) *BreedSe
 	}
 }
 
-
-func (s *BreedService) GetAllBreeds() ([]Breed, error) {
+func (s *BreedService) GetAllBreeds() ([]BreedMongo, error) {
+    s.Logger.Infof("Service GetAllBreeds")
     breeds, err := s.BreedRepo.GetAllBreeds()
     if err != nil {
-        s.Logger.WithError(err).Error("Failed to get all breeds")
+        s.Logger.WithError(err).Error("failed to get all breeds")
         return nil, err
     }
+    s.Logger.Infof("Service GetAllBreeds OK")
     return breeds, nil
 }
 
-func (s *BreedService) GetCompatibleBreeds(breedID string) ([]string, error) {
-    compatibleBreeds, err := s.BreedRepo.GetCompatibleBreeds(breedID)
-    if err != nil {
-        s.Logger.WithError(err).Errorf("Failed to get compatible breeds for breed with ID %s", breedID)
-        return nil, err
-    }
-    return compatibleBreeds, nil
+func (s *BreedService) GetBreedByID(id string) (*BreedMongo, error) {
+	s.Logger.Infof("Service GetBreedByID")
+    breed, err := s.BreedRepo.GetBreedByID(id)
+	if err != nil {
+		s.Logger.Errorf("error fetching breed from repository: %v", err)
+		return nil, err
+	}
+    s.Logger.Infof("Service GetBreedByID OK")
+	return breed, nil
 }
 

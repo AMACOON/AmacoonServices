@@ -7,10 +7,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
+	"github.com/scuba13/AmacoonServices/config/migrate/models/sql"
 )
 
 func MigrateFederations(db *gorm.DB, client *mongo.Client) error {
-	var federations []*federation.Federation
+	var federations []*sql.Federation
 	if err := db.Unscoped().Find(&federations).Error; err != nil {
 		return err
 	}

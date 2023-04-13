@@ -17,14 +17,14 @@ func NewCountryService(countryRepo *CountryRepository, logger *logrus.Logger) *C
 	}
 }
 
-func (s *CountryService) GetAllCountries() ([]Country, error) {
-	s.Logger.Infof("GetAllCountries Sercice")
+func (s *CountryService) GetAllCountries() ([]CountryMongo, error) {
+	s.Logger.Infof("Service GetAllCountries")
 	countries, err := s.CountryRepo.GetAllCountries()
 	if err != nil {
 		s.Logger.WithError(err).Error("Failed to get all countries")
 		return nil, err
 	}
-	s.Logger.Infof("GetAllCountries Sercice OK")
+	s.Logger.Infof("Service GetAllCountries OK")
 	return countries, nil
 }
 
