@@ -8,6 +8,7 @@
 *.swn
 *.bak
 *.tmp
+*.csv
 
 # Arquivos do sistema de controle de versão
 .git/
