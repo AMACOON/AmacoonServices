@@ -1,34 +1,23 @@
 package utils
 
 import (
-	"fmt"
-
-	"gorm.io/gorm"
+    "fmt"
+    "math/rand"
+    "time"
 )
 
+
 type ProtocolService struct {
-	DB *gorm.DB
 }
 
-func NewProtocolService(db *gorm.DB) *ProtocolService {
-	return &ProtocolService{DB: db}
+func NewProtocolService() *ProtocolService {
+	return &ProtocolService{}
 }
 
-func (ps *ProtocolService) GenerateProtocolNumber() (string, error) {
-	var protocol ProtocolDB
-	var protocolNumber string
-
-	if err := ps.DB.Create(&protocol).Error; err != nil {
-		return "", err
-	}
-
-	// Gere o número do protocolo amigável
-	protocolNumber = fmt.Sprintf("P%08d", protocol.ID)
-
-	// Atualize o número do protocolo na tabela Protocol
-	if err := ps.DB.Model(&protocol).Update("protocol_number", protocolNumber).Error; err != nil {
-		return "", err
-	}
-
-	return protocolNumber, nil
+func (u *ProtocolService) GenerateProtocolNumber(letter string) string {
+    // generate random 9-digit string
+    rand.Seed(time.Now().UnixNano())
+    protocolNumber := fmt.Sprintf("%s%09d", letter, rand.Intn(1000000000))
+    return protocolNumber
 }
+

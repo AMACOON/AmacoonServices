@@ -96,8 +96,6 @@ func setupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 	}
 
 	if err := db.AutoMigrate(
-		&litter.LitterDB{},
-		&litter.KittenDB{},
 		&transfer.TransferDB{},
 		&utils.ProtocolDB{},
 		&utils.FilesDB{},
@@ -124,24 +122,23 @@ func initializeApp(e *echo.Echo, db *gorm.DB, logger *logrus.Logger, mongo *mong
 	catRepo := cat.NewCatRepository(mongo,logger)
 	ownerRepo := owner.NewOwnerRepository(mongo, logger)
 	colorRepo := color.NewColorRepository(mongo, logger)
-	litterRepo := litter.NewLitterRepository(db, logger)
+	litterRepo := litter.NewLitterRepository(mongo, logger)
 	breedRepo := breed.NewBreedRepository(mongo, logger)
 	countryRepo := country.NewCountryRepository(mongo, logger)
 	transferepo := transfer.NewTransferRepository(db, logger)
-	filesRepo := utils.NewFilesRepository(db)
 	catteryRepo:= cattery.NewCatteryRepository(mongo, logger)
 	federationRepo:= federation.NewFederationRepository(mongo, logger)
 	logger.Info("Initialize Repositories OK")
 
 	// Initialize converters
 	logger.Info("Initialize Converters")
-	litterConverter := litter.NewLitterConverter(logger)
 	transferConverter := transfer.NewTransferConverter(logger)
 	logger.Info("Initialize Converters OK")
 
 	// Initialize services
 	logger.Info("Initialize Services")
-	litterService := litter.NewLitterService(litterRepo, filesRepo, logger, litterConverter)
+	protocolService:= utils.NewProtocolService()
+	litterService := litter.NewLitterService(litterRepo,logger, protocolService)
 	transferService := transfer.NewTransferService(transferepo, filesRepo, logger, transferConverter)
 	catService := cat.NewCatService(catRepo, logger)
 	breedService := breed.NewBreedService(breedRepo, logger)

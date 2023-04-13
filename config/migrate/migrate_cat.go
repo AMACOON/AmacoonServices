@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 	"github.com/scuba13/AmacoonServices/config/migrate/models/sql"
+	"go.mongodb.org/mongo-driver/bson"
 )
 const batchSize = 100
 
@@ -18,6 +19,7 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 	var err error
 	var offset int
 
+	catCollection := mongoClient.Database("amacoon").Collection("catteries")
 	for {
 		catMigrations, err = GetCatsMigrate(db, offset, batchSize)
 		if err != nil {
@@ -27,25 +29,38 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 		if len(catMigrations) == 0 {
 			break
 		}
+		
 
 		log.Printf("Migrating cats %d - %d\n", offset, offset+len(catMigrations)-1)
 
 		catMongos := make([]interface{}, len(catMigrations))
 		for i, cat := range catMigrations {
 			log.Printf("Migrating cat %d: %s\n", i, cat.Name)
+		
+			filter := bson.M{"name": cat.Name}
+			count, err := catCollection.CountDocuments(context.Background(), filter)
+			if err != nil {
+				return err
+			}
+		
+			if count > 0 {
+				log.Printf("Cat already exists: %s", cat.Name)
+				continue
+			}
+		
 			neutered := cat.Neutered == "s"
 			validated := cat.Validated == "s"
 			fifecat := cat.FifeCat == "s"
-
+		
 			titles := []string{}
 			if cat.AdultTitle != "0" {
 				titles = append(titles, cat.AdultTitle)
 			}
-
+		
 			if cat.NeuterTitle != "0" {
 				titles = append(titles, cat.NeuterTitle)
 			}
-
+		
 			if cat.WW == "1" {
 				titles = append(titles, "WW")
 			}
@@ -67,59 +82,52 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 			if cat.DM == "1" {
 				titles = append(titles, "DM")
 			}
-
+		
 			federationID, err := getFederationID(mongoClient, cat.FedName)
 			if err != nil {
 				log.Printf("Error getting federation ID for cat %d: %v\n", i, err)
 				return err
 			}
-
+		
 			breedID, err := getBreedID(mongoClient, cat.BreedName)
 			if err != nil {
 				log.Printf("Error getting getBreedID for cat %d: %v\n", i, err)
 				return err
 			}
-
+		
 			colorID, err := getColorID(mongoClient, cat.EmsCode, cat.BreedID)
 			if err != nil {
 				log.Printf("Error getting getColorID for cat %d: %v\n", i, err)
 				return err
 			}
-
+		
 			countryId, err := findCountryIdByCode(mongoClient, cat.Country)
 			if err != nil {
 				log.Printf("Error getting findCountryIdByCode for cat %d: %v\n", i, err)
 				return err
 			}
-
+		
 			catteryId, err := getCatteryID(mongoClient, cat.BreederName)
 			if err != nil {
 				log.Printf("Error getting getCatteryID for cat %d: %v\n", i, err)
 				return err
 			}
-
+			
 			ownerId, err := getOwnerID(mongoClient, cat.OwnerName)
 			if err != nil {
 				log.Printf("Error getting getOwnerID for cat %d: %v\n", i, err)
 				return err
 			}
-
+	
 			sexString := ""
 			if cat.Sex == "1" {
 				sexString = "male"
 			} else if cat.Sex == "2" {
 				sexString = "female"
 			}
-
-			// log.Println("cat.BirthDate: ", cat.BirthDate)
-			// birthdateStr := cat.BirthDate.Format("20-02-2006") // formatando para "dd-mm-yyyy"
-			// log.Println("birthdateStr: ", birthdateStr)
-			// birthdate, err := time.Parse("20-02-2006", birthdateStr)
-			// if err != nil {
-			// 	return err
-			// }
-			// log.Println("birthdate: ", birthdate)
-
+	
+		
+	
 			catMongos[i] = models.CatMongo{
 				ID:                       primitive.NewObjectID(),
 				Name:                     cat.Name,
@@ -142,21 +150,25 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 				OwnerID:                  ownerId,
 				CountryID:                countryId,
 			}
+	
+			// Insert cat into database
+			_, err = catCollection.InsertOne(context.Background(), catMongos[i])
+			if err != nil {
+				log.Printf("Error inserting cat %s: %v\n", cat.Name, err)
+				return err
+			}
 		}
-
-		mongoDB := mongoClient.Database("amacoon")
-		catCollection := mongoDB.Collection("cats")
-		_, err = catCollection.InsertMany(context.Background(), catMongos)
-		if err != nil {
-			log.Printf("Error inserting cats: %v\n", err)
-		}
-
+	
 		offset += len(catMigrations)
 	}
-
+	
 	log.Printf("Migrated all cats\n")
 	return nil
-}
+	
+}	
+
+
+
 
 func GetCatsMigrate(db *gorm.DB, offset, batchSize int) ([]sql.CatTable, error) {
 	var cats []sql.CatTable

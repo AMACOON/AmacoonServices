@@ -46,7 +46,7 @@ func (h *LitterHandler) GetLitterByID(c echo.Context) error {
 	}
 
 	// Call the service to get the litter data
-	litterData, err := h.LitterService.GetLitterByID(uint(litterID))
+	litterData, err := h.LitterService.GetLitterByID(id string())
 	if err != nil {
 		h.Logger.WithError(err).Errorf("Failed to get litter by ID %v", litterID)
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
