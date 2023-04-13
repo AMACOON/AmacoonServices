@@ -1,18 +1,9 @@
 package cat
 
 import (
-	"context"
-
-	"github.com/scuba13/AmacoonServices/internal/breed"
-	"github.com/scuba13/AmacoonServices/internal/cattery"
-	"github.com/scuba13/AmacoonServices/internal/color"
-	"github.com/scuba13/AmacoonServices/internal/country"
-	"github.com/scuba13/AmacoonServices/internal/federation"
-	"github.com/scuba13/AmacoonServices/internal/owner"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
-
 
 var database = "amacoon"
 var catsCollection = "cats"
@@ -23,141 +14,204 @@ var catteriesCollection = "catteries"
 var ownersCollection = "owners"
 var countriesCollection = "countries"
 
+func BuildPipelineWithLookups(matchStage bson.D, lookups []string) mongo.Pipeline {
+	pipeline := mongo.Pipeline{matchStage}
 
-func (r *CatRepository) getFatherName(cat *CatMongo) (string, error) {
-	catCollection := r.DB.Database(database).Collection(catsCollection)
-
-	father := &CatMongo{}
-	if err := catCollection.FindOne(context.Background(), bson.M{"_id": cat.FatherID}).Decode(father); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return "", nil
+	for _, lookup := range lookups {
+		switch lookup {
+		case "breed":
+			pipeline = append(pipeline, LookupBreedStage(), UnwindBreedStage())
+		case "color":
+			pipeline = append(pipeline, LookupColorStage(), UnwindColorStage())
+		case "father":
+			pipeline = append(pipeline, LookupFatherStage(), UnwindFatherStage(), AddFatherNameAndRemoveFatherStage())
+		case "country":
+			pipeline = append(pipeline, LookupCountryStage(), UnwindCountryStage())
+		case "mother":
+			pipeline = append(pipeline, LookupMotherStage(), UnwindMotherStage(), AddMotherNameAndRemoveFatherStage())
+		case "cattery":
+			pipeline = append(pipeline, LookupCatteryStage(), UnwindCatteryStage())
+		case "owner":
+			pipeline = append(pipeline, LookupOwnerStage(), UnwindOwnerStage())
+		case "federation":
+			pipeline = append(pipeline, LookupFederationStage(), UnwindFederationStage())
 		}
-		r.Logger.WithError(err).Errorf("error getting father: %v", err)
-		return "", err
 	}
-	return father.Name, nil
+
+	return pipeline
 }
 
-func (r *CatRepository) getCountry(cat *CatMongo) (*country.CountryMongo, error) {
-	country := &country.CountryMongo{}
-	if err := r.DB.Database(database).Collection(countriesCollection).FindOne(context.Background(), bson.M{"_id": cat.CountryID}).Decode(country); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, nil
-		}
-		r.Logger.WithError(err).Errorf("error getting country: %v", err)
-		return nil, err
-	}
-	return country, nil
+
+func LookupFatherStage() bson.D {
+	return bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         catsCollection,
+			"localField":   "fatherId",
+			"foreignField": "_id",
+			"as":           "father",
+		},
+	}}
 }
 
-func (r *CatRepository) getMotherName(cat *CatMongo) (string, error) {
-	catCollection := r.DB.Database(database).Collection(catsCollection)
-
-	mother := &CatMongo{}
-	if err := catCollection.FindOne(context.Background(), bson.M{"_id": cat.MotherID}).Decode(mother); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return "", nil
-		}
-		r.Logger.WithError(err).Errorf("error getting mother: %v", err)
-		return "", err
-	}
-	return mother.Name, nil
+func UnwindFatherStage() bson.D {
+	return bson.D{{
+		Key:   "$unwind",
+		Value: "$father",
+	}}
 }
 
-func (r *CatRepository) getBreed(cat *CatMongo) (*breed.BreedMongo, error) {
-	breed := &breed.BreedMongo{}
-	if err := r.DB.Database(database).Collection(breedsCollection).FindOne(context.Background(), bson.M{"_id": cat.BreedID}).Decode(breed); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, nil
-		}
-		r.Logger.WithError(err).Errorf("error getting breed: %v", err)
-		return nil, err
-	}
-	return breed, nil
-}
-
-func (r *CatRepository) getColor(cat *CatMongo) (*color.ColorMongo, error) {
-	color := &color.ColorMongo{}
-	if err := r.DB.Database(database).Collection(colorsCollection).FindOne(context.Background(), bson.M{"_id": cat.ColorID}).Decode(color); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, nil
-		}
-		r.Logger.WithError(err).Errorf("error getting color: %v", err)
-		return nil, err
-	}
-	return color, nil
-}
-
-func (r *CatRepository) getCattery(cat *CatMongo) (*cattery.CatteryMongo, error) {
-	cattery := &cattery.CatteryMongo{}
-	if err := r.DB.Database(database).Collection(catteriesCollection).FindOne(context.Background(), bson.M{"_id": cat.CatteryID}).Decode(cattery); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, nil
-		}
-		r.Logger.WithError(err).Errorf("error getting cattery: %v", err)
-		return nil, err
-	}
-	return cattery, nil
-}
-
-// Busca o proprietário do gato
-func (r *CatRepository) getOwner(cat *CatMongo) (*owner.OwnerMongo, error) {
-	owner := &owner.OwnerMongo{}
-	if err := r.DB.Database(database).Collection(ownersCollection).FindOne(context.Background(), bson.M{"_id": cat.OwnerID}).Decode(owner); err != nil {
-		if err == mongo.ErrNoDocuments {
-			r.Logger.WithField("id", cat.OwnerID).Warn("Owner not found")
-			owner = nil
-		} else {
-			r.Logger.WithError(err).Errorf("error getting owner: %v", err)
-			return nil, err
-		}
-	}
-	return owner, nil
+func AddFatherNameAndRemoveFatherStage() bson.D {
+	return bson.D{{
+		Key: "$addFields",
+		Value: bson.M{
+			"fatherName": "$father.name",
+			"father":     nil,
+		},
+	}}
 }
 
 
 
-// Busca o pai do gato
-func (r *CatRepository) getFather(cat *CatMongo) (string, error) {
-	father := &CatMongo{}
-	if err := r.DB.Database(database).Collection(catsCollection).FindOne(context.Background(), bson.M{"_id": cat.FatherID}).Decode(father); err != nil {
-		if err == mongo.ErrNoDocuments {
-			r.Logger.WithField("id", cat.FatherID).Warn("Father not found")
-			return "", nil
-		} else {
-			r.Logger.WithError(err).Errorf("error getting father: %v", err)
-			return "", err
-		}
-	}
-	return father.Name, nil
+func LookupCountryStage() bson.D {
+	return bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         countriesCollection,
+			"localField":   "countryId",
+			"foreignField": "_id",
+			"as":           "country",
+		},
+	}}
 }
 
-// Busca a mãe do gato
-func (r *CatRepository) getMother(cat *CatMongo) (string, error) {
-	mother := &CatMongo{}
-	if err := r.DB.Database(database).Collection(catsCollection).FindOne(context.Background(), bson.M{"_id": cat.MotherID}).Decode(mother); err != nil {
-		if err == mongo.ErrNoDocuments {
-			r.Logger.WithField("id", cat.MotherID).Warn("Mother not found")
-			return "", nil
-		} else {
-			r.Logger.WithError(err).Errorf("error getting mother: %v", err)
-			return "", err
-		}
-	}
-	return mother.Name, nil
+func UnwindCountryStage() bson.D {
+	return bson.D{{
+		Key:   "$unwind",
+		Value: "$country",
+	}}
 }
 
+func LookupMotherStage() bson.D {
+	return bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         catsCollection,
+			"localField":   "motherId",
+			"foreignField": "_id",
+			"as":           "mother",
+		},
+	}}
+}
 
-func (r *CatRepository) getFederation(cat *CatMongo) (*federation.FederationMongo, error) {
-	federation := &federation.FederationMongo{}
-	r.Logger.Info("ID Federation: ", cat.RegistrationFederationID)
-	if err := r.DB.Database(database).Collection(federationsCollection).FindOne(context.Background(), bson.M{"_id": cat.RegistrationFederationID}).Decode(federation); err != nil {
-		if err == mongo.ErrNoDocuments {
-			r.Logger.Infof("Federation not found")
-			return nil, nil
-		}
-		r.Logger.WithError(err).Errorf("error getting federation: %v", err)
-		return nil, err
-	}
-	return federation, nil
+func UnwindMotherStage() bson.D {
+	return bson.D{{
+		Key:   "$unwind",
+		Value: "$mother",
+	}}
+}
+
+func AddMotherNameAndRemoveFatherStage() bson.D {
+	return bson.D{{
+		Key: "$addFields",
+		Value: bson.M{
+			"motherName": "$mother.name",
+			"mother":     nil,
+		},
+	}}
+}
+
+func LookupBreedStage() bson.D {
+	return bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         breedsCollection,
+			"localField":   "breedId",
+			"foreignField": "_id",
+			"as":           "breed",
+		},
+	}}
+}
+
+func UnwindBreedStage() bson.D {
+	return bson.D{{
+		Key:   "$unwind",
+		Value: "$breed",
+	}}
+}
+
+func LookupColorStage() bson.D {
+	return bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         colorsCollection,
+			"localField":   "colorId",
+			"foreignField": "_id",
+			"as":           "color",
+		},
+	}}
+}
+
+func UnwindColorStage() bson.D {
+	return bson.D{{
+		Key:   "$unwind",
+		Value: "$color",
+	}}
+}
+
+func LookupCatteryStage() bson.D {
+	return bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         catteriesCollection,
+			"localField":   "catteryId",
+			"foreignField": "_id",
+			"as":           "cattery",
+		},
+	}}
+}
+
+func UnwindCatteryStage() bson.D {
+	return bson.D{{
+		Key:   "$unwind",
+		Value: "$cattery",
+	}}
+}
+
+func LookupOwnerStage() bson.D {
+	return bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         ownersCollection,
+			"localField":   "ownerId",
+			"foreignField": "_id",
+			"as":           "owner",
+		},
+	}}
+}
+
+func UnwindOwnerStage() bson.D {
+	return bson.D{{
+		Key:   "$unwind",
+		Value: "$owner",
+	}}
+}
+
+func LookupFederationStage() bson.D {
+	return bson.D{{
+		Key: "$lookup",
+		Value: bson.M{
+			"from":         federationsCollection,
+			"localField":   "registrationFederation",
+			"foreignField": "_id",
+			"as":           "federation",
+		},
+	}}
+}
+
+func UnwindFederationStage() bson.D {
+	return bson.D{{
+		Key:   "$unwind",
+		Value: "$federation",
+	}}
 }

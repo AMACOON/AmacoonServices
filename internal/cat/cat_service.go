@@ -7,11 +7,11 @@ import (
 
 
 type CatService struct {
-	CatRepo *CatRepository
+	CatRepo CatRepoInterface
 	Logger        *logrus.Logger
 }
 
-func NewCatService(catRepo *CatRepository, logger *logrus.Logger) *CatService {
+func NewCatService(catRepo CatRepoInterface, logger *logrus.Logger) *CatService {
 	return &CatService{
 		CatRepo: catRepo,
         Logger:       logger,
@@ -27,30 +27,23 @@ func (s *CatService) GetCatsCompleteByID(id string) (*CatComplete, error) {
     return cats, nil
 }
 
-// func (s *CatService) GetCatByRegistrationTable(registration string) (*CatTable, error) {
-//     cat, err := s.CatRepo.GetCatByRegistrationTable(registration)
-//     if err != nil {
-//         s.Logger.WithError(err).Errorf("Failed to get cat by registration '%s' from repo", registration)
-//         return nil, err
-//     }
-//     return cat, nil
-// }
 
-// func (s *CatService) GetCatsByExhibitorAndSex(idExhibitor int, sex int) ([]Cat, error) {
-//     cats, err := s.CatRepo.GetCatsByExhibitorAndSex(idExhibitor, sex)
-//     if err != nil {
-//         s.Logger.WithError(err).Error("Failed to get cats by exhibitor and sex from repo")
-//         return nil, err
-//     }
-//     return cats, nil
-// }
 
-// func (s *CatService) GetCatByRegistration(registration string) (*Cat, error) {
-//     cat, err := s.CatRepo.GetCatByRegistration(registration)
-//     if err != nil {
-//         s.Logger.WithError(err).Errorf("Failed to get cat by registration '%s' from repo", registration)
-//         return nil, err
-//     }
-//     return cat, nil
-// }
+func (s *CatService) GetCatsByOwnerAndGender(ownerID string, gender string) ([]*CatComplete, error) {
+    cats, err := s.CatRepo.GetAllByOwnerAndGender(ownerID, gender)
+    if err != nil {
+        s.Logger.WithError(err).Error("Failed to get cats by Owner and Gender from repo")
+        return nil, err
+    }
+    return cats, nil
+}
+
+func (s *CatService) GetCatCompleteByRegistration(registration string) (*CatComplete, error) {
+    cat, err := s.CatRepo.GetCatCompleteByRegistration(registration)
+    if err != nil {
+        s.Logger.WithError(err).Errorf("Failed to get cat by registration '%s' from repo", registration)
+        return nil, err
+    }
+    return cat, nil
+}
 

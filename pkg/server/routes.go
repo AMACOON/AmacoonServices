@@ -58,8 +58,8 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	e.GET("/cats/:id", catHandler.GetCatsCompleteByID)
-	// e.GET("/cats/:registration", catHandler.GetCatByRegistrationTable)
-	// e.GET("/catsservice", catHandler.GetCatsByExhibitorAndSex)
+    e.GET("/cats/registration/:registration", catHandler.GetCatCompleteByRegistration)
+	 e.GET("/cats", catHandler.GetCatsByOwnerAndGender)
 	// e.GET("/catsservice/:registration", catHandler.GetCatByRegistration)
 }
 

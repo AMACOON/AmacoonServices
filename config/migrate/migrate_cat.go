@@ -133,7 +133,7 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 				Observation:              "",
 				Fifecat:                  fifecat,
 				Titles:                   titles,
-				RegistrationFederationID: federationID,
+				FederationID: federationID,
 				BreedID:                  breedID,
 				ColorID:                  colorID,
 				FatherID:                 primitive.NilObjectID,
