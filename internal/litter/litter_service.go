@@ -2,9 +2,6 @@ package litter
 
 import (
 	"errors"
-	"fmt"
-	"math/rand"
-	"time"
 
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
@@ -27,7 +24,10 @@ func NewLitterService(litterRepo *LitterRepository, logger *logrus.Logger, proto
 func (s *LitterService) CreateLitter(litter Litter) (Litter, error) {
 	s.Logger.Infof("Service CreateLitter")
 
-
+	protocolNumber := s.ProtocolService.GenerateProtocolNumber("L")
+	
+	litter.ProtocolNumber = protocolNumber
+	
 	litter, err := s.LitterRepo.CreateLitter(litter)
 	if err != nil {
 		s.Logger.Errorf("error fetching litter from repository: %v", err)
@@ -50,8 +50,6 @@ func (s *LitterService) GetLitterByID(id string) (*Litter, error) {
 	s.Logger.Infof("Service GetLitterByID OK")
 	return &litter, nil
 }
-
-
 
 func (s *LitterService) UpdateLitterStatus(id string, status string) error {
 	s.Logger.Infof("Service UpdateLitterStatus")
@@ -113,24 +111,13 @@ func (s *LitterService) GetAllLittersByOwner(ownerId string) ([]Litter, error) {
 	return litters, nil
 }
 
-func (s *LitterService) UpdateLitter(litter Litter) error {
+func (s *LitterService) UpdateLitter(id string ,litter Litter) error {
 	s.Logger.Infof("Service UpdateLitter")
-	if litter.MotherData.ID.IsZero() {
-		err := errors.New("invalid litter ID")
-		s.Logger.Errorf("error updating litter: %v", err)
-		return err
-	}
-	if err := s.LitterRepo.UpdateLitter(litter); err != nil {
+
+	if err := s.LitterRepo.UpdateLitter(id, litter); err != nil {
 		s.Logger.WithError(err).Error("failed to update litter")
 		return err
 	}
 	s.Logger.Infof("Service UpdateLitter OK")
 	return nil
-}
-
-func (s *LitterService) generateProtocolNumber() string {
-	// generate random 8-digit string
-	rand.Seed(time.Now().UnixNano())
-	protocolNumber := fmt.Sprintf("%08d", rand.Intn(100000000))
-	return protocolNumber
 }

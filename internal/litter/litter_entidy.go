@@ -7,6 +7,7 @@ import (
 )
 
 type Litter struct {
+	ID           primitive.ObjectID `bson:"_id,omitempty"`
 	MotherData     CatLitter           `bson:"motherData"`
 	FatherData     CatLitter           `bson:"fatherData"`
 	BirthData      BirthLitter         `bson:"birthData"`

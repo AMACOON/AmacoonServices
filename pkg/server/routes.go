@@ -58,7 +58,7 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	e.GET("/cats/:id", catHandler.GetCatsCompleteByID)
-    e.GET("/cats/registration/:registration", catHandler.GetCatCompleteByRegistration)
+    e.GET("/cats/:registration/registration", catHandler.GetCatCompleteByRegistration)
 	 e.GET("/cats", catHandler.GetCatsByOwnerAndGender)
 	// e.GET("/catsservice/:registration", catHandler.GetCatByRegistration)
 }
@@ -73,11 +73,13 @@ func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {
 }
 
 func setupLitterRoutes(e *echo.Echo, litterHandler *handler.LitterHandler) {
-	e.GET("/litters", litterHandler.GetAllLitters)
-	e.GET("/litters/:id", litterHandler.GetLitterByID)
 	e.POST("/litters", litterHandler.CreateLitter)
-	e.PUT("/litters/:id", litterHandler.UpdateLitter)
-	e.DELETE("/litters/:id", litterHandler.DeleteLitter)
+	e.GET("/litters/:id", litterHandler.GetLitterByID)
+	e.PUT("/litters/:id/status", litterHandler.UpdateLitterStatus)
+	e.GET("/litters/:id/files", litterHandler.GetLitterFilesByID)
+	e.GET("/litters/:ownerId/owner", litterHandler.GetAllLittersByOwner)
+	e.PATCH("/litters/:id", litterHandler.UpdateLitter)
+	e.POST("/litters/:id/files", litterHandler.AddTransferFiles)
 }
 
 func setupBreedRoutes(e *echo.Echo, breedHandler *handler.BreedHandler) {
@@ -100,11 +102,13 @@ func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
 }
 
 func setupTransferRoutes(e *echo.Echo, transferHandler *handler.TransferHandler) {
-    e.POST("/transfer", transferHandler.CreateTransfer)
-	e.GET("/transfer", transferHandler.GetAlltransfers)
-    e.GET("/transfer/:id", transferHandler.GetTransferByID)
-    e.PUT("/transfer/:id", transferHandler.UpdateTransfer)
-    e.DELETE("/transfer/:id", transferHandler.DeleteTransfer)
+	e.POST("/transfers", transferHandler.CreateTransfer)
+	e.GET("/transfers/:id", transferHandler.GetTransferByID)
+	e.PUT("/transfers/:id/status", transferHandler.UpdateTransferStatus)
+	e.GET("/transfers/:ownerId/owner", transferHandler.GetAllLittersByOwner)
+	e.GET("/transfers/:id/files", transferHandler.GetTransferFilesByID)
+	e.POST("/transfers/:id/files", transferHandler.AddTransferFiles)
+	e.PUT("/transfers/:id", transferHandler.UpdateTransfer)
 }
 
 

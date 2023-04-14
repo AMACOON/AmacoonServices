@@ -1,95 +1,129 @@
 package transfer
 
 import (
-	"github.com/sirupsen/logrus"
+	"errors"
+
 	"github.com/scuba13/AmacoonServices/internal/utils"
+	"github.com/sirupsen/logrus"
 )
 
 type TransferService struct {
-	TransferRepo      *TransferRepository
-	FilesRepo         *utils.FilesRepository
-	Logger            *logrus.Logger
-	TransferConverter *TransferConverter
+	TransferRepo    *TransferRepository
+	ProtocolService *utils.ProtocolService
+	Logger          *logrus.Logger
 }
 
-func NewTransferService(transferRepo *TransferRepository, filesRepo *utils.FilesRepository, logger *logrus.Logger, transferConverter *TransferConverter) *TransferService {
+func NewTransferService(transferRepo *TransferRepository, logger *logrus.Logger, protocolService *utils.ProtocolService) *TransferService {
 	return &TransferService{
-		TransferRepo:      transferRepo,
-		FilesRepo:         filesRepo,
-		Logger:            logger,
-		TransferConverter: transferConverter,
+		TransferRepo:    transferRepo,
+		ProtocolService: protocolService,
+		Logger:          logger,
 	}
 }
 
-func (s *TransferService) CreateTransfer(transfer Transfer) (uint, string, error) {
-	transferDB, filesDB := s.TransferConverter.TransferToTransferDB(transfer)
-	transferID, protocolNumber, err := s.TransferRepo.CreateTransfer(&transferDB, filesDB)
+func (s *TransferService) CreateTransfer(transfer Transfer) (Transfer, error) {
+	s.Logger.Infof("Service CreateTransfer")
+
+	protocolNumber := s.ProtocolService.GenerateProtocolNumber("T")
+	
+	transfer.ProtocolNumber = protocolNumber
+
+	transfer, err := s.TransferRepo.CreateTransfer(transfer)
 	if err != nil {
-		s.Logger.WithError(err).Error("Failed to create Transfer")
-		return 0, "", err
+		s.Logger.Errorf("error creating transfer in repository: %v", err)
+		return Transfer{}, err
 	}
 
-	return transferID, protocolNumber, nil
-}
-
-func (s *TransferService) GetAllTransfers() ([]*Transfer, error) {
-	s.Logger.Info("Getting all transfers")
-	transfers, err := s.TransferRepo.GetAlltransfers()
-	if err != nil {
-		s.Logger.WithError(err).Error("Failed to get all transfers")
-		return nil, err
-	}
-
-	var transferList []*Transfer
-
-	// Transform each TransferDB and FilesDB into a Transfer struct
-	for _, transfer := range transfers {
-		files, err := s.FilesRepo.GetFilesByServiceID(transfer.ID)
-		if err != nil {
-			s.Logger.WithError(err).Errorf("Failed to get files by transfer ID %v", transfer.ID)
-			return nil, err
-		}
-
-		transferData := s.TransferConverter.TransferDBToTransfer(&transfer, files)
-		transferList = append(transferList, transferData)
-	}
-	return transferList, nil
-}
-
-func (s *TransferService) GetTransferByID(transferID uint) (*Transfer, error) {
-	s.Logger.Info("Getting transfer with ID ", transferID)
-
-	transferDB, filesDB, err := s.TransferRepo.GetTransferByID(transferID)
-	if err != nil {
-		s.Logger.WithError(err).Error("Failed to get transfer from repository")
-		return nil, err
-	}
-
-	transfer := s.TransferConverter.TransferDBToTransfer(transferDB, filesDB)
-
+	s.Logger.Infof("Service CreateTransfer OK")
 	return transfer, nil
 }
 
-func (s *TransferService) UpdateTransfer(id uint, transfer *Transfer) error {
-    s.Logger.Infof("Updating transfer with id %d", id)
-    transferDB, filesDB := s.TransferConverter.TransferToTransferDB(*transfer)
-    if err := s.TransferRepo.UpdateTransfer(id, &transferDB, filesDB); err != nil {
-        s.Logger.WithError(err).Error("Failed to update transfer")
-        return err
-    }
-    s.Logger.Infof("Successfully updated transfer with id %d", id)
-    return nil
+func (s *TransferService) GetTransferByID(id string) (*Transfer, error) {
+	s.Logger.Infof("Service GetTransferByID")
+
+	transfer, err := s.TransferRepo.GetTransferByID(id)
+	if err != nil {
+		s.Logger.Errorf("error fetching transfer from repository: %v", err)
+		return nil, err
+	}
+
+	s.Logger.Infof("Service GetTransferByID OK")
+	return &transfer, nil
 }
 
-func (s *TransferService) DeleteTransfer(id uint) error {
-    s.Logger.Infof("Deleting transfer with id %d", id)
-    if err := s.TransferRepo.DeleteTransfer(id); err != nil {
-        s.Logger.WithError(err).Error("Failed to delete transfer")
-        return err
-    }
-    s.Logger.Infof("Successfully deleted transfer with id %d", id)
-    return nil
+func (s *TransferService) UpdateTransferStatus(id string, status string) error {
+	s.Logger.Infof("Service UpdateTransferStatus")
+
+	// check if the transfer exists
+	if _, err := s.TransferRepo.GetTransferByID(id); err != nil {
+		return errors.New("transfer not found")
+	}
+
+	if err := s.TransferRepo.UpdateTransferStatus(id, status); err != nil {
+		return err
+	}
+
+	s.Logger.Infof("Service UpdateTransferStatus OK")
+	return nil
 }
 
+func (s *TransferService) AddTransferFiles(id string, files []utils.Files) error {
+	s.Logger.Infof("Service AddTransferFiles")
+
+	// check if the transfer exists
+	if _, err := s.TransferRepo.GetTransferByID(id); err != nil {
+		return errors.New("transfer not found")
+	}
+
+	if err := s.TransferRepo.AddTransferFiles(id, files); err != nil {
+		return err
+	}
+
+	s.Logger.Infof("Service AddTransferFiles OK")
+	return nil
+}
+
+func (s *TransferService) GetLitterFilesByID(id string) ([]utils.Files, error) {
+	s.Logger.Infof("Service GetTransferFilesByID")
+
+	// check if the litter exists
+	if _, err := s.TransferRepo.GetTransferByID(id); err != nil {
+		return nil, errors.New("litter not found")
+	}
+
+	files, err := s.TransferRepo.GetTransferFilesByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	s.Logger.Infof("Service GetTransferFilesByID OK")
+	return files, nil
+}
+
+func (s *TransferService) GetAllTransfersByOwner(requesterID string) ([]Transfer, error) {
+	s.Logger.Infof("Service GetAllTransfersByRequester")
+	transfers, err := s.TransferRepo.GetAllTransfersByOwner(requesterID)
+	if err != nil {
+		s.Logger.WithError(err).Error("failed to get transfers by requester ID")
+		return nil, err
+	}
+	s.Logger.Infof("Service GetAllTransfersByRequester OK")
+	return transfers, nil
+}
+
+func (s *TransferService) UpdateTransfer(id string,transfer Transfer) error {
+	s.Logger.Infof("Service UpdateTransfer")
+	if transfer.ID.IsZero() {
+		err := errors.New("invalid transfer ID")
+		s.Logger.Errorf("error updating transfer: %v", err)
+		return err
+	}
+	if err := s.TransferRepo.UpdateTransfer(id ,transfer); err != nil {
+		s.Logger.WithError(err).Error("failed to update transfer")
+		return err
+	}
+	s.Logger.Infof("Service UpdateTransfer OK")
+	return nil
+}
 
 
