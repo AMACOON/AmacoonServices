@@ -76,7 +76,7 @@ func setupLitterRoutes(e *echo.Echo, litterHandler *handler.LitterHandler) {
 	e.POST("/litters", litterHandler.CreateLitter)
 	e.GET("/litters/:id", litterHandler.GetLitterByID)
 	e.PUT("/litters/:id/status", litterHandler.UpdateLitterStatus)
-	e.GET("/litters/:id/files", litterHandler.GetLitterFilesByID)
+	//e.GET("/litters/:id/files", litterHandler.GetLitterFilesByID)
 	e.GET("/litters/:ownerId/owner", litterHandler.GetAllLittersByOwner)
 	e.PATCH("/litters/:id", litterHandler.UpdateLitter)
 	e.POST("/litters/:id/files", litterHandler.AddTransferFiles)

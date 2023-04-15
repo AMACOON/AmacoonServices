@@ -11,15 +11,15 @@ type Litter struct {
 	MotherData     CatLitter           `bson:"motherData"`
 	FatherData     CatLitter           `bson:"fatherData"`
 	BirthData      BirthLitter         `bson:"birthData"`
-	KittenData     []KittenLitter      `bson:"kittenData"`
 	Status         string              `bson:"status"`
 	ProtocolNumber string              `bson:"protocolNumber"`
 	RequesterID    primitive.ObjectID  `bson:"requesterID"` // OwnerId q esta logado, Pegar dado na Femea
+	KittenData     []KittenLitter      `bson:"kittenData"`
 	Files          []utils.Files       `bson:"files"`
 }
 
 type CatLitter struct {
-	ID           primitive.ObjectID `bson:"_id"`
+	ID           primitive.ObjectID `bson:"catId"`
 	Name         string             `bson:"name"`
 	Registration string             `bson:"registration"`
 	Microchip    string             `bson:"microchip"`
@@ -31,7 +31,7 @@ type CatLitter struct {
 }
 
 type OwnerLitter struct {
-	ID          primitive.ObjectID `bson:"_id"`
+	ID          primitive.ObjectID `bson:"ownerId"`
 	Name        string             `bson:"name"`
 	CPF         string             `bson:"cpf"`
 	Address     string             `bson:"address"`

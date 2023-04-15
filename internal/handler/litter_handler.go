@@ -8,6 +8,7 @@ import (
 
 	"github.com/scuba13/AmacoonServices/internal/litter"
     "github.com/scuba13/AmacoonServices/internal/utils"
+	//"encoding/json" 
 )
 
 type LitterHandler struct {
@@ -24,7 +25,8 @@ func NewLitterHandler(litterService *litter.LitterService, logger *logrus.Logger
 
 func (h *LitterHandler) CreateLitter(c echo.Context) error {
 	h.Logger.Infof("Handler CreateLitter")
-	var litter litter.Litter
+	var litter litter.LitterRequest
+	//err := json.NewDecoder(c.Request().Body).Decode(&litter)
 	err := c.Bind(&litter)
 	if err != nil {
 		h.Logger.Errorf("error binding request body: %v", err)
@@ -62,17 +64,17 @@ func (h *LitterHandler) UpdateLitterStatus(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *LitterHandler) GetLitterFilesByID(c echo.Context) error {
-	h.Logger.Infof("Handler GetLitterFilesByID")
-	id := c.Param("id")
-	files, err := h.LitterService.GetLitterFilesByID(id)
-	if err != nil {
-		h.Logger.WithError(err).Error("failed to get litter files")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get litter files")
-	}
-    h.Logger.Infof("Handler GetLitterFilesByID OK")
-	return c.JSON(http.StatusOK, files)
-}
+// func (h *LitterHandler) GetLitterFilesByID(c echo.Context) error {
+// 	h.Logger.Infof("Handler GetLitterFilesByID")
+// 	id := c.Param("id")
+// 	files, err := h.LitterService.GetLitterFilesByID(id)
+// 	if err != nil {
+// 		h.Logger.WithError(err).Error("failed to get litter files")
+// 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get litter files")
+// 	}
+//     h.Logger.Infof("Handler GetLitterFilesByID OK")
+// 	return c.JSON(http.StatusOK, files)
+// }
 
 func (h *LitterHandler) GetAllLittersByOwner(c echo.Context) error {
 	h.Logger.Infof("Handler GetAllLittersByOwner")

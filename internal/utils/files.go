@@ -9,5 +9,10 @@ type Files struct {
 	Name           string             `bson:"name"`
 	Type           string             `bson:"type"`
 	Base64         string             `bson:"base64"`
-	ProtocolNumber string             `bson:"protocolNumber"`
+}
+
+type FilesReq struct {
+	Name           string             `json:"name"`
+	Type           string             `json:"type"`
+	Base64         string             `json:"base64"`
 }
