@@ -25,10 +25,14 @@ func (s *LitterService) CreateLitter(req LitterRequest) (Litter, error) {
 	s.Logger.Infof("Service CreateLitter")
 
 	reqEntidy, err:= ConvertLitterRequestToLitter(req)
-	protocolNumber := s.ProtocolService.GenerateProtocolNumber("L")
-	reqEntidy.ProtocolNumber = protocolNumber
 	if err != nil {
 		s.Logger.Errorf("error convert litterReq to  litter: %v", err)
+		return Litter{}, err
+	}
+	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("L")
+	reqEntidy.ProtocolNumber = protocolNumber
+	if err != nil {
+		s.Logger.Errorf("error generate protocol to  litter: %v", err)
 		return Litter{}, err
 	}
 	

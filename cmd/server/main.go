@@ -119,13 +119,14 @@ func initializeApp(e *echo.Echo, logger *logrus.Logger, mongo *mongo.Client) {
 	transferepo := transfer.NewTransferRepository(mongo, logger)
 	catteryRepo:= cattery.NewCatteryRepository(mongo, logger)
 	federationRepo:= federation.NewFederationRepository(mongo, logger)
+	protocolRepo:= utils.NewProtocolRepository(mongo, logger)
 	logger.Info("Initialize Repositories OK")
 
 
 
 	// Initialize services
 	logger.Info("Initialize Services")
-	protocolService:= utils.NewProtocolService()
+	protocolService:= utils.NewProtocolService(protocolRepo, logger)
 	litterService := litter.NewLitterService(litterRepo,logger, protocolService)
 	transferService := transfer.NewTransferService(transferepo, logger, protocolService)
 	catService := cat.NewCatService(catRepo, logger)

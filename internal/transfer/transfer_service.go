@@ -24,11 +24,14 @@ func NewTransferService(transferRepo *TransferRepository, logger *logrus.Logger,
 func (s *TransferService) CreateTransfer(transfer Transfer) (Transfer, error) {
 	s.Logger.Infof("Service CreateTransfer")
 
-	protocolNumber := s.ProtocolService.GenerateProtocolNumber("T")
-	
+	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("T")
+	if err != nil {
+		s.Logger.Errorf("error generate protocol to  transfer: %v", err)
+		return Transfer{}, err
+	}
 	transfer.ProtocolNumber = protocolNumber
 
-	transfer, err := s.TransferRepo.CreateTransfer(transfer)
+	transfer, err = s.TransferRepo.CreateTransfer(transfer)
 	if err != nil {
 		s.Logger.Errorf("error creating transfer in repository: %v", err)
 		return Transfer{}, err
