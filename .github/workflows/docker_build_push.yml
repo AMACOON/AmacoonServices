@@ -26,7 +26,7 @@ jobs:
         push: true
         tags: scuba13/amacoon_service:latest
 
-      - name: Trigger Deploy to VPS
+    - name: Trigger Deploy to VPS
       uses: peter-evans/repository-dispatch@v1
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
