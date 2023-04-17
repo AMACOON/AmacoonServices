@@ -24,4 +24,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: scuba13/amacoonService:latest
+        tags: scuba13/amacoon_service:latest
