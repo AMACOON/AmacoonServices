@@ -24,13 +24,13 @@ func NewTransferHandler(transferService *transfer.TransferService, logger *logru
 
 func (h *TransferHandler) CreateTransfer(c echo.Context) error {
 	h.Logger.Infof("Handler CreateTransfer")
-	var transfer transfer.Transfer
-	err := c.Bind(&transfer)
+	var transferReq transfer.TransferRequest
+	err := c.Bind(&transferReq)
 	if err != nil {
 		h.Logger.Errorf("error binding request body: %v", err)
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
 	}
-	createdTransfer, err := h.TransferService.CreateTransfer(transfer)
+	createdTransfer, err := h.TransferService.CreateTransfer(transferReq)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to create transfer")
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create transfer")
@@ -47,6 +47,7 @@ func (h *TransferHandler) GetTransferByID(c echo.Context) error {
 		h.Logger.WithError(err).Error("failed to get transfer")
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get transfer")
 	}
+	h.Logger.Infof("Handler GetTransferByID OK")
 	return c.JSON(http.StatusOK, foundTransfer)
 }
 
@@ -59,6 +60,53 @@ func (h *TransferHandler) UpdateTransferStatus(c echo.Context) error {
 		h.Logger.WithError(err).Error("failed to update transfer status")
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update transfer status")
 	}
+	h.Logger.Infof("Handler UpdateTransferStatus OK")
+	return c.NoContent(http.StatusOK)
+}
+
+func (h *TransferHandler) GetTransferFilesByID(c echo.Context) error {
+	h.Logger.Infof("Handler GetTransferFilesByID")
+	id := c.Param("id")
+	files, err := h.TransferService.GetTransferFilesByID(id)
+	if err != nil {
+		h.Logger.WithError(err).Error("failed to get transfer files")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get transfer files")
+	}
+	h.Logger.Infof("Handler GetTransferFilesByID OK")
+	return c.JSON(http.StatusOK, files)
+}
+
+func (h *TransferHandler) GetAllTransfersByRequesterID(c echo.Context) error {
+	h.Logger.Infof("Handler GetAllTransfersByRequesterID")
+	id := c.Param("requesterID")
+
+	transfers, err := h.TransferService.GetAllTransfersByRequesterID(id)
+	if err != nil {
+		h.Logger.WithError(err).Error("failed to get transfers by Requester ID")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get transfers by Requester ID")
+	}
+
+	h.Logger.Infof("Handler GetAllTransfersByRequesterID OK")
+	return c.JSON(http.StatusOK, transfers)
+}
+
+func (h *TransferHandler) UpdateTransfer(c echo.Context) error {
+	h.Logger.Infof("Handler UpdateTransfer")
+	id := c.Param("id")
+	var transferObj transfer.Transfer
+	err := c.Bind(&transferObj)
+	if err != nil {
+		h.Logger.Errorf("error binding request body: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
+	}
+
+	err = h.TransferService.UpdateTransfer(id, transferObj)
+	if err != nil {
+		h.Logger.WithError(err).Errorf("failed to update transfer with id %s", id)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	h.Logger.Infof("Handler UpdateTransfer OK")
 	return c.NoContent(http.StatusOK)
 }
 
@@ -81,51 +129,3 @@ func (h *TransferHandler) AddTransferFiles(c echo.Context) error {
 	h.Logger.Infof("Handler AddTransferFiles OK")
 	return c.NoContent(http.StatusOK)
 }
-
-func (h *TransferHandler) UpdateTransfer(c echo.Context) error {
-	h.Logger.Infof("Handler UpdateTransfer")
-	id := c.Param("id")
-	var transfer transfer.Transfer
-	err := c.Bind(&transfer)
-	if err != nil {
-		h.Logger.Errorf("error binding request body: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
-	}
-
-	err = h.TransferService.UpdateTransfer(id, transfer)
-	if err != nil {
-		h.Logger.WithError(err).Errorf("failed to update transfer with id %s", id)
-		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
-	}
-
-	h.Logger.Infof("Handler UpdateTransfer OK")
-	return c.NoContent(http.StatusOK)
-}
-
-func (h *TransferHandler) GetAllLittersByOwner(c echo.Context) error {
-	h.Logger.Infof("Handler GetAllLittersByOwner")
-	id := c.Param("ownerId")
-
-	litters, err := h.TransferService.GetAllTransfersByOwner(id)
-	if err != nil {
-		h.Logger.WithError(err).Error("failed to get litters by owner id")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get litters by owner id")
-	}
-
-	h.Logger.Infof("Handler GetAllLittersByOwner OK")
-	return c.JSON(http.StatusOK, litters)
-}
-
-func (h *TransferHandler) GetTransferFilesByID(c echo.Context) error {
-	h.Logger.Infof("Handler GetTransferFilesByID")
-	id := c.Param("id")
-	files, err := h.TransferService.GetLitterFilesByID(id)
-	if err != nil {
-		h.Logger.WithError(err).Error("failed to get transfer files")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get transfer files")
-	}
-	h.Logger.Infof("Handler GetTransferFilesByID OK")
-	return c.JSON(http.StatusOK, files)
-}
-
-

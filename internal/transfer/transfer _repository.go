@@ -17,8 +17,7 @@ type TransferRepository struct {
 
 func NewTransferRepository(db *mongo.Client, logger *logrus.Logger) *TransferRepository {
 	return &TransferRepository{
-		DB: db,
-
+		DB:     db,
 		Logger: logger,
 	}
 }
@@ -45,35 +44,58 @@ func (r *TransferRepository) GetTransferByID(id string) (Transfer, error) {
 
 func (r *TransferRepository) CreateTransfer(transfer Transfer) (Transfer, error) {
 	r.Logger.Infof("Repository CreateTransfer")
-	transfer.ID = primitive.NewObjectID()
-	_, err := r.DB.Database(database).Collection(collection).InsertOne(context.Background(), transfer)
+
+	res, err := r.DB.Database(database).Collection(collection).InsertOne(context.Background(), transfer)
 	if err != nil {
 		return Transfer{}, err
 	}
+
+	transfer.ID = res.InsertedID.(primitive.ObjectID)
 	r.Logger.Infof("Repository CreateTransfer OK")
 	return transfer, nil
 }
 
-func (r *TransferRepository) UpdateTransfer(id string, transfer Transfer) error {
-	r.Logger.Infof("Repository UpdateTransfer")
+func (r *TransferRepository) UpdateTransferStatus(id string, status string) error {
+	r.Logger.Infof("Repository UpdateTransferStatus")
+
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		r.Logger.Errorf("error parsing id to ObjectID: %v", err)
 		return err
 	}
 	filter := bson.M{"_id": objID}
-	update := bson.M{"$set": transfer}
+	update := bson.M{"$set": bson.M{"status": status}}
 	_, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return err
 	}
 
-	r.Logger.Infof("Repository UpdateTransfer OK")
+	r.Logger.Infof("Repository UpdateTransferStatus OK")
 	return nil
 }
 
-func (r *TransferRepository) GetAllTransfersByOwner(requesterID string) ([]Transfer, error) {
-	r.Logger.Infof("Repository GetAllTransfersByRequester")
+func (r *TransferRepository) AddTransferFiles(id string, files []utils.Files) error {
+	r.Logger.Infof("Repository AddTransferFiles id %s", id)
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	for i := range files {
+		files[i].ID = primitive.NewObjectID()
+	}
+
+	filter := bson.M{"_id": objID}
+	update := bson.M{"$push": bson.M{"files": bson.M{"$each": files}}}
+	_, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return err
+	}
+	r.Logger.Infof("Repository AddTransferFiles OK")
+	return nil
+}
+
+func (r *TransferRepository) GetAllTransfersByRequesterID(requesterID string) ([]Transfer, error) {
+	r.Logger.Infof("Repository GetAllTransfersByRequesterID")
 	objID, err := primitive.ObjectIDFromHex(requesterID)
 	if err != nil {
 		return nil, err
@@ -96,7 +118,7 @@ func (r *TransferRepository) GetAllTransfersByOwner(requesterID string) ([]Trans
 	if err := cur.Err(); err != nil {
 		return nil, err
 	}
-	r.Logger.Infof("Repository GetAllTransfersByRequester OK")
+	r.Logger.Infof("Repository GetAllTransfersByRequesterID OK")
 	return transfers, nil
 }
 
@@ -124,35 +146,20 @@ func (r *TransferRepository) GetTransferFilesByID(id string) ([]utils.Files, err
 	return transfer.Files, nil
 }
 
-func (r *TransferRepository) UpdateTransferStatus(id string, status string) error {
-	r.Logger.Infof("Repository UpdateTransferStatus")
+func (r *TransferRepository) UpdateTransfer(id string, transfer Transfer) error {
+	r.Logger.Infof("Repository UpdateTransfer")
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
+		r.Logger.Errorf("error parsing id to ObjectID: %v", err)
 		return err
 	}
+
 	filter := bson.M{"_id": objID}
-	update := bson.M{"$set": bson.M{"status": status}}
+	update := bson.M{"$set": transfer}
 	_, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return err
 	}
-
-	r.Logger.Infof("Repository UpdateTransferStatus OK")
-	return nil
-}
-
-func (r *TransferRepository) AddTransferFiles(id string, files []utils.Files) error {
-	r.Logger.Infof("Repository AddTransferFiles id %s", id)
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-	filter := bson.M{"_id": objID}
-	update := bson.M{"$set": bson.M{"files": files}}
-	_, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		return err
-	}
-	r.Logger.Infof("Repository AddTransferFiles OK")
+	r.Logger.Infof("Repository UpdateTransfer OK")
 	return nil
 }

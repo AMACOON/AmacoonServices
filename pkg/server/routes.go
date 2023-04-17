@@ -79,7 +79,17 @@ func setupLitterRoutes(e *echo.Echo, litterHandler *handler.LitterHandler) {
 	e.GET("/litters/:id/files", litterHandler.GetLitterFilesByID)
 	e.GET("/litters/:requesterID/requesterID", litterHandler.GetAllLittersByRequesterID)
 	e.PATCH("/litters/:id", litterHandler.UpdateLitter)
-	e.POST("/litters/:id/files", litterHandler.AddTransferFiles)
+	e.POST("/litters/:id/files", litterHandler.AddLitterFiles)
+}
+
+func setupTransferRoutes(e *echo.Echo, transferHandler *handler.TransferHandler) {
+	e.POST("/transfers", transferHandler.CreateTransfer)
+	e.GET("/transfers/:id", transferHandler.GetTransferByID)
+	e.PUT("/transfers/:id/status", transferHandler.UpdateTransferStatus)
+	e.GET("/transfers/:requesterID/requesterID", transferHandler.GetAllTransfersByRequesterID)
+	e.GET("/transfers/:id/files", transferHandler.GetTransferFilesByID)
+	e.POST("/transfers/:id/files", transferHandler.AddTransferFiles)
+	e.PUT("/transfers/:id", transferHandler.UpdateTransfer)
 }
 
 func setupBreedRoutes(e *echo.Echo, breedHandler *handler.BreedHandler) {
@@ -101,15 +111,7 @@ func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
 	e.GET("/countries", countryHandler.GetAllCountry)
 }
 
-func setupTransferRoutes(e *echo.Echo, transferHandler *handler.TransferHandler) {
-	e.POST("/transfers", transferHandler.CreateTransfer)
-	e.GET("/transfers/:id", transferHandler.GetTransferByID)
-	e.PUT("/transfers/:id/status", transferHandler.UpdateTransferStatus)
-	e.GET("/transfers/:ownerId/owner", transferHandler.GetAllLittersByOwner)
-	e.GET("/transfers/:id/files", transferHandler.GetTransferFilesByID)
-	e.POST("/transfers/:id/files", transferHandler.AddTransferFiles)
-	e.PUT("/transfers/:id", transferHandler.UpdateTransfer)
-}
+
 
 
 

@@ -5,6 +5,17 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type Transfer struct {
+	ID             primitive.ObjectID `bson:"_id,omitempty"`
+	CatData        CatTransfer        `bson:"catData"`
+	SellerData     SellerTransfer     `bson:"sellerData"`
+	BuyerData      BuyerTransfer      `bson:"buyerData"`
+	Status         string             `bson:"status"`
+	ProtocolNumber string             `bson:"protocolNumber"`
+	RequesterID    primitive.ObjectID  `bson:"requesterID"`
+	Files          []utils.Files      `bson:"files"`
+}
+
 type CatTransfer struct {
 	ID           primitive.ObjectID `bson:"_id"`
 	Name         string             `bson:"name"`
@@ -40,15 +51,4 @@ type BuyerTransfer struct {
 	ZipCode     string             `bson:"zipCode"`
 	CountryName string             `bson:"countryName"`
 	Phone       string             `bson:"phone"`
-}
-
-type Transfer struct {
-	ID             primitive.ObjectID `bson:"_id,omitempty"`
-	CatData        CatTransfer        `bson:"catData"`
-	SellerData     SellerTransfer     `bson:"sellerData"`
-	BuyerData      BuyerTransfer      `bson:"buyerData"`
-	Status         string             `bson:"status"`
-	ProtocolNumber string             `bson:"protocolNumber"`
-	RequesterID    primitive.ObjectID `bson:"requesterID"`
-	Files          []utils.Files      `bson:"files"`
 }

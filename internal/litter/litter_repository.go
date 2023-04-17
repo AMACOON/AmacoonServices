@@ -44,8 +44,6 @@ func (r *LitterRepository) GetLitterByID(id string) (Litter, error) {
 
 func (r *LitterRepository) CreateLitter(litter Litter) (Litter, error) {
 	r.Logger.Infof("Repository CreateLitter")
-	
-	litter.Status = "submitted"
 		
 		res, err := r.DB.Database(database).Collection(collection).InsertOne(context.Background(), litter)
 		if err != nil {

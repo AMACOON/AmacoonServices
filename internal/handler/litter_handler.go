@@ -8,7 +8,7 @@ import (
 
 	"github.com/scuba13/AmacoonServices/internal/litter"
     "github.com/scuba13/AmacoonServices/internal/utils"
-	//"encoding/json" 
+	
 )
 
 type LitterHandler struct {
@@ -26,7 +26,6 @@ func NewLitterHandler(litterService *litter.LitterService, logger *logrus.Logger
 func (h *LitterHandler) CreateLitter(c echo.Context) error {
 	h.Logger.Infof("Handler CreateLitter")
 	var litter litter.LitterRequest
-	//err := json.NewDecoder(c.Request().Body).Decode(&litter)
 	err := c.Bind(&litter)
 	if err != nil {
 		h.Logger.Errorf("error binding request body: %v", err)
@@ -112,7 +111,7 @@ func (h *LitterHandler) UpdateLitter(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *LitterHandler) AddTransferFiles(c echo.Context) error {
+func (h *LitterHandler) AddLitterFiles(c echo.Context) error {
 	h.Logger.Infof("Handler AddLitterFiles")
 	id := c.Param("id")
 	var files []utils.Files

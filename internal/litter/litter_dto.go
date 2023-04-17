@@ -12,7 +12,7 @@ type LitterRequest struct {
 	BirthData      BirthLitterRequest    `json:"birthData"`
 	Status         string                `json:"status"`
 	ProtocolNumber string                `json:"protocolNumber"`
-	RequesterID    string                `json:"requesterID"` // OwnerId q esta logado, Pegar dado na Femea
+	RequesterID    string                `json:"requesterID"`
 	KittenData     []KittenLitterRequest `json:"kittenData"`
 	Files          []utils.FilesReq      `json:"files"`
 }
