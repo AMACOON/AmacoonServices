@@ -91,31 +91,31 @@ func (s *LitterService) AddLitterFiles(id string, files []utils.Files) error {
 	return nil
 }
 
-// func (s *LitterService) GetLitterFilesByID(id string) ([]utils.Files, error) {
-// 	s.Logger.Infof("Service GetLitterFilesByID")
+func (s *LitterService) GetLitterFilesByID(id string) ([]utils.Files, error) {
+	s.Logger.Infof("Service GetLitterFilesByID")
 
-// 	// check if the litter exists
-// 	if _, err := s.LitterRepo.GetLitterByID(id); err != nil {
-// 		return nil, errors.New("litter not found")
-// 	}
+	// check if the litter exists
+	if _, err := s.LitterRepo.GetLitterByID(id); err != nil {
+		return nil, errors.New("litter not found")
+	}
 
-// 	files, err := s.LitterRepo.GetLitterFilesByID(id)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	files, err := s.LitterRepo.GetLitterFilesByID(id)
+	if err != nil {
+		return nil, err
+	}
 
-// 	s.Logger.Infof("Service GetLitterFilesByID OK")
-// 	return files, nil
-// }
+	s.Logger.Infof("Service GetLitterFilesByID OK")
+	return files, nil
+}
 
-func (s *LitterService) GetAllLittersByOwner(ownerId string) ([]Litter, error) {
-	s.Logger.Infof("Service GetLittersByOwnerId")
-	litters, err := s.LitterRepo.GetAllLittersByOwner(ownerId)
+func (s *LitterService) GetAllLittersByRequesterID(ownerId string) ([]Litter, error) {
+	s.Logger.Infof("Service GetAllLittersByRequesterID")
+	litters, err := s.LitterRepo.GetAllLittersByRequesterID(ownerId)
 	if err != nil {
 		s.Logger.WithError(err).Error("failed to get litters by owner ID")
 		return nil, err
 	}
-	s.Logger.Infof("Service GetLittersByOwnerId OK")
+	s.Logger.Infof("Service GetAllLittersByRequesterID OK")
 	return litters, nil
 }
 

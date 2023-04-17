@@ -49,6 +49,7 @@ func (h *LitterHandler) GetLitterByID(c echo.Context) error {
 		h.Logger.WithError(err).Error("failed to get litter")
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get litter")
 	}
+	h.Logger.Infof("Handler GetLitterByID OK")
 	return c.JSON(http.StatusOK, foundLitter)
 }
 
@@ -61,32 +62,33 @@ func (h *LitterHandler) UpdateLitterStatus(c echo.Context) error {
 		h.Logger.WithError(err).Error("failed to update litter status")
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update litter status")
 	}
+	h.Logger.Infof("Handler UpdateLitterStatus OK")
 	return c.NoContent(http.StatusOK)
 }
 
-// func (h *LitterHandler) GetLitterFilesByID(c echo.Context) error {
-// 	h.Logger.Infof("Handler GetLitterFilesByID")
-// 	id := c.Param("id")
-// 	files, err := h.LitterService.GetLitterFilesByID(id)
-// 	if err != nil {
-// 		h.Logger.WithError(err).Error("failed to get litter files")
-// 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get litter files")
-// 	}
-//     h.Logger.Infof("Handler GetLitterFilesByID OK")
-// 	return c.JSON(http.StatusOK, files)
-// }
-
-func (h *LitterHandler) GetAllLittersByOwner(c echo.Context) error {
-	h.Logger.Infof("Handler GetAllLittersByOwner")
-	id := c.Param("ownerId")
-
-	litters, err := h.LitterService.GetAllLittersByOwner(id)
+func (h *LitterHandler) GetLitterFilesByID(c echo.Context) error {
+	h.Logger.Infof("Handler GetLitterFilesByID")
+	id := c.Param("id")
+	files, err := h.LitterService.GetLitterFilesByID(id)
 	if err != nil {
-		h.Logger.WithError(err).Error("failed to get litters by owner id")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get litters by owner id")
+		h.Logger.WithError(err).Error("failed to get litter files")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get litter files")
+	}
+    h.Logger.Infof("Handler GetLitterFilesByID OK")
+	return c.JSON(http.StatusOK, files)
+}
+
+func (h *LitterHandler) GetAllLittersByRequesterID(c echo.Context) error {
+	h.Logger.Infof("Handler GetAllLittersByRequesterID")
+	id := c.Param("requesterID")
+
+	litters, err := h.LitterService.GetAllLittersByRequesterID(id)
+	if err != nil {
+		h.Logger.WithError(err).Error("failed to get litters by Requester ID")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get litters by Requester ID")
 	}
 
-	h.Logger.Infof("Handler GetAllLittersByOwner OK")
+	h.Logger.Infof("Handler GetAllLittersByRequesterID OK")
 	return c.JSON(http.StatusOK, litters)
 }
 
