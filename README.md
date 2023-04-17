@@ -1,3 +1,3 @@
 # AmacoonServices
-Backend para os serviços da Amacoon com deploy automatico.
+Backend para os serviços da Amacoon com deploy automatico Docker
 
