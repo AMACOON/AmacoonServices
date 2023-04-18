@@ -8,32 +8,37 @@ import (
 )
 
 type TransferService struct {
-	TransferRepo    *TransferRepository
-	ProtocolService *utils.ProtocolService
-	Logger          *logrus.Logger
+	TransferRepo      *TransferRepository
+	ProtocolService   *utils.ProtocolService
+	Logger            *logrus.Logger
 }
 
 func NewTransferService(transferRepo *TransferRepository, logger *logrus.Logger, protocolService *utils.ProtocolService) *TransferService {
 	return &TransferService{
-		TransferRepo:    transferRepo,
-		ProtocolService: protocolService,
-		Logger:          logger,
+		TransferRepo:      transferRepo,
+		ProtocolService:   protocolService,
+		Logger:            logger,
 	}
 }
 
-func (s *TransferService) CreateTransfer(transfer Transfer) (Transfer, error) {
+func (s *TransferService) CreateTransfer(req TransferRequest) (Transfer, error) {
 	s.Logger.Infof("Service CreateTransfer")
 
-	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("T")
+	reqEntity, err := ConvertTransferRequestToTransfer(req)
 	if err != nil {
-		s.Logger.Errorf("error generate protocol to  transfer: %v", err)
+		s.Logger.Errorf("error converting transfer request to transfer: %v", err)
 		return Transfer{}, err
 	}
-	transfer.ProtocolNumber = protocolNumber
-
-	transfer, err = s.TransferRepo.CreateTransfer(transfer)
+	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("T")
+	reqEntity.ProtocolNumber = protocolNumber
 	if err != nil {
-		s.Logger.Errorf("error creating transfer in repository: %v", err)
+		s.Logger.Errorf("error generating protocol for transfer: %v", err)
+		return Transfer{}, err
+	}
+	reqEntity.Status = "submitted"
+	transfer, err := s.TransferRepo.CreateTransfer(reqEntity)
+	if err != nil {
+		s.Logger.Errorf("error fetching transfer from repository: %v", err)
 		return Transfer{}, err
 	}
 
@@ -86,12 +91,12 @@ func (s *TransferService) AddTransferFiles(id string, files []utils.Files) error
 	return nil
 }
 
-func (s *TransferService) GetLitterFilesByID(id string) ([]utils.Files, error) {
+func (s *TransferService) GetTransferFilesByID(id string) ([]utils.Files, error) {
 	s.Logger.Infof("Service GetTransferFilesByID")
 
-	// check if the litter exists
+	// check if the transfer exists
 	if _, err := s.TransferRepo.GetTransferByID(id); err != nil {
-		return nil, errors.New("litter not found")
+		return nil, errors.New("transfer not found")
 	}
 
 	files, err := s.TransferRepo.GetTransferFilesByID(id)
@@ -103,30 +108,25 @@ func (s *TransferService) GetLitterFilesByID(id string) ([]utils.Files, error) {
 	return files, nil
 }
 
-func (s *TransferService) GetAllTransfersByOwner(requesterID string) ([]Transfer, error) {
-	s.Logger.Infof("Service GetAllTransfersByRequester")
-	transfers, err := s.TransferRepo.GetAllTransfersByOwner(requesterID)
+func (s *TransferService) GetAllTransfersByRequesterID(requesterID string) ([]Transfer, error) {
+	s.Logger.Infof("Service GetAllTransfersByRequesterID")
+	transfers, err := s.TransferRepo.GetAllTransfersByRequesterID(requesterID)
 	if err != nil {
 		s.Logger.WithError(err).Error("failed to get transfers by requester ID")
 		return nil, err
 	}
-	s.Logger.Infof("Service GetAllTransfersByRequester OK")
+	s.Logger.Infof("Service GetAllTransfersByRequesterID OK")
 	return transfers, nil
 }
 
-func (s *TransferService) UpdateTransfer(id string,transfer Transfer) error {
+func (s *TransferService) UpdateTransfer(id string, transfer Transfer) error {
 	s.Logger.Infof("Service UpdateTransfer")
-	if transfer.ID.IsZero() {
-		err := errors.New("invalid transfer ID")
-		s.Logger.Errorf("error updating transfer: %v", err)
-		return err
-	}
-	if err := s.TransferRepo.UpdateTransfer(id ,transfer); err != nil {
+
+	if err := s.TransferRepo.UpdateTransfer(id, transfer); err != nil {
 		s.Logger.WithError(err).Error("failed to update transfer")
 		return err
 	}
 	s.Logger.Infof("Service UpdateTransfer OK")
 	return nil
 }
-
 

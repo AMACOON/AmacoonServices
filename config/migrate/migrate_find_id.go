@@ -17,7 +17,7 @@ import (
 
 
 
-func UpdateCatsWithParentIDs3(mongoClient *mongo.Client) error {
+func UpdateCatsWithParentIDs2(mongoClient *mongo.Client) error {
 	ctx := context.Background()
 
 	// Connect to the cats_temp collection

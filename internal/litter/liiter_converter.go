@@ -12,16 +12,16 @@ func ConvertLitterRequestToLitter(litterReq LitterRequest) (Litter, error) {
     var err error
 
     // Convertendo o ID do Request
-    var motherDataID, fatherDataID, requesterID primitive.ObjectID
-    motherDataID, err = primitive.ObjectIDFromHex(litterReq.MotherData.ID)
+    //var motherDataID, fatherDataID, requesterID primitive.ObjectID
+    motherDataID, err := primitive.ObjectIDFromHex(litterReq.MotherData.ID)
     if err != nil {
         return Litter{}, err
     }
-    fatherDataID, err = primitive.ObjectIDFromHex(litterReq.FatherData.ID)
+    fatherDataID, err := primitive.ObjectIDFromHex(litterReq.FatherData.ID)
     if err != nil {
         return Litter{}, err
     }
-    requesterID, err = primitive.ObjectIDFromHex(litterReq.RequesterID)
+    requesterID, err := primitive.ObjectIDFromHex(litterReq.RequesterID)
     if err != nil {
         return Litter{}, err
     }
@@ -98,7 +98,7 @@ func ConvertLitterRequestToLitter(litterReq LitterRequest) (Litter, error) {
         Status:         litterReq.Status,
         ProtocolNumber: litterReq.ProtocolNumber,
         RequesterID:    requesterID,
-        Files:          convertFilesReqToFiles(litterReq.Files),
+        Files:          utils.ConvertFilesReqToFiles(litterReq.Files),
 
     }
 fmt.Println(litter)

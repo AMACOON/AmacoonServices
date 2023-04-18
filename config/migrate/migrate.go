@@ -83,23 +83,25 @@ func MigrateBreeds(db *gorm.DB, client *mongo.Client) error {
 	return nil
 }
 
+
 func MigrateColors(db *gorm.DB, client *mongo.Client) error {
 	fmt.Println("Entrou Migrate Colors")
 	var colors []*sql.Color
-	if err := db.Unscoped().Find(&colors).Error; err != nil {
-		return err
-	}
 
 	colorCollection := client.Database("amacoon").Collection("colors")
+	batchSize := 100
+	offset := 0
 
-	for _, c := range colors {
-		filter := bson.M{"emsCode": c.EmsCode}
-		count, err := colorCollection.CountDocuments(context.Background(), filter)
-		if err != nil {
+	for {
+		if err := db.Unscoped().Limit(batchSize).Offset(offset).Find(&colors).Error; err != nil {
 			return err
 		}
 
-		if count == 0 {
+		if len(colors) == 0 {
+			break
+		}
+
+		for _, c := range colors {
 			colorMongo := color.ColorMongo{
 				ID:        primitive.NewObjectID(),
 				BreedCode: c.BreedID,
@@ -114,7 +116,70 @@ func MigrateColors(db *gorm.DB, client *mongo.Client) error {
 				return err
 			}
 		}
+
+		if len(colors) < batchSize {
+			break
+		}
+
+		offset += batchSize
 	}
+
 	fmt.Println("FIM Migrate Colors")
 	return nil
 }
+
+
+
+
+// func MigrateColors(db *gorm.DB, client *mongo.Client) error {
+// 	fmt.Println("Entrou Migrate Colors")
+// 	var colors []*sql.Color
+
+// 	colorCollection := client.Database("amacoon").Collection("colors")
+// 	batchSize := 100
+// 	offset := 0
+
+// 	for {
+// 		if err := db.Unscoped().Limit(batchSize).Offset(offset).Find(&colors).Error; err != nil {
+// 			return err
+// 		}
+
+// 		if len(colors) == 0 {
+// 			break
+// 		}
+
+// 		for _, c := range colors {
+// 			filter := bson.M{"emsCode": c.EmsCode}
+// 			count, err := colorCollection.CountDocuments(context.Background(), filter)
+// 			if err != nil {
+// 				return err
+// 			}
+
+// 			if count == 0 {
+// 				colorMongo := color.ColorMongo{
+// 					ID:        primitive.NewObjectID(),
+// 					BreedCode: c.BreedID,
+// 					EmsCode:   c.EmsCode,
+// 					Name:      c.ColorName,
+// 					Group:     c.Group,
+// 					SubGroup:  c.SubGroup,
+// 				}
+
+// 				_, err := colorCollection.InsertOne(context.Background(), colorMongo)
+// 				if err != nil {
+// 					return err
+// 				}
+// 			}
+// 		}
+
+// 		if len(colors) < batchSize {
+// 			break
+// 		}
+
+// 		offset += batchSize
+// 	}
+
+// 	fmt.Println("FIM Migrate Colors")
+// 	return nil
+// }
+

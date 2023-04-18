@@ -35,7 +35,7 @@ func (s *LitterService) CreateLitter(req LitterRequest) (Litter, error) {
 		s.Logger.Errorf("error generate protocol to  litter: %v", err)
 		return Litter{}, err
 	}
-	
+	reqEntidy.Status = "submitted"
 	litter, err := s.LitterRepo.CreateLitter(reqEntidy)
 	if err != nil {
 		s.Logger.Errorf("error fetching litter from repository: %v", err)

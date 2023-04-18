@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (r *CatRepository) GetAllByOwnerAndGender(ownerID, sex string) ([]*CatComplete, error) {
+func (r *CatRepository) GetAllByOwnerAndGender(ownerID, gender string) ([]*CatComplete, error) {
 	r.Logger.Infof("Repository GetAllByOwnerAndSex")
 
 	catCollection := r.DB.Database(database).Collection(catsCollection)
@@ -22,7 +22,7 @@ func (r *CatRepository) GetAllByOwnerAndGender(ownerID, sex string) ([]*CatCompl
 		Key: "$match",
 		Value: bson.M{
 			"ownerId": ownerObjectID,
-			"sex":     sex,
+			"gender":     gender,
 		},
 	}}
 
