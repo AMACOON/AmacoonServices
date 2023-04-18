@@ -101,3 +101,28 @@ func (h *CatHandler) GetCatsByOwnerAndGender(c echo.Context) error {
 	h.Logger.Infof("Handler GetCatsByOwnerAndGender OK")
 	return c.JSON(http.StatusOK, cat)
 }
+
+func (h *CatHandler) GetAllByOwner(c echo.Context) error {
+	h.Logger.Infof("Handler GetAllByOwner")
+	ownerId := c.Param("ownerId")
+
+	h.Logger.WithFields(logrus.Fields{
+		"OwnerId": ownerId,
+		
+	}).Info("Getting cat by OwnerID")
+
+	cat, err := h.CatService.GetAllByOwner(ownerId)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to get cat by OwnerID")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	if cat == nil {
+		h.Logger.WithFields(logrus.Fields{
+			"OwnerId": ownerId,
+		}).Warn("Cat not found by OwnerID")
+		return echo.NewHTTPError(http.StatusNotFound, "cat not found by OwnerID")
+	}
+	h.Logger.Infof("Handler GetAllByOwner OK")
+	return c.JSON(http.StatusOK, cat)
+}

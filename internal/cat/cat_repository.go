@@ -10,6 +10,7 @@ type CatRepoInterface interface {
 	GetCatCompleteByID(id string) (*CatComplete, error)
 	GetAllByOwnerAndGender(ownerID, gender string) ([]*CatComplete, error)
 	GetCatCompleteByRegistration(id string) (*CatComplete, error)
+	GetAllByOwner(ownerID string) ([]*CatComplete, error)
 }
 
 type CatRepository struct {

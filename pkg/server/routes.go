@@ -1,12 +1,12 @@
 package routes
 
 import (
-	
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/sirupsen/logrus"
-	"net/http"
 	"github.com/scuba13/AmacoonServices/internal/handler"
+	"github.com/sirupsen/logrus"
 )
 
 func NewRouter(catHandler *handler.CatHandler,
@@ -34,8 +34,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupBreedRoutes(e, breedHandler)
 	setupCountryRoutes(e, countryHandler)
 	setupTransferRoutes(e, transferHandler)
-	setupCatteryRoutes (e, catteryHandler)
-	setupFederationRoutes(e,federationHandler)
+	setupCatteryRoutes(e, catteryHandler)
+	setupFederationRoutes(e, federationHandler)
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -58,14 +58,16 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	e.GET("/cats/:id", catHandler.GetCatsCompleteByID)
-    e.GET("/cats/:registration/registration", catHandler.GetCatCompleteByRegistration)
-	 e.GET("/cats", catHandler.GetCatsByOwnerAndGender)
-	// e.GET("/catsservice/:registration", catHandler.GetCatByRegistration)
+	e.GET("/cats/:registration/registration", catHandler.GetCatCompleteByRegistration)
+	e.GET("/cats", catHandler.GetCatsByOwnerAndGender)
+	e.GET("/cats/:ownerId/owner", catHandler.GetAllByOwner)
 }
 
 func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
 	e.GET("/owners/:id", ownerHandler.GetOwnerByID)
 	e.GET("/owners", ownerHandler.GetAllOwners)
+	e.GET("/owners/:cpf/cpf", ownerHandler.GetOwnerByCPF)
+	e.POST("/owners", ownerHandler.CreateOwner)
 }
 
 func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {
@@ -110,10 +112,3 @@ func setupFederationRoutes(e *echo.Echo, federationHandler *handler.FederationHa
 func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
 	e.GET("/countries", countryHandler.GetAllCountry)
 }
-
-
-
-
-
-
-

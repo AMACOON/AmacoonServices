@@ -19,7 +19,7 @@ func NewOwnerService(ownerRepo *OwnerRepository, logger *logrus.Logger) *OwnerSe
 
 func (s *OwnerService) GetOwnerByID(id string) (*OwnerMongo, error) {
 	s.Logger.Info("Service GetOwnerByID")
-	owner, err := s.OwnerRepo.GetOwnerByExhibitorID(id)
+	owner, err := s.OwnerRepo.GetOwnerByID(id)
 	if err != nil {
 		s.Logger.WithError(err).Error("Failed to get owner from repository: %v", err)
 		return nil, err
@@ -38,4 +38,29 @@ func (s *OwnerService) GetAllOwners() ([]OwnerMongo, error) {
     s.Logger.Infof("Service GetAllOwners OK")
     return owners, nil
 }
+
+func (s *OwnerService) GetOwnerByCPF(cpf string) (*OwnerMongo, error) {
+    s.Logger.Infof("Service GetOwnerByCPF")
+    owner, err := s.OwnerRepo.GetOwnerByCPF(cpf)
+    if err != nil {
+        s.Logger.WithError(err).Error("failed to get owner by CPF")
+        return nil, err
+    }
+    s.Logger.Infof("Service GetOwnerByCPF OK")
+    return owner, nil
+}
+
+func (s *OwnerService) CreateOwner(owner *OwnerMongo) (*OwnerMongo, error) {
+    s.Logger.Infof("Service CreateOwner")
+    createdOwner, err := s.OwnerRepo.CreateOwner(owner)
+    if err != nil {
+        s.Logger.WithError(err).Error("failed to create owner")
+        return nil, err
+    }
+    s.Logger.Infof("Service CreateOwner OK")
+    return createdOwner, nil
+}
+
+
+
 
