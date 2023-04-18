@@ -10,6 +10,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/federation"
 	"github.com/scuba13/AmacoonServices/internal/owner"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/scuba13/AmacoonServices/internal/utils"
 )
 
 type CatComplete struct {
@@ -33,4 +34,5 @@ type CatComplete struct {
 	Color            color.ColorMongo           `bson:"color"`
 	Cattery          cattery.CatteryMongo       `bson:"cattery"`
 	Owner            owner.OwnerMongo           `bson:"owner"`
+	Files            []utils.Files      `bson:"files"`
 }
