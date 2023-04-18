@@ -60,3 +60,45 @@ func (h *OwnerHandler) GetAllOwners(c echo.Context) error {
 	h.Logger.Infof("Handler GetAllOwners OK")
 	return c.JSON(http.StatusOK, owners)
 }
+
+func (h *OwnerHandler) GetOwnerByCPF(c echo.Context) error {
+    // Log de entrada da função
+    h.Logger.Infof("Handler GetOwnerByCPF")
+
+    cpf := c.Param("cpf")
+    owner, err := h.OwnerService.GetOwnerByCPF(cpf)
+    if err != nil {
+        h.Logger.WithError(err).Error("Failed to get owner by CPF")
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get owner by CPF")
+    }
+
+    // Log de saída da função
+    h.Logger.Infof("Handler GetOwnerByCPF OK")
+    return c.JSON(http.StatusOK, owner)
+}
+
+func (h *OwnerHandler) CreateOwner(c echo.Context) error {
+    // Log de entrada da função
+    h.Logger.Infof("Handler CreateOwner")
+
+    var owner owner.OwnerMongo
+    if err := c.Bind(&owner); err != nil {
+        h.Logger.WithError(err).Error("Failed to parse request body")
+        return echo.NewHTTPError(http.StatusBadRequest, "Failed to parse request body")
+    }
+
+    createdOwner, err := h.OwnerService.CreateOwner(&owner)
+    if err != nil {
+        h.Logger.WithError(err).Error("Failed to create owner")
+        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create owner")
+    }
+
+    // Log de saída da função
+    h.Logger.Infof("Handler CreateOwner OK")
+    return c.JSON(http.StatusCreated, createdOwner)
+}
+
+
+
+
+
