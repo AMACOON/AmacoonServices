@@ -12,14 +12,16 @@ import (
 
 func (r *CatRepository) GetCatCompleteByID(id string) (*CatComplete, error) {
 	r.Logger.Infof("Repository GetCatCompleteByID")
+	
 
-	catCollection := r.DB.Database(database).Collection(catsCollection)
+	catCollection := r.DB.Database("amacoon").Collection("cats")
 
 	catID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		r.Logger.WithError(err).Errorf("invalid cat ID: %v", id)
 		return nil, err
 	}
+	r.Logger.Infof("Repository GetCatCompleteByID: ", catID)
 
 	matchStage := bson.D{{
 		Key: "$match",
@@ -27,9 +29,10 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*CatComplete, error) {
 			"_id": catID,
 		},
 	}}
+	r.Logger.Infof("matchStage ", matchStage)
 
 	// Pass the required lookups as a slice of strings
-	lookups := []string{"color", "breed", "mother", "cattery", "country", "federation", "owner", "father"}
+	lookups := []string{"color", "breed", "cattery", "country", "owner", "federation", "mother", "father"}
 
 	pipeline := BuildPipelineWithLookups(matchStage, lookups)
 

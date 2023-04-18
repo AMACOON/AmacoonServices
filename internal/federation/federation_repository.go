@@ -22,7 +22,7 @@ func NewFederationRepository(db *mongo.Client, logger *logrus.Logger) *Federatio
 }
 
 var database = "amacoon"
-var collection = "catteries"
+var collection = "federations"
 
 func (r *FederationRepository) GetFederationByID(id string) (*FederationMongo, error) {
 	r.Logger.Infof("Repository GetFederationByID")

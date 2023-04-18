@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func UpdateCatsTempWithPattensIDs2(client *mongo.Client) error {
+func UpdateCatsTempWithPattensIDs3(client *mongo.Client) error {
 	catsTempCollection := client.Database("amacoon").Collection("cats_temp")
 	catsCollection := client.Database("amacoon").Collection("cats")
 

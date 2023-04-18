@@ -8,7 +8,7 @@ import (
 )
 
 func (r *CatRepository) GetCatCompleteByRegistration(registration string) (*CatComplete, error) {
-	r.Logger.Infof("Repository GetCatCompleteByID")
+	r.Logger.Infof("Repository GetCatCompleteByRegistration")
 
 	catCollection := r.DB.Database(database).Collection(catsCollection)
 

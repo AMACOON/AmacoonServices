@@ -56,8 +56,11 @@ func LookupFatherStage() bson.D {
 
 func UnwindFatherStage() bson.D {
 	return bson.D{{
-		Key:   "$unwind",
-		Value: "$father",
+		Key: "$unwind",
+		Value: bson.M{
+			"path":                       "$father",
+			"preserveNullAndEmptyArrays": true,
+		},
 	}}
 }
 
@@ -88,7 +91,10 @@ func LookupCountryStage() bson.D {
 func UnwindCountryStage() bson.D {
 	return bson.D{{
 		Key:   "$unwind",
-		Value: "$country",
+		Value: bson.M{
+			"path":                       "$country",
+			"preserveNullAndEmptyArrays": true,
+		},
 	}}
 }
 
@@ -106,10 +112,14 @@ func LookupMotherStage() bson.D {
 
 func UnwindMotherStage() bson.D {
 	return bson.D{{
-		Key:   "$unwind",
-		Value: "$mother",
+		Key: "$unwind",
+		Value: bson.M{
+			"path":                       "$mother",
+			"preserveNullAndEmptyArrays": true,
+		},
 	}}
 }
+
 
 func AddMotherNameAndRemoveFatherStage() bson.D {
 	return bson.D{{
@@ -136,7 +146,10 @@ func LookupBreedStage() bson.D {
 func UnwindBreedStage() bson.D {
 	return bson.D{{
 		Key:   "$unwind",
-		Value: "$breed",
+		Value: bson.M{
+			"path":                       "$breed",
+			"preserveNullAndEmptyArrays": true,
+		},
 	}}
 }
 
@@ -155,7 +168,10 @@ func LookupColorStage() bson.D {
 func UnwindColorStage() bson.D {
 	return bson.D{{
 		Key:   "$unwind",
-		Value: "$color",
+		Value: bson.M{
+			"path":                       "$color",
+			"preserveNullAndEmptyArrays": true,
+		},
 	}}
 }
 
@@ -174,7 +190,10 @@ func LookupCatteryStage() bson.D {
 func UnwindCatteryStage() bson.D {
 	return bson.D{{
 		Key:   "$unwind",
-		Value: "$cattery",
+		Value: bson.M{
+			"path":                       "$cattery",
+			"preserveNullAndEmptyArrays": true,
+		},
 	}}
 }
 
@@ -193,7 +212,10 @@ func LookupOwnerStage() bson.D {
 func UnwindOwnerStage() bson.D {
 	return bson.D{{
 		Key:   "$unwind",
-		Value: "$owner",
+		Value: bson.M{
+			"path":                       "$owner",
+			"preserveNullAndEmptyArrays": true,
+		},
 	}}
 }
 
@@ -202,7 +224,7 @@ func LookupFederationStage() bson.D {
 		Key: "$lookup",
 		Value: bson.M{
 			"from":         federationsCollection,
-			"localField":   "registrationFederation",
+			"localField":   "federationId",
 			"foreignField": "_id",
 			"as":           "federation",
 		},
@@ -212,6 +234,9 @@ func LookupFederationStage() bson.D {
 func UnwindFederationStage() bson.D {
 	return bson.D{{
 		Key:   "$unwind",
-		Value: "$federation",
+		Value: bson.M{
+			"path":                       "$federation",
+			"preserveNullAndEmptyArrays": true,
+		},
 	}}
 }

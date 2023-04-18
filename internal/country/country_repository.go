@@ -6,7 +6,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type CountryRepository struct {
@@ -30,7 +29,8 @@ func (r *CountryRepository) GetAllCountries() ([]CountryMongo, error) {
 	ctx := context.Background()
 
 	filter := bson.M{"isActivated": true}
-	cur, err := r.Client.Database(database).Collection(collection).Find(ctx, filter, options.Find().SetProjection(bson.M{"_id": 0}))
+	cur, err := r.Client.Database(database).Collection(collection).Find(ctx, filter)
+
 	if err != nil {
 		return nil, err
 	}
