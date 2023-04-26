@@ -41,7 +41,7 @@ func ConvertTransferRequestToTransfer(req TransferRequest) (Transfer, error) {
 		MotherName:   req.CatData.MotherName,
 	}
 
-	sellerData := SellerTransfer{
+	sellerData := OwnerTransfer{
 		ID:          sellerDataID,
 		Name:        req.SellerData.Name,
 		CPF:         req.SellerData.CPF,
@@ -53,7 +53,7 @@ func ConvertTransferRequestToTransfer(req TransferRequest) (Transfer, error) {
 		Phone:       req.SellerData.Phone,
 	}
 
-	buyerData := BuyerTransfer{
+	buyerData := OwnerTransfer{
 		ID:          buyerDataID,
 		Name:        req.BuyerData.Name,
 		CPF:         req.BuyerData.CPF,

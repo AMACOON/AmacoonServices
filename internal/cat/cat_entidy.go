@@ -19,7 +19,7 @@ type CatMongo struct {
 	Validated        bool               `bson:"validated"`
 	Observation      string             `bson:"observation"`
 	Fifecat          bool               `bson:"fifecat"`
-	Titles           []string           `bson:"titles"`
+	Titles           []TitlesCatsMongo  `bson:"titles"`
 	FederationID     primitive.ObjectID `bson:"federationId"`
 	BreedID          primitive.ObjectID `bson:"breedId"`
 	ColorID          primitive.ObjectID `bson:"colorId"`
@@ -29,4 +29,10 @@ type CatMongo struct {
 	OwnerID          primitive.ObjectID `bson:"ownerId"`
 	CountryID        primitive.ObjectID `bson:"countryId"`
 	Files            []utils.Files      `bson:"files"`
+}
+
+type TitlesCatsMongo struct {
+	TitleID      primitive.ObjectID `bson:"id"`
+	Date         time.Time          `bson:"date"`
+	FederationID primitive.ObjectID `bson:"federationId"`
 }

@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 
+	"time"
+
 	"github.com/scuba13/AmacoonServices/config/migrate/models/sql"
 	models "github.com/scuba13/AmacoonServices/internal/cat"
 	"github.com/scuba13/AmacoonServices/internal/utils"
@@ -19,6 +21,9 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 	var catMigrations []sql.CatTable
 	var err error
 	var offset int
+
+	newCats := []string{} 
+    noTitleCats := []string{}
 
 	catCollection := mongoClient.Database("amacoon").Collection("cats")
 	for {
@@ -37,11 +42,12 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 		for i, cat := range catMigrations {
 			log.Printf("Migrating cat %d: %s\n", i, cat.Name)
 
-			filter := bson.M{"name": cat.Name}
+			filter := bson.M{"name": cat.Name, "registration": cat.Registration}
 			count, err := catCollection.CountDocuments(context.Background(), filter)
 			if err != nil {
 				return err
 			}
+			
 
 			if count > 0 {
 				log.Printf("Cat already exists: %s", cat.Name)
@@ -53,11 +59,11 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 			fifecat := cat.FifeCat == "s"
 
 			titles := []string{}
-			if cat.AdultTitle != "0" {
+			if cat.AdultTitle != "0" && cat.AdultTitle != "" {
 				titles = append(titles, cat.AdultTitle)
 			}
 
-			if cat.NeuterTitle != "0" {
+			if cat.NeuterTitle != "0" && cat.NeuterTitle != "" {
 				titles = append(titles, cat.NeuterTitle)
 			}
 
@@ -126,6 +132,16 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 				sexString = "female"
 			}
 
+			titlesObjectIDs, err := getTitleObjectIDs(mongoClient, titles)
+			if err != nil {
+				log.Printf("Error getting getTitleObjectIDs for cat %d: %v\n", i, err)
+				return err
+			}
+	
+			if len(titlesObjectIDs) != len(titles) {
+				noTitleCats = append(noTitleCats, cat.Name)
+			}
+
 			catMongos[i] = models.CatMongo{
 				ID:               primitive.NewObjectID(),
 				Name:             cat.Name,
@@ -138,7 +154,7 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 				Validated:        validated,
 				Observation:      "",
 				Fifecat:          fifecat,
-				Titles:           titles,
+				Titles:           titlesObjectIDs,
 				FederationID:     federationID,
 				BreedID:          breedID,
 				ColorID:          colorID,
@@ -156,13 +172,16 @@ func MigrateCats(db *gorm.DB, mongoClient *mongo.Client) error {
 				log.Printf("Error inserting cat %s: %v\n", cat.Name, err)
 				return err
 			}
+			newCats = append(newCats, cat.Name)
 		}
 
 		offset += len(catMigrations)
 	}
 
 	log.Printf("Migrated all cats\n")
-	return nil
+    log.Printf("New cats: %v\n", newCats)
+    log.Printf("Cats with no title found: %v\n", noTitleCats)
+    return nil
 
 }
 
@@ -183,4 +202,40 @@ func GetCatsMigrate(db *gorm.DB, offset, batchSize int) ([]sql.CatTable, error) 
 	}
 
 	return cats, nil
+}
+
+func getTitleObjectIDs(client *mongo.Client, titleCodes []string) ([]models.TitlesCatsMongo, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	titlesCollection := client.Database("amacoon").Collection("titles")
+	titlesCats := []models.TitlesCatsMongo{}
+
+	for _, titleCode := range titleCodes {
+		filter := bson.M{"code": bson.M{"$regex": primitive.Regex{Pattern: "^" + titleCode + "$", Options: "i"}}}
+		var title struct {
+			ID           primitive.ObjectID `bson:"_id,omitempty"`
+			Date         time.Time          `bson:"date"`
+			FederationID primitive.ObjectID `bson:"federationId"`
+		}
+
+		err := titlesCollection.FindOne(ctx, filter).Decode(&title)
+		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				log.Printf("No document found for title code: %s\n", titleCode)
+				continue
+			}
+			return nil, err
+		}
+
+		titleCat := models.TitlesCatsMongo{
+			TitleID:        title.ID,
+			Date:         title.Date,
+			FederationID: title.FederationID,
+		}
+
+		titlesCats = append(titlesCats, titleCat)
+	}
+
+	return titlesCats, nil
 }

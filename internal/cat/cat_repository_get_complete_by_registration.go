@@ -5,6 +5,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (r *CatRepository) GetCatCompleteByRegistration(registration string) (*CatComplete, error) {
@@ -20,7 +21,7 @@ func (r *CatRepository) GetCatCompleteByRegistration(registration string) (*CatC
 	}}
 
 	// Pass the required lookups as a slice of strings
-	lookups := []string{"color", "breed", "mother", "cattery", "country", "federation", "owner", "father"}
+	lookups := []string{"color", "breed", "mother", "cattery", "country", "federation", "owner", "father", "titles"}
 
 	pipeline := BuildPipelineWithLookups(matchStage, lookups)
 
@@ -42,6 +43,12 @@ func (r *CatRepository) GetCatCompleteByRegistration(registration string) (*CatC
 		r.Logger.WithField("Registration", registration).Warn("Cat not found")
 		return nil, mongo.ErrNoDocuments
 	}
-
+	if len(catComplete.Titles) > 0 {
+		if catComplete.Titles[0].Title.ID == primitive.NilObjectID {
+			catComplete.Titles = []TitlesCats{}
+		}
+	}
+	catComplete.FullName = GetFullName(catComplete)
+	r.Logger.Infof("Repository GetCatCompleteByRegistration OK")
 	return catComplete, nil
 }

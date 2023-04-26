@@ -16,6 +16,8 @@ func NewCatService(catRepo CatRepoInterface, logger *logrus.Logger) *CatService 
 	}
 }
 
+// GetCatsCompleteByID returns a CatComplete by its ID
+// @param: id: the ID of the cat
 func (s *CatService) GetCatsCompleteByID(id string) (*CatComplete, error) {
 	s.Logger.Infof("Service GetCatsCompleteByID")
 	cats, err := s.CatRepo.GetCatCompleteByID(id)
@@ -23,6 +25,7 @@ func (s *CatService) GetCatsCompleteByID(id string) (*CatComplete, error) {
 		s.Logger.WithError(err).Error("Failed to get cats by Id from repo")
 		return nil, err
 	}
+
 	s.Logger.Infof("Service GetCatsCompleteByID OK")
 	return cats, nil
 }
@@ -34,6 +37,7 @@ func (s *CatService) GetCatsByOwnerAndGender(ownerID string, gender string) ([]*
 		s.Logger.WithError(err).Error("Failed to get cats by Owner and Gender from repo")
 		return nil, err
 	}
+	
 	s.Logger.Infof("Service GetCatsByOwnerAndGender OK")
 	return cats, nil
 }
@@ -58,4 +62,22 @@ func (s *CatService) GetAllByOwner(ownerID string) ([]*CatComplete, error) {
 	}
 	s.Logger.Infof("Service GetAllByOwner OK")
 	return cats, nil
+}
+
+
+func GetFullName(cat *CatComplete) string {
+	var prefix, suffix string
+
+	for _, titleCat := range cat.Titles {
+		title := titleCat.Title
+		if title.Type == "Championship/Premiorship Titles" {
+			prefix += title.Code + " "
+		} else if title.Type == "Winner Titles" {
+			prefix += titleCat.Date.Format("06") + " " + title.Code + " "
+		} else if title.Type == "Merit Titles" {
+			suffix += " " + title.Code
+		}
+	}
+
+	return prefix + cat.Name + suffix
 }
