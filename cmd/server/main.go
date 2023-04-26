@@ -46,18 +46,23 @@ func main() {
 	//db:= setupDatabase(cfg, logger)
 	 logger.Info("Inicio Migração")
 	 
-	   //migrate.PopulateCountries(db,mongo)
-	  // migrate.MigrateBreeds(db,mongo)
-	   //migrate.MigrateColors(db,mongo)
-	  // migrate.MigrateOwners(db,mongo)
-	  // migrate.MigrateFederations(db,mongo)
-	  // migrate.MigrateCattery(db,mongo)
-	  // migrate.UpdateOwnerIDInCattery(mongo, 80)
+	//    migrate.InsertTitles(mongo)
+	//    migrate.PopulateCountries(db,mongo)
+	//    migrate.MigrateBreeds(db,mongo)
+	//    migrate.MigrateColors(db,mongo)
+	//    migrate.MigrateOwners(db,mongo)
+	//    migrate.MigrateFederations(db,mongo)
+	//    migrate.MigrateCattery(db,mongo)
+	//    migrate.UpdateOwnerIDInCattery(mongo, 80)
+	  
 
-	  // migrate.MigrateCats(db,mongo)
-	 // migrate.MigrateCatsPattentNameToCats1(db,mongo)
-  //  migrate.UpdateCatsWithParentIDs2(mongo) 
-	//migrate.UpdateCatsTempWithPattensIDs3(mongo)
+	//    migrate.MigrateCats(db,mongo)
+	//    migrate.MigrateCatsPattentNameToCats1(db,mongo)
+    //    migrate.UpdateCatsWithParentIDs2(mongo) 
+	//    migrate.UpdateCatsTempWithPattensIDs3(mongo)
+	 
+	 
+	
 	 
 
 	 

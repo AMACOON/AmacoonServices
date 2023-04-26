@@ -8,11 +8,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
+	"fmt"
 )
 
 func MigrateOwners(db *gorm.DB, client *mongo.Client) error {
+	fmt.Println("Entrou Migrate Owners")
+	
 	var owners []*sql.Owner
-
+	newOwners := []string{}
 	ownerCollection := client.Database("amacoon").Collection("owners")
 	batchSize := 500
 	offset := 0
@@ -60,6 +63,7 @@ func MigrateOwners(db *gorm.DB, client *mongo.Client) error {
 				if err != nil {
 					return err
 				}
+				newOwners = append(newOwners, o.OwnerName)
 			}
 		}
 
@@ -69,6 +73,7 @@ func MigrateOwners(db *gorm.DB, client *mongo.Client) error {
 
 		offset += batchSize
 	}
-
+	fmt.Println("New owners: %v\n", newOwners)
+	fmt.Println("Fim Migrate Owners")
 	return nil
 }

@@ -12,6 +12,8 @@ import (
 )
 
 func MigrateFederations(db *gorm.DB, client *mongo.Client) error {
+	
+	newFederations := []string{} 
 	var federations []*sql.Federation
 	if err := db.Unscoped().Find(&federations).Error; err != nil {
 		return err
@@ -43,6 +45,7 @@ func MigrateFederations(db *gorm.DB, client *mongo.Client) error {
 			if err != nil {
 				return err
 			}
+			newFederations = append(newFederations, f.FederationCode)
 		}
 	}
 

@@ -16,6 +16,8 @@ import (
 
 func PopulateCountries(db *gorm.DB, client *mongo.Client) error {
 	fmt.Println("Entrou Migrate Country")
+	
+	newCountries := []string{} 
 	var countries []*sql.Country
 	if err := db.Unscoped().Find(&countries).Error; err != nil {
 		return err
@@ -41,15 +43,19 @@ func PopulateCountries(db *gorm.DB, client *mongo.Client) error {
 			if err != nil {
 				return err
 			}
+			newCountries = append(newCountries, c.CountryName)
 		}
 	}
-
+	fmt.Println("New countries: %v\n", newCountries)
 	fmt.Println("FIM Migrate Country")
 	return nil
+	
 }
 
 func MigrateBreeds(db *gorm.DB, client *mongo.Client) error {
 	fmt.Println("Entrou Migrate Breeds")
+	
+	newBreeds := []string{} 
 	var breeds []*sql.Breed
 	if err := db.Unscoped().Find(&breeds).Error; err != nil {
 		return err
@@ -77,15 +83,19 @@ func MigrateBreeds(db *gorm.DB, client *mongo.Client) error {
 			if err != nil {
 				return err
 			}
+			newBreeds = append(newBreeds, b.BreedName)
 		}
 	}
-	fmt.Println("FIM Migrate Brreds")
+	fmt.Println("New breeds: %v\n", newBreeds)
+	fmt.Println("FIM Migrate Breeds")
 	return nil
 }
 
 
 func MigrateColors(db *gorm.DB, client *mongo.Client) error {
 	fmt.Println("Entrou Migrate Colors")
+	
+	
 	var colors []*sql.Color
 
 	colorCollection := client.Database("amacoon").Collection("colors")

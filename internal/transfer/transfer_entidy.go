@@ -8,11 +8,11 @@ import (
 type Transfer struct {
 	ID             primitive.ObjectID `bson:"_id,omitempty"`
 	CatData        CatTransfer        `bson:"catData"`
-	SellerData     SellerTransfer     `bson:"sellerData"`
-	BuyerData      BuyerTransfer      `bson:"buyerData"`
+	SellerData     OwnerTransfer      `bson:"sellerData"`
+	BuyerData      OwnerTransfer      `bson:"buyerData"`
 	Status         string             `bson:"status"`
 	ProtocolNumber string             `bson:"protocolNumber"`
-	RequesterID    primitive.ObjectID  `bson:"requesterID"`
+	RequesterID    primitive.ObjectID `bson:"requesterID"`
 	Files          []utils.Files      `bson:"files"`
 }
 
@@ -29,19 +29,7 @@ type CatTransfer struct {
 	MotherName   string             `bson:"motherName"`
 }
 
-type SellerTransfer struct {
-	ID          primitive.ObjectID `bson:"_id"`
-	Name        string             `bson:"name"`
-	CPF         string             `bson:"cpf"`
-	Address     string             `bson:"address"`
-	City        string             `bson:"city"`
-	State       string             `bson:"state"`
-	ZipCode     string             `bson:"zipCode"`
-	CountryName string             `bson:"countryName"`
-	Phone       string             `bson:"phone"`
-}
-
-type BuyerTransfer struct {
+type OwnerTransfer struct {
 	ID          primitive.ObjectID `bson:"_id"`
 	Name        string             `bson:"name"`
 	CPF         string             `bson:"cpf"`

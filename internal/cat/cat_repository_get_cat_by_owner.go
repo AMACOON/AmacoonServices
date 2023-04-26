@@ -26,7 +26,7 @@ func (r *CatRepository) GetAllByOwner(ownerID string) ([]*CatComplete, error) {
 	}}
 
 	// Pass the required lookups as a slice of strings
-	lookups := []string{"color", "breed", "mother", "cattery", "country", "federation", "owner", "father"}
+	lookups := []string{"color", "breed", "mother", "cattery", "country", "federation", "owner", "father", "titles"}
 
 	pipeline := BuildPipelineWithLookups(matchStage, lookups)
 
@@ -45,6 +45,12 @@ func (r *CatRepository) GetAllByOwner(ownerID string) ([]*CatComplete, error) {
 			r.Logger.WithError(err).Error("error decoding cat")
 			return nil, err
 		}
+		if len(catComplete.Titles) > 0 {
+			if catComplete.Titles[0].Title.ID == primitive.NilObjectID {
+				catComplete.Titles = []TitlesCats{}
+			}
+		}
+		catComplete.FullName = GetFullName(catComplete)
 		catsComplete = append(catsComplete, catComplete)
 	}
 
@@ -52,6 +58,6 @@ func (r *CatRepository) GetAllByOwner(ownerID string) ([]*CatComplete, error) {
 		r.Logger.WithError(err).Error("cursor error")
 		return nil, err
 	}
-
+	r.Logger.Infof("Repository GetAllByOwner")
 	return catsComplete, nil
 }

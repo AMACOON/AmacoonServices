@@ -8,7 +8,7 @@ import (
 )
 
 func (r *CatRepository) GetAllByOwnerAndGender(ownerID, gender string) ([]*CatComplete, error) {
-	r.Logger.Infof("Repository GetAllByOwnerAndSex")
+	r.Logger.Infof("Repository GetAllByOwnerAndGender")
 
 	catCollection := r.DB.Database(database).Collection(catsCollection)
 
@@ -27,7 +27,7 @@ func (r *CatRepository) GetAllByOwnerAndGender(ownerID, gender string) ([]*CatCo
 	}}
 
 	// Pass the required lookups as a slice of strings
-	lookups := []string{"color", "breed", "mother", "cattery", "country", "federation", "owner", "father"}
+	lookups := []string{"color", "breed", "mother", "cattery", "country", "federation", "owner", "father", "titles"}
 
 	pipeline := BuildPipelineWithLookups(matchStage, lookups)
 
@@ -46,6 +46,12 @@ func (r *CatRepository) GetAllByOwnerAndGender(ownerID, gender string) ([]*CatCo
 			r.Logger.WithError(err).Error("error decoding cat")
 			return nil, err
 		}
+		if len(catComplete.Titles) > 0 {
+			if catComplete.Titles[0].Title.ID == primitive.NilObjectID {
+				catComplete.Titles = []TitlesCats{}
+			}
+		}
+		catComplete.FullName = GetFullName(catComplete)
 		catsComplete = append(catsComplete, catComplete)
 	}
 
@@ -53,6 +59,6 @@ func (r *CatRepository) GetAllByOwnerAndGender(ownerID, gender string) ([]*CatCo
 		r.Logger.WithError(err).Error("cursor error")
 		return nil, err
 	}
-
+	r.Logger.Infof("Repository GetAllByOwnerAndGender OK")
 	return catsComplete, nil
 }

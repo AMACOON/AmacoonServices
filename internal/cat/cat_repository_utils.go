@@ -1,6 +1,8 @@
+// File: cat_repository_utils.go
 package cat
 
 import (
+	logger "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -13,11 +15,13 @@ var federationsCollection = "federations"
 var catteriesCollection = "catteries"
 var ownersCollection = "owners"
 var countriesCollection = "countries"
+var titlesCollection = "titles"
 
 func BuildPipelineWithLookups(matchStage bson.D, lookups []string) mongo.Pipeline {
 	pipeline := mongo.Pipeline{matchStage}
 
 	for _, lookup := range lookups {
+		logger.Infof("Adding stage: %s", lookup)
 		switch lookup {
 		case "breed":
 			pipeline = append(pipeline, LookupBreedStage(), UnwindBreedStage())
@@ -35,12 +39,16 @@ func BuildPipelineWithLookups(matchStage bson.D, lookups []string) mongo.Pipelin
 			pipeline = append(pipeline, LookupOwnerStage(), UnwindOwnerStage())
 		case "federation":
 			pipeline = append(pipeline, LookupFederationStage(), UnwindFederationStage())
+		case "titles":
+			pipeline = append(pipeline, BuildPipelineForCatComplete()...)
+			
+
+		
 		}
 	}
 
 	return pipeline
 }
-
 
 func LookupFatherStage() bson.D {
 	return bson.D{{
@@ -74,8 +82,6 @@ func AddFatherNameAndRemoveFatherStage() bson.D {
 	}}
 }
 
-
-
 func LookupCountryStage() bson.D {
 	return bson.D{{
 		Key: "$lookup",
@@ -90,7 +96,7 @@ func LookupCountryStage() bson.D {
 
 func UnwindCountryStage() bson.D {
 	return bson.D{{
-		Key:   "$unwind",
+		Key: "$unwind",
 		Value: bson.M{
 			"path":                       "$country",
 			"preserveNullAndEmptyArrays": true,
@@ -120,7 +126,6 @@ func UnwindMotherStage() bson.D {
 	}}
 }
 
-
 func AddMotherNameAndRemoveFatherStage() bson.D {
 	return bson.D{{
 		Key: "$addFields",
@@ -145,7 +150,7 @@ func LookupBreedStage() bson.D {
 
 func UnwindBreedStage() bson.D {
 	return bson.D{{
-		Key:   "$unwind",
+		Key: "$unwind",
 		Value: bson.M{
 			"path":                       "$breed",
 			"preserveNullAndEmptyArrays": true,
@@ -167,7 +172,7 @@ func LookupColorStage() bson.D {
 
 func UnwindColorStage() bson.D {
 	return bson.D{{
-		Key:   "$unwind",
+		Key: "$unwind",
 		Value: bson.M{
 			"path":                       "$color",
 			"preserveNullAndEmptyArrays": true,
@@ -189,7 +194,7 @@ func LookupCatteryStage() bson.D {
 
 func UnwindCatteryStage() bson.D {
 	return bson.D{{
-		Key:   "$unwind",
+		Key: "$unwind",
 		Value: bson.M{
 			"path":                       "$cattery",
 			"preserveNullAndEmptyArrays": true,
@@ -211,7 +216,7 @@ func LookupOwnerStage() bson.D {
 
 func UnwindOwnerStage() bson.D {
 	return bson.D{{
-		Key:   "$unwind",
+		Key: "$unwind",
 		Value: bson.M{
 			"path":                       "$owner",
 			"preserveNullAndEmptyArrays": true,
@@ -233,10 +238,109 @@ func LookupFederationStage() bson.D {
 
 func UnwindFederationStage() bson.D {
 	return bson.D{{
-		Key:   "$unwind",
+		Key: "$unwind",
 		Value: bson.M{
 			"path":                       "$federation",
 			"preserveNullAndEmptyArrays": true,
 		},
 	}}
 }
+
+
+func BuildPipelineForCatComplete() []bson.D {
+	return []bson.D{
+		{
+			{"$unwind", bson.M{"path": "$titles", "preserveNullAndEmptyArrays": true}},
+		},
+		{
+			{"$lookup",
+				bson.M{
+					"from":         "titles",
+					"localField":   "titles.id",
+					"foreignField": "_id",
+					"as":           "titles.title",
+				},
+			},
+		},
+		{
+			{"$unwind", bson.M{"path": "$titles.title", "preserveNullAndEmptyArrays": true}},
+		},
+		{
+			{"$lookup",
+				bson.M{
+					"from":         "federations",
+					"localField":   "titles.federationId",
+					"foreignField": "_id",
+					"as":           "titles.federation",
+				},
+			},
+		},
+		{
+			{"$unwind", bson.M{"path": "$titles.federation", "preserveNullAndEmptyArrays": true}},
+		},
+		{
+			{"$addFields",
+				bson.M{
+					"titles.federationName": bson.M{"$ifNull": []interface{}{"$titles.federation.name", "Unknown"}},
+				},
+			},
+		},
+		{
+			{"$project",
+				bson.M{
+					"titles.id":              0,
+					"titles.federationId":    0,
+					"titles.title.federationId": 0,
+					"titles.federation":      0,
+				},
+			},
+		},
+		{
+			{"$group",
+				bson.M{
+					"_id":   "$_id",
+					"root":  bson.M{"$first": "$$ROOT"},
+					"titles": bson.M{
+						"$push": bson.M{
+							"$cond": []interface{}{
+								bson.M{"$eq": []interface{}{"$titles", bson.M{}}},
+								nil,
+								"$titles",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			{"$addFields",
+				bson.M{
+					"root.titles": "$titles",
+				},
+			},
+		},
+		{
+			{"$replaceRoot",
+				bson.M{
+					"newRoot": "$root",
+				},
+			},
+		},
+	}
+}
+
+
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
