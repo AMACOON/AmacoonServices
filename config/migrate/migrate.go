@@ -99,7 +99,7 @@ func MigrateColors(db *gorm.DB, client *mongo.Client) error {
 	var colors []*sql.Color
 
 	colorCollection := client.Database("amacoon").Collection("colors")
-	batchSize := 100
+	batchSize := 500
 	offset := 0
 
 	for {

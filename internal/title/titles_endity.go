@@ -9,4 +9,7 @@ type TitlesMongo struct {
 	Name string             `bson:"name"`
 	Code string             `bson:"code"`
 	Type string             `bson:"type"`
+	Certificate string      `bson:"certificate"`
+	Amount int              `bson:"amount"`
+	Observation string     `bson:"observation"`
 }

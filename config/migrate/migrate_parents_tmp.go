@@ -18,12 +18,13 @@ func cleanParentName(name string) string {
 	// Remover a vírgula e o asterisco
 	name = strings.ReplaceAll(name, ",", "")
 	name = strings.ReplaceAll(name, "*", "")
+	name = strings.ReplaceAll(name, "'", "")
 
 	// Converter a string para minúsculas
 	name = strings.ToLower(name)
 
 	// Lista das palavras a serem removidas
-	wordsToRemove := []string{"ch", "pr", "ic", "ip", "gic", "gip", "sc", "sp", "nw", "aw", "bw", "cew", "mw", "nsw", "sw", "ww", "jw", "dsw", "dm", "dsm", "dvm"}
+	wordsToRemove := []string{"ch", "pr", "ic", "ip", "gic", "gip", "sc", "sp", "nw", "aw", "bw", "cew", "mw", "nsw", "sw", "ww", "jw", "dsw", "dm", "dsm", "dvm", "qgc"}
 
 	// Cria uma expressão regular a partir das palavras a serem removidas
 	regexPattern := `(\b(?:` + strings.Join(wordsToRemove, "|") + `)\b\s*)`
@@ -31,6 +32,13 @@ func cleanParentName(name string) string {
 
 	// Remove as palavras do nome
 	cleanedName := regex.ReplaceAllString(name, "")
+
+	// Adicionar novas regras para limpar o nome
+	cleanedName = regexp.MustCompile(`\s[\d']+`).ReplaceAllString(cleanedName, "")
+	cleanedName = strings.TrimLeftFunc(cleanedName, func(r rune) bool {
+		return unicode.IsSpace(r) || unicode.IsDigit(r)
+	})
+	cleanedName = regexp.MustCompile(`[\[\]\(\)]`).ReplaceAllString(cleanedName, "")
 
 	// Se os dois primeiros caracteres são letras e o terceiro é um espaço, remova-os
 	if len(cleanedName) >= 3 && unicode.IsLetter(rune(cleanedName[0])) && unicode.IsLetter(rune(cleanedName[1])) && unicode.IsSpace(rune(cleanedName[2])) {
@@ -47,18 +55,6 @@ func cleanParentName(name string) string {
 		cleanedName = cleanedName[1:]
 	}
 
-	// Se o primeiro caractere for um apóstrofo, remova-o e todos os números seguintes até encontrar uma letra
-	if len(cleanedName) > 0 && cleanedName[0] == '\'' {
-		cleanedName = cleanedName[1:]
-		if len(cleanedName) > 0 {
-			cleanedName = strings.TrimLeftFunc(cleanedName, unicode.IsDigit)
-		}
-	}
-	// Se os dois primeiros caracteres são números, remova-os
-	if len(cleanedName) >= 2 && unicode.IsDigit(rune(cleanedName[0])) && unicode.IsDigit(rune(cleanedName[1])) {
-		cleanedName = cleanedName[2:]
-	}
-
 	// Remover espaços no início e no fim
 	cleanedName = strings.TrimSpace(cleanedName)
 
@@ -68,6 +64,7 @@ func cleanParentName(name string) string {
 
 	return cleanedName
 }
+
 
 func MigrateCatsPattentNameToCats1(db *gorm.DB, mongoClient *mongo.Client) error {
 	// Fetch CatMigration records from SQL

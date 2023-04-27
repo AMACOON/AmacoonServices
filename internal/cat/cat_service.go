@@ -81,3 +81,4 @@ func GetFullName(cat *CatComplete) string {
 
 	return prefix + cat.Name + suffix
 }
+// WW'Ano se for 2 anos WW'20'21

@@ -18,6 +18,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	transferHandler *handler.TransferHandler,
 	catteryHandler *handler.CatteryHandler,
 	federationHandler *handler.FederationHandler,
+	titleHandler *handler.TitleHandler,
+	titleRecognitionHandler *handler.TitleRecognitionHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -36,6 +38,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupTransferRoutes(e, transferHandler)
 	setupCatteryRoutes(e, catteryHandler)
 	setupFederationRoutes(e, federationHandler)
+	setupTitlesRoutes(e, titleHandler)
+	setupTitleRecognitionRoutes(e, titleRecognitionHandler)
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -94,6 +98,16 @@ func setupTransferRoutes(e *echo.Echo, transferHandler *handler.TransferHandler)
 	e.PUT("/transfers/:id", transferHandler.UpdateTransfer)
 }
 
+func setupTitleRecognitionRoutes(e *echo.Echo, titleRecognitionHandler *handler.TitleRecognitionHandler) {
+	e.POST("/titles-recognition", titleRecognitionHandler.CreateTitleRecognition)
+	e.GET("/titles-recognition/:id", titleRecognitionHandler.GetTitleRecognitionByID)
+	e.PUT("/titles-recognition/:id/status", titleRecognitionHandler.UpdateTitleRecognitionStatus)
+	e.GET("/titles-recognition/:requesterID/requesterID", titleRecognitionHandler.GetAllTitleRecognitionsByRequesterID)
+	e.GET("/titles-recognition/:id/files", titleRecognitionHandler.GetTitleRecognitionFilesByID)
+	e.POST("/titles-recognition/:id/files", titleRecognitionHandler.AddTitlesReconitionFiles)
+	e.PUT("/titles-recognition/:id", titleRecognitionHandler.UpdateTitlesRecognition)
+	}
+
 func setupBreedRoutes(e *echo.Echo, breedHandler *handler.BreedHandler) {
 	e.GET("/breeds", breedHandler.GetAllBreeds)
 	e.GET("/breeds/:id", breedHandler.GetBreedByID)
@@ -111,4 +125,8 @@ func setupFederationRoutes(e *echo.Echo, federationHandler *handler.FederationHa
 
 func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
 	e.GET("/countries", countryHandler.GetAllCountry)
+}
+
+func setupTitlesRoutes(e *echo.Echo, titleHandler *handler.TitleHandler) {
+	e.GET("/titles", titleHandler.GetAllTitles)
 }

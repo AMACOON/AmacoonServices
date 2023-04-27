@@ -29,7 +29,7 @@ func (s *TransferService) CreateTransfer(req TransferRequest) (Transfer, error) 
 		s.Logger.Errorf("error converting transfer request to transfer: %v", err)
 		return Transfer{}, err
 	}
-	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("T")
+	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("P")
 	reqEntity.ProtocolNumber = protocolNumber
 	if err != nil {
 		s.Logger.Errorf("error generating protocol for transfer: %v", err)

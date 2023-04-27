@@ -1,8 +1,7 @@
-// File: cat_repository_utils.go
 package cat
 
 import (
-	logger "github.com/sirupsen/logrus"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -21,7 +20,7 @@ func BuildPipelineWithLookups(matchStage bson.D, lookups []string) mongo.Pipelin
 	pipeline := mongo.Pipeline{matchStage}
 
 	for _, lookup := range lookups {
-		logger.Infof("Adding stage: %s", lookup)
+		
 		switch lookup {
 		case "breed":
 			pipeline = append(pipeline, LookupBreedStage(), UnwindBreedStage())
@@ -335,12 +334,5 @@ func BuildPipelineForCatComplete() []bson.D {
 
 
 		
-
-
-
-
-
-
-
 
 

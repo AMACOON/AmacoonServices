@@ -123,20 +123,3 @@ func convertKittenData(kittenDataReq []KittenLitterRequest) []KittenLitter {
 }
 
 
-func convertFilesReqToFiles(filesReqList []utils.FilesReq) []utils.Files {
-	filesList := make([]utils.Files, len(filesReqList))
-
-	for i, filesReq := range filesReqList {
-		filesList[i] = utils.Files{
-			ID:       primitive.NewObjectID(), // Gere um novo ObjectID
-			Name:     filesReq.Name,
-			Type:     filesReq.Type,
-			Base64:   filesReq.Base64,
-		}
-	}
-
-	return filesList
-}
-
-
-
