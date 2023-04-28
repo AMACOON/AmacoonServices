@@ -17,7 +17,7 @@ func NewTitleService(titleRepo *TitleRepository, logger *logrus.Logger) *TitleSe
 	}
 }
 
-func (s *TitleService) GetAllTitles() ([]TitlesMongo, error) {
+func (s *TitleService) GetAllTitles() ([]TitleMongo, error) {
 	s.Logger.Infof("Service GetAllTitles")
 	
 	titles, err := s.TitleRepo.GetAllTitles()

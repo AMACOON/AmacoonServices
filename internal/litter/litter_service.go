@@ -24,7 +24,7 @@ func NewLitterService(litterRepo *LitterRepository, logger *logrus.Logger, proto
 func (s *LitterService) CreateLitter(req LitterRequest) (Litter, error) {
 	s.Logger.Infof("Service CreateLitter")
 
-	reqEntidy, err:= ConvertLitterRequestToLitter(req)
+	reqEntidy, err:= req.ToLitter()
 	if err != nil {
 		s.Logger.Errorf("error convert litterReq to  litter: %v", err)
 		return Litter{}, err
@@ -36,7 +36,7 @@ func (s *LitterService) CreateLitter(req LitterRequest) (Litter, error) {
 		return Litter{}, err
 	}
 	reqEntidy.Status = "submitted"
-	litter, err := s.LitterRepo.CreateLitter(reqEntidy)
+	litter, err := s.LitterRepo.CreateLitter(*reqEntidy)
 	if err != nil {
 		s.Logger.Errorf("error fetching litter from repository: %v", err)
 		return Litter{}, err

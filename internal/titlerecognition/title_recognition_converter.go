@@ -1,76 +1,56 @@
 package titlerecognition
 
-
 import (
-
-	"github.com/scuba13/AmacoonServices/internal/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func (trr *TitleRecognitionRequest) ToTitleRecognitionMongo() (*TitleRecognitionMongo, error) {
+	titles := make([]TitleMongo, len(trr.Titles))
+	for i, title := range trr.Titles {
+		titleMongo, err := title.ToTitleMongo()
+		if err != nil {
+			return nil, err
+		}
+		titles[i] = titleMongo
+	}
 
-func ConvertTitleRecognitionRequestToTitleRecognitionMongo(request TitleRecognitionRequest) (TitleRecognitionMongo, error) {
-	catID, err := primitive.ObjectIDFromHex(request.CatData.ID)
+	catService, err := trr.CatData.ToCatService()
 	if err != nil {
-		return TitleRecognitionMongo{}, err
+		return nil, err
 	}
 
-	ownerID, err := primitive.ObjectIDFromHex(request.OwnerData.ID)
+	ownerService, err := trr.OwnerData.ToOwnerService()
 	if err != nil {
-		return TitleRecognitionMongo{}, err
+		return nil, err
 	}
 
-	requesterID, err := primitive.ObjectIDFromHex(request.RequesterID)
+	requesterID, err := primitive.ObjectIDFromHex(trr.RequesterID)
 	if err != nil {
-		return TitleRecognitionMongo{}, err
+		return nil, err
 	}
 
-	titleID, err := primitive.ObjectIDFromHex(request.TitleID)
-	if err != nil {
-		return TitleRecognitionMongo{}, err
-	}
-
-	catTitle := CatTitle{
-		ID:           catID,
-		Name:         request.CatData.Name,
-		Registration: request.CatData.Registration,
-		Microchip:    request.CatData.Microchip,
-		BreedName:    request.CatData.BreedName,
-		EmsCode:      request.CatData.EmsCode,
-		ColorName:    request.CatData.ColorName,
-		Gender:       request.CatData.Gender,
-		FatherName:   request.CatData.FatherName,
-		MotherName:   request.CatData.MotherName,
-	}
-
-	ownerTitle := OwnerTitle{
-		ID:          ownerID,
-		Name:        request.OwnerData.Name,
-		CPF:         request.OwnerData.CPF,
-		Address:     request.OwnerData.Address,
-		City:        request.OwnerData.City,
-		State:       request.OwnerData.State,
-		ZipCode:     request.OwnerData.ZipCode,
-		CountryName: request.OwnerData.CountryName,
-		Phone:       request.OwnerData.Phone,
-	}
-
-
-
-	titleRecognition := TitleRecognitionMongo{
-		ID:             request.ID,
-		CatData:        catTitle,
-		OwnerData:      ownerTitle,
-		TitleID:        titleID,
-		TitleCode:      request.TitleCode,
-		TitleName:      request.TitleName,
-		Certificate:    request.Certificate,
-		Date:           request.Date,
-		Judge:          request.Judge,
-		Status:         request.Status,
-		ProtocolNumber: request.ProtocolNumber,
+	return &TitleRecognitionMongo{
+		CatData:        catService,
+		OwnerData:      ownerService,
+		Titles:         titles,
+		Status:         trr.Status,
+		ProtocolNumber: trr.ProtocolNumber,
 		RequesterID:    requesterID,
-		Files:          utils.ConvertFilesReqToFiles(request.Files),
+	}, nil
+}
+
+func (tr *TitleRequest) ToTitleMongo() (TitleMongo, error) {
+	titleID, err := primitive.ObjectIDFromHex(tr.TitleID)
+	if err != nil {
+		return TitleMongo{}, err
 	}
 
-	return titleRecognition, nil
+	return TitleMongo{
+		TitleID:     titleID,
+		TitleCode:   tr.TitleCode,
+		TitleName:   tr.TitleName,
+		Certificate: tr.Certificate,
+		Date:        tr.Date,
+		Judge:       tr.Judge,
+	}, nil
 }

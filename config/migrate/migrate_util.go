@@ -8,7 +8,57 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"reflect"
+	"gorm.io/gorm"
 )
+
+func populateCollection(db *gorm.DB, client *mongo.Client, collectionName string, items interface{}, convertItem func(item interface{}) interface{}, lenItems func(items interface{}) int, filterItem func(item interface{}) bson.M) error {
+	collection := client.Database("amacoon").Collection(collectionName)
+
+	batchSize := 500
+	offset := 0
+
+	for {
+		if err := db.Unscoped().Limit(batchSize).Offset(offset).Find(items).Error; err != nil {
+			return err
+		}
+
+		if lenItems(items) == 0 {
+			break
+		}
+
+		valueItems := reflect.ValueOf(items).Elem()
+		for i := 0; i < valueItems.Len(); i++ {
+			item := valueItems.Index(i).Interface()
+			filter := filterItem(item)
+			count, err := collection.CountDocuments(context.Background(), filter)
+			if err != nil {
+				return err
+			}
+
+			if count == 0 {
+				mongoItem := convertItem(item)
+				_, err := collection.InsertOne(context.Background(), mongoItem)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		if lenItems(items) < batchSize {
+			break
+		}
+
+		offset += batchSize
+	}
+
+	return nil
+}
+
+
+
+
+
 
 func findCountryIdByCode(client *mongo.Client, countryCode string) (primitive.ObjectID, error) {
 	if countryCode == "" || countryCode == "0" {

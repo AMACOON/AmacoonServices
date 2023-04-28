@@ -25,29 +25,29 @@ func NewTransferRepository(db *mongo.Client, logger *logrus.Logger) *TransferRep
 var database = "amacoon"
 var collection = "transfers"
 
-func (r *TransferRepository) GetTransferByID(id string) (Transfer, error) {
+func (r *TransferRepository) GetTransferByID(id string) (TransferMongo, error) {
 	r.Logger.Infof("Repository GetTransferByID")
-	var transfer Transfer
+	var transfer TransferMongo
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return Transfer{}, err
+		return TransferMongo{}, err
 	}
 	filter := bson.M{"_id": objID}
 	err = r.DB.Database(database).Collection(collection).FindOne(context.Background(), filter).Decode(&transfer)
 	if err != nil {
-		return Transfer{}, err
+		return TransferMongo{}, err
 	}
 
 	r.Logger.Infof("Repository GetTransferByID OK")
 	return transfer, nil
 }
 
-func (r *TransferRepository) CreateTransfer(transfer Transfer) (Transfer, error) {
+func (r *TransferRepository) CreateTransfer(transfer TransferMongo) (TransferMongo, error) {
 	r.Logger.Infof("Repository CreateTransfer")
 
 	res, err := r.DB.Database(database).Collection(collection).InsertOne(context.Background(), transfer)
 	if err != nil {
-		return Transfer{}, err
+		return TransferMongo{}, err
 	}
 
 	transfer.ID = res.InsertedID.(primitive.ObjectID)
@@ -75,26 +75,12 @@ func (r *TransferRepository) UpdateTransferStatus(id string, status string) erro
 
 func (r *TransferRepository) AddTransferFiles(id string, files []utils.Files) error {
 	r.Logger.Infof("Repository AddTransferFiles id %s", id)
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-
-	for i := range files {
-		files[i].ID = primitive.NewObjectID()
-	}
-
-	filter := bson.M{"_id": objID}
-	update := bson.M{"$push": bson.M{"files": bson.M{"$each": files}}}
-	_, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		return err
-	}
+	
 	r.Logger.Infof("Repository AddTransferFiles OK")
 	return nil
 }
 
-func (r *TransferRepository) GetAllTransfersByRequesterID(requesterID string) ([]Transfer, error) {
+func (r *TransferRepository) GetAllTransfersByRequesterID(requesterID string) ([]TransferMongo, error) {
 	r.Logger.Infof("Repository GetAllTransfersByRequesterID")
 	objID, err := primitive.ObjectIDFromHex(requesterID)
 	if err != nil {
@@ -106,9 +92,9 @@ func (r *TransferRepository) GetAllTransfersByRequesterID(requesterID string) ([
 		return nil, err
 	}
 	defer cur.Close(context.Background())
-	var transfers []Transfer
+	var transfers []TransferMongo
 	for cur.Next(context.Background()) {
-		var transfer Transfer
+		var transfer TransferMongo
 		err := cur.Decode(&transfer)
 		if err != nil {
 			return nil, err
@@ -138,7 +124,7 @@ func (r *TransferRepository) GetTransferFilesByID(id string) ([]utils.Files, err
 		}
 		return nil, err
 	}
-	var transfer Transfer
+	var transfer TransferMongo
 	if err := result.Decode(&transfer); err != nil {
 		return nil, err
 	}
@@ -146,7 +132,7 @@ func (r *TransferRepository) GetTransferFilesByID(id string) ([]utils.Files, err
 	return transfer.Files, nil
 }
 
-func (r *TransferRepository) UpdateTransfer(id string, transfer Transfer) error {
+func (r *TransferRepository) UpdateTransfer(id string, transfer TransferMongo) error {
 	r.Logger.Infof("Repository UpdateTransfer")
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {

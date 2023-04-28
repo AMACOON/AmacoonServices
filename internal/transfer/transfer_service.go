@@ -21,32 +21,33 @@ func NewTransferService(transferRepo *TransferRepository, logger *logrus.Logger,
 	}
 }
 
-func (s *TransferService) CreateTransfer(req TransferRequest) (Transfer, error) {
+func (s *TransferService) CreateTransfer(req TransferRequest) (TransferMongo, error) {
 	s.Logger.Infof("Service CreateTransfer")
 
-	reqEntity, err := ConvertTransferRequestToTransfer(req)
+	reqEntity, err := req.ToTransferMongo()
 	if err != nil {
 		s.Logger.Errorf("error converting transfer request to transfer: %v", err)
-		return Transfer{}, err
+		return TransferMongo{}, err
 	}
 	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("P")
 	reqEntity.ProtocolNumber = protocolNumber
 	if err != nil {
 		s.Logger.Errorf("error generating protocol for transfer: %v", err)
-		return Transfer{}, err
+		return TransferMongo{}, err
 	}
 	reqEntity.Status = "submitted"
-	transfer, err := s.TransferRepo.CreateTransfer(reqEntity)
+	transfer, err := s.TransferRepo.CreateTransfer(*reqEntity)
 	if err != nil {
 		s.Logger.Errorf("error fetching transfer from repository: %v", err)
-		return Transfer{}, err
+		return TransferMongo{}, err
 	}
 
 	s.Logger.Infof("Service CreateTransfer OK")
 	return transfer, nil
 }
 
-func (s *TransferService) GetTransferByID(id string) (*Transfer, error) {
+
+func (s *TransferService) GetTransferByID(id string) (*TransferMongo, error) {
 	s.Logger.Infof("Service GetTransferByID")
 
 	transfer, err := s.TransferRepo.GetTransferByID(id)
@@ -108,7 +109,7 @@ func (s *TransferService) GetTransferFilesByID(id string) ([]utils.Files, error)
 	return files, nil
 }
 
-func (s *TransferService) GetAllTransfersByRequesterID(requesterID string) ([]Transfer, error) {
+func (s *TransferService) GetAllTransfersByRequesterID(requesterID string) ([]TransferMongo, error) {
 	s.Logger.Infof("Service GetAllTransfersByRequesterID")
 	transfers, err := s.TransferRepo.GetAllTransfersByRequesterID(requesterID)
 	if err != nil {
@@ -119,7 +120,7 @@ func (s *TransferService) GetAllTransfersByRequesterID(requesterID string) ([]Tr
 	return transfers, nil
 }
 
-func (s *TransferService) UpdateTransfer(id string, transfer Transfer) error {
+func (s *TransferService) UpdateTransfer(id string, transfer TransferMongo) error {
 	s.Logger.Infof("Service UpdateTransfer")
 
 	if err := s.TransferRepo.UpdateTransfer(id, transfer); err != nil {

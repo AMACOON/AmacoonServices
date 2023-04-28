@@ -75,22 +75,7 @@ func (r *TitleRecognitionRepository) UpdateTitleRecognitionStatus(id string, sta
 
 func (r *TitleRecognitionRepository) AddTitleRecognitionFiles(id string, files []utils.Files) error {
 	r.Logger.Infof("Repository AddTitleRecognitionFiles id %s", id)
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
 
-	// Assign a new ObjectID to each file
-	for i := range files {
-		files[i].ID = primitive.NewObjectID()
-	}
-
-	filter := bson.M{"_id": objID}
-	update := bson.M{"$push": bson.M{"files": bson.M{"$each": files}}}
-	_, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		return err
-	}
 	r.Logger.Infof("Repository AddTitleRecognitionFiles OK")
 	return nil
 }

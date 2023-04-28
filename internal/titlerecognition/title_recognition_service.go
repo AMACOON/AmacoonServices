@@ -24,7 +24,7 @@ func NewTitleRecognitionService(titleRecognitionRepo *TitleRecognitionRepository
 func (s *TitleRecognitionService) CreateTitleRecognition(req TitleRecognitionRequest) (TitleRecognitionMongo, error) {
 	s.Logger.Infof("Service CreateTitleRecognition")
 
-	reqEntity, err := ConvertTitleRecognitionRequestToTitleRecognitionMongo(req)
+	reqEntity, err := req.ToTitleRecognitionMongo()
 	if err != nil {
 		s.Logger.Errorf("error converting titleRecognitionReq to titleRecognition: %v", err)
 		return TitleRecognitionMongo{}, err
@@ -36,7 +36,7 @@ func (s *TitleRecognitionService) CreateTitleRecognition(req TitleRecognitionReq
 		return TitleRecognitionMongo{}, err
 	}
 	reqEntity.Status = "submitted"
-	titleRecognition, err := s.TitleRecognitionRepo.CreateTitleRecognition(reqEntity)
+	titleRecognition, err := s.TitleRecognitionRepo.CreateTitleRecognition(*reqEntity)
 	if err != nil {
 		s.Logger.Errorf("error fetching titleRecognition from repository: %v", err)
 		return TitleRecognitionMongo{}, err

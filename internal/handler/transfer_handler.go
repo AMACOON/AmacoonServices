@@ -93,7 +93,7 @@ func (h *TransferHandler) GetAllTransfersByRequesterID(c echo.Context) error {
 func (h *TransferHandler) UpdateTransfer(c echo.Context) error {
 	h.Logger.Infof("Handler UpdateTransfer")
 	id := c.Param("id")
-	var transferObj transfer.Transfer
+	var transferObj transfer.TransferMongo
 	err := c.Bind(&transferObj)
 	if err != nil {
 		h.Logger.Errorf("error binding request body: %v", err)

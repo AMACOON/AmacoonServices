@@ -75,22 +75,7 @@ func (r *LitterRepository) UpdateLitterStatus(id string, status string) error {
 
 func (r *LitterRepository) AddLitterFiles(id string, files []utils.Files) error {
     r.Logger.Infof("Repository AddLitterFiles id %s", id)
-    objID, err := primitive.ObjectIDFromHex(id)
-    if err != nil {
-        return err
-    }
-
-    // Atribui um novo ObjectID a cada arquivo
-    for i := range files {
-        files[i].ID = primitive.NewObjectID()
-    }
-
-    filter := bson.M{"_id": objID}
-    update := bson.M{"$push": bson.M{"files": bson.M{"$each": files}}}
-    _, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
-    if err != nil {
-        return err
-    }
+    
     r.Logger.Infof("Repository AddLitterFiles OK")
     return nil
 }

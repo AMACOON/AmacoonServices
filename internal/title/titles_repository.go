@@ -22,10 +22,10 @@ func NewTitleRepository(client *mongo.Client, logger *logrus.Logger) *TitleRepos
 var database = "amacoon"
 var collection = "titles"
 
-func (r *TitleRepository) GetAllTitles() ([]TitlesMongo, error) {
+func (r *TitleRepository) GetAllTitles() ([]TitleMongo, error) {
 
 	r.Logger.Infof("Repository GetAllTitles")
-	var titles []TitlesMongo
+	var titles []TitleMongo
 	cursor, err := r.Client.Database(database).Collection(collection).Find(context.Background(), bson.M{})
 	if err != nil {
 		return nil, err

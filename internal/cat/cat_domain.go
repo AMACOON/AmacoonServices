@@ -40,7 +40,7 @@ type CatComplete struct {
 }
 
 type TitlesCats struct {
-    Title          title.TitlesMongo `bson:"title"`
+    Title          title.TitleMongo `bson:"title"`
     Date           time.Time `bson:"date"`
     FederationName string    `bson:"federationName"`
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func InsertTitles(client *mongo.Client) {
-	titles := []model.TitlesMongo{
+	titles := []model.TitleMongo{
 		// Championship/Premiorship Titles
 		{Name: "Champion", Code: "CH", Type: "Championship/Premiorship Titles", Certificate: "CAC", Amount: 3, Observation: "3 juízes diferentes"},
 		{Name: "Premior", Code: "PR", Type: "Championship/Premiorship Titles", Certificate: "CAP", Amount: 3, Observation: "3 juízes diferentes"},
