@@ -3,39 +3,44 @@ package litter
 import (
 	"time"
 
-	"github.com/scuba13/AmacoonServices/internal/service"
-	"github.com/scuba13/AmacoonServices/internal/utils"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/scuba13/AmacoonServices/internal/catservice"
+	"gorm.io/gorm"
 )
 
 type Litter struct {
-	ID             primitive.ObjectID   `bson:"_id,omitempty"`
-	MotherData     service.CatService   `bson:"motherData"`
-	FatherData     service.CatService   `bson:"fatherData"`
-	MotherOwner    service.OwnerService `bson:"motherOwner"`
-	FatherOwner    service.OwnerService `bson:"fatherOwner"`
-	BirthData      BirthLitter          `bson:"birthData"`
-	Status         string               `bson:"status"`
-	ProtocolNumber string               `bson:"protocolNumber"`
-	RequesterID    primitive.ObjectID   `bson:"requesterID"` // OwnerId q esta logado, Pegar dado na Femea
-	KittenData     []KittenLitter       `bson:"kittenData"`
-	Files          []utils.Files        `bson:"files"`
+	gorm.Model
+	MotherData     catservice.CatService   `gorm:"embedded;embeddedPrefix:mother_"`
+	FatherData     catservice.CatService   `gorm:"embedded;embeddedPrefix:father_"`
+	MotherOwner    catservice.OwnerService `gorm:"embedded;embeddedPrefix:motherOwner_"`
+	FatherOwner    catservice.OwnerService `gorm:"embedded;embeddedPrefix:fatherOwner_"`
+	CatteryName    string                  
+	NumKittens     int                     
+	BirthDate      time.Time              
+	CountryCode    string               
+	Status         string                
+	ProtocolNumber string                  
+	RequesterID    uint                   
+	KittenData     []KittenLitter       
 }
 
-type BirthLitter struct {
-	CatteryName string    `bson:"catteryName"` // Pegar da Femea
-	NumKittens  int       `bson:"numKittens"`
-	BirthDate   time.Time `bson:"birthDate"`
-	CountryCode string    `bson:"countryCode"`
+func (Litter) TableName() string {
+	return "service_litters"
 }
 
 type KittenLitter struct {
-	Name       string `bson:"name"`
-	Gender     string `bson:"gender"`
-	BreedName  string `bson:"breedName"`
-	ColorName  string `bson:"colorName"`
-	EmsCode    string `bson:"emsCode"`
-	ColorNameX string `bson:"colorNameX"`
-	Microchip  string `bson:"microchip"`
-	Breeding   bool   `bson:"breeding"`
+	gorm.Model
+	Name       string 
+	Gender     string 
+	BreedName  string 
+	ColorName  string 
+	EmsCode    string 
+	ColorNameX string 
+	Microchip  string 
+	Breeding   bool   
+	LitterID   uint    // Esta é a chave estrangeira para a tabela litters
+	
+}
+
+func (KittenLitter) TableName() string {
+	return "service_kittens_litters"
 }

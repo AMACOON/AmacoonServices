@@ -1,15 +1,19 @@
 package title
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
+    "gorm.io/gorm"
 )
 
-type TitleMongo struct {
-	ID   primitive.ObjectID `bson:"_id,omitempty"`
-	Name string             `bson:"name"`
-	Code string             `bson:"code"`
-	Type string             `bson:"type"`
-	Certificate string      `bson:"certificate"`
-	Amount int              `bson:"amount"`
-	Observation string     `bson:"observation"`
+type Title struct {
+    gorm.Model
+    Name        string
+	Code        string `gorm:"type:varchar(191);unique"`
+    Type        string
+    Certificate string
+    Amount      int
+    Observation string
+}
+
+func (Title) TableName() string {
+    return "titles"
 }

@@ -17,7 +17,7 @@ func NewCountryService(countryRepo *CountryRepository, logger *logrus.Logger) *C
 	}
 }
 
-func (s *CountryService) GetAllCountries() ([]CountryMongo, error) {
+func (s *CountryService) GetAllCountries() ([]Country, error) {
 	s.Logger.Infof("Service GetAllCountries")
 	countries, err := s.CountryRepo.GetAllCountries()
 	if err != nil {

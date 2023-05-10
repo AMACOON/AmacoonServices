@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/scuba13/AmacoonServices/internal/transfer"
-	"github.com/scuba13/AmacoonServices/internal/utils"
+	
 )
 
 type TransferHandler struct {
@@ -24,7 +24,7 @@ func NewTransferHandler(transferService *transfer.TransferService, logger *logru
 
 func (h *TransferHandler) CreateTransfer(c echo.Context) error {
 	h.Logger.Infof("Handler CreateTransfer")
-	var transferReq transfer.TransferRequest
+	var transferReq transfer.Transfer
 	err := c.Bind(&transferReq)
 	if err != nil {
 		h.Logger.Errorf("error binding request body: %v", err)
@@ -51,49 +51,10 @@ func (h *TransferHandler) GetTransferByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, foundTransfer)
 }
 
-func (h *TransferHandler) UpdateTransferStatus(c echo.Context) error {
-	h.Logger.Infof("Handler UpdateTransferStatus")
-	id := c.Param("id")
-	status := c.QueryParam("status")
-	err := h.TransferService.UpdateTransferStatus(id, status)
-	if err != nil {
-		h.Logger.WithError(err).Error("failed to update transfer status")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update transfer status")
-	}
-	h.Logger.Infof("Handler UpdateTransferStatus OK")
-	return c.NoContent(http.StatusOK)
-}
-
-func (h *TransferHandler) GetTransferFilesByID(c echo.Context) error {
-	h.Logger.Infof("Handler GetTransferFilesByID")
-	id := c.Param("id")
-	files, err := h.TransferService.GetTransferFilesByID(id)
-	if err != nil {
-		h.Logger.WithError(err).Error("failed to get transfer files")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get transfer files")
-	}
-	h.Logger.Infof("Handler GetTransferFilesByID OK")
-	return c.JSON(http.StatusOK, files)
-}
-
-func (h *TransferHandler) GetAllTransfersByRequesterID(c echo.Context) error {
-	h.Logger.Infof("Handler GetAllTransfersByRequesterID")
-	id := c.Param("requesterID")
-
-	transfers, err := h.TransferService.GetAllTransfersByRequesterID(id)
-	if err != nil {
-		h.Logger.WithError(err).Error("failed to get transfers by Requester ID")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get transfers by Requester ID")
-	}
-
-	h.Logger.Infof("Handler GetAllTransfersByRequesterID OK")
-	return c.JSON(http.StatusOK, transfers)
-}
-
 func (h *TransferHandler) UpdateTransfer(c echo.Context) error {
 	h.Logger.Infof("Handler UpdateTransfer")
 	id := c.Param("id")
-	var transferObj transfer.TransferMongo
+	var transferObj transfer.Transfer
 	err := c.Bind(&transferObj)
 	if err != nil {
 		h.Logger.Errorf("error binding request body: %v", err)
@@ -110,22 +71,33 @@ func (h *TransferHandler) UpdateTransfer(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (h *TransferHandler) AddTransferFiles(c echo.Context) error {
-	h.Logger.Infof("Handler AddTransferFiles")
+func (h *TransferHandler) UpdateTransferStatus(c echo.Context) error {
+	h.Logger.Infof("Handler UpdateTransferStatus")
 	id := c.Param("id")
-	var files []utils.Files
-	err := c.Bind(&files)
+	status := c.QueryParam("status")
+	err := h.TransferService.UpdateTransferStatus(id, status)
 	if err != nil {
-		h.Logger.Errorf("error binding request body: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
+		h.Logger.WithError(err).Error("failed to update transfer status")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update transfer status")
 	}
-
-	err = h.TransferService.AddTransferFiles(id, files)
-	if err != nil {
-		h.Logger.WithError(err).Error("failed to add files to transfer")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to add files to transfer")
-	}
-
-	h.Logger.Infof("Handler AddTransferFiles OK")
+	h.Logger.Infof("Handler UpdateTransferStatus OK")
 	return c.NoContent(http.StatusOK)
 }
+
+func (h *TransferHandler) GetAllTransfersByRequesterID(c echo.Context) error {
+	h.Logger.Infof("Handler GetAllTransfersByRequesterID")
+	id := c.Param("requesterID")
+
+	transfers, err := h.TransferService.GetAllTransfersByRequesterID(id)
+	if err != nil {
+		h.Logger.WithError(err).Error("failed to get transfers by Requester ID")
+		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get transfers by Requester ID")
+	}
+
+	h.Logger.Infof("Handler GetAllTransfersByRequesterID OK")
+	return c.JSON(http.StatusOK, transfers)
+}
+
+
+
+

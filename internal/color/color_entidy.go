@@ -1,14 +1,18 @@
 package color
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
+    "gorm.io/gorm"
 )
 
-type ColorMongo struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty"`
-	BreedCode string             `bson:"breedCode"`
-	EmsCode   string             `bson:"emsCode"`
-	Name      string             `bson:"name"`
-	Group     int                `bson:"group"`
-	SubGroup  int                `bson:"subGroup"`
+type Color struct {
+    gorm.Model
+    BreedCode string
+    EmsCode   string
+    Name      string
+    Group     int
+    SubGroup  int
+}
+
+func (Color) TableName() string {
+    return "colors"
 }

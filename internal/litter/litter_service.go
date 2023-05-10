@@ -1,16 +1,16 @@
 package litter
 
 import (
-	"errors"
-
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
+	"strconv"
 )
 
 type LitterService struct {
 	LitterRepo      *LitterRepository
 	ProtocolService *utils.ProtocolService
 	Logger          *logrus.Logger
+	//FilesService    *utils.FilesService // adiciona o campo FilesService
 }
 
 func NewLitterService(litterRepo *LitterRepository, logger *logrus.Logger, protocolService *utils.ProtocolService) *LitterService {
@@ -18,27 +18,23 @@ func NewLitterService(litterRepo *LitterRepository, logger *logrus.Logger, proto
 		LitterRepo:      litterRepo,
 		ProtocolService: protocolService,
 		Logger:          logger,
+		//FilesService:    filesService, // adiciona a instância de FilesService
 	}
 }
 
-func (s *LitterService) CreateLitter(req LitterRequest) (Litter, error) {
+func (s *LitterService) CreateLitter(req Litter) (Litter, error) {
 	s.Logger.Infof("Service CreateLitter")
 
-	reqEntidy, err:= req.ToLitter()
-	if err != nil {
-		s.Logger.Errorf("error convert litterReq to  litter: %v", err)
-		return Litter{}, err
-	}
 	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("L")
-	reqEntidy.ProtocolNumber = protocolNumber
+	req.ProtocolNumber = protocolNumber
 	if err != nil {
 		s.Logger.Errorf("error generate protocol to  litter: %v", err)
 		return Litter{}, err
 	}
-	reqEntidy.Status = "submitted"
-	litter, err := s.LitterRepo.CreateLitter(*reqEntidy)
+	req.Status = "submitted"
+	litter, err := s.LitterRepo.CreateLitter(req)
 	if err != nil {
-		s.Logger.Errorf("error fetching litter from repository: %v", err)
+		s.Logger.Errorf("error create litter from repository: %v", err)
 		return Litter{}, err
 	}
 
@@ -48,8 +44,11 @@ func (s *LitterService) CreateLitter(req LitterRequest) (Litter, error) {
 
 func (s *LitterService) GetLitterByID(id string) (*Litter, error) {
 	s.Logger.Infof("Service GetLitterByID")
-
-	litter, err := s.LitterRepo.GetLitterByID(id)
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	litter, err := s.LitterRepo.GetLitterByID(uint(idUint))
 	if err != nil {
 		s.Logger.Errorf("error fetching litter from repository: %v", err)
 		return nil, err
@@ -59,15 +58,36 @@ func (s *LitterService) GetLitterByID(id string) (*Litter, error) {
 	return &litter, nil
 }
 
+func (s *LitterService) UpdateLitter(id string, litter Litter) error {
+	s.Logger.Infof("Service UpdateLitter")
+
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return err
+	}
+	if err := s.LitterRepo.UpdateLitter(uint(idUint), litter); err != nil {
+		s.Logger.WithError(err).Error("failed to update litter status")
+		return err
+	}
+	s.Logger.Infof("Service UpdateLitter OK")
+	return nil
+}
+
 func (s *LitterService) UpdateLitterStatus(id string, status string) error {
 	s.Logger.Infof("Service UpdateLitterStatus")
 
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return err
+	}
 	// check if the litter exists
-	if _, err := s.LitterRepo.GetLitterByID(id); err != nil {
-		return errors.New("litter not found")
+	if _, err := s.LitterRepo.GetLitterByID(uint(idUint)); err != nil {
+		s.Logger.WithError(err).Error("litter not found")
+		return err
 	}
 
-	if err := s.LitterRepo.UpdateLitterStatus(id, status); err != nil {
+	if err := s.LitterRepo.UpdateLitterStatus(uint(idUint), status); err != nil {
+		s.Logger.WithError(err).Error("failed to update litter")
 		return err
 	}
 
@@ -75,42 +95,14 @@ func (s *LitterService) UpdateLitterStatus(id string, status string) error {
 	return nil
 }
 
-func (s *LitterService) AddLitterFiles(id string, files []utils.Files) error {
-	s.Logger.Infof("Service AddLitterFiles")
+func (s *LitterService) GetAllLittersByRequesterID(requesterID string) ([]Litter, error) {
+	s.Logger.Infof("Service GetAllLittersByRequesterID")
 
-	// check if the litter exists
-	if _, err := s.LitterRepo.GetLitterByID(id); err != nil {
-		return errors.New("litter not found")
-	}
-
-	if err := s.LitterRepo.AddLitterFiles(id, files); err != nil {
-		return err
-	}
-
-	s.Logger.Infof("Service AddLitterFiles OK")
-	return nil
-}
-
-func (s *LitterService) GetLitterFilesByID(id string) ([]utils.Files, error) {
-	s.Logger.Infof("Service GetLitterFilesByID")
-
-	// check if the litter exists
-	if _, err := s.LitterRepo.GetLitterByID(id); err != nil {
-		return nil, errors.New("litter not found")
-	}
-
-	files, err := s.LitterRepo.GetLitterFilesByID(id)
+	idUint, err := strconv.ParseUint(requesterID, 10, 64)
 	if err != nil {
 		return nil, err
 	}
-
-	s.Logger.Infof("Service GetLitterFilesByID OK")
-	return files, nil
-}
-
-func (s *LitterService) GetAllLittersByRequesterID(ownerId string) ([]Litter, error) {
-	s.Logger.Infof("Service GetAllLittersByRequesterID")
-	litters, err := s.LitterRepo.GetAllLittersByRequesterID(ownerId)
+	litters, err := s.LitterRepo.GetAllLittersByRequesterID(uint(idUint))
 	if err != nil {
 		s.Logger.WithError(err).Error("failed to get litters by owner ID")
 		return nil, err
@@ -119,13 +111,4 @@ func (s *LitterService) GetAllLittersByRequesterID(ownerId string) ([]Litter, er
 	return litters, nil
 }
 
-func (s *LitterService) UpdateLitter(id string ,litter Litter) error {
-	s.Logger.Infof("Service UpdateLitter")
 
-	if err := s.LitterRepo.UpdateLitter(id, litter); err != nil {
-		s.Logger.WithError(err).Error("failed to update litter")
-		return err
-	}
-	s.Logger.Infof("Service UpdateLitter OK")
-	return nil
-}

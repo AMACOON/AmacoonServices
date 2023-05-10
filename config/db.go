@@ -33,6 +33,24 @@ func SetupDB(config *Config) (*gorm.DB, error) {
 	return db, nil
 }
 
+func SetupDBOld(config *Config) (*gorm.DB, error) {
+	
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		"amacoon001_add1",
+		"armin013",
+		config.DBHost,
+		config.DBPort,
+		"amacoon01",
+	)
+	
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	
+	return db, nil
+}
+
 func SetupMongo(config *Config) (*mongo.Client, error) {
 	// Define a string de conexão com o MongoDB
 	mongoURI := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s",

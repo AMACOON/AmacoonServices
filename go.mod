@@ -4,7 +4,9 @@ go 1.19
 
 require (
 	github.com/agext/levenshtein v1.2.3
+	github.com/aws/aws-sdk-go v1.44.255
 	github.com/labstack/echo/v4 v4.10.2
+	github.com/sashabaranov/go-openai v1.9.3
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.15.0
 	go.mongodb.org/mongo-driver v1.11.4
@@ -20,6 +22,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

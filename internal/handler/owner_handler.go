@@ -38,7 +38,7 @@ func (h *OwnerHandler) GetOwnerByID(c echo.Context) error {
 		h.Logger.WithFields(logrus.Fields{
 			"id": id,
 		}).Warn("Owner not found by ID")
-		return echo.NewHTTPError(http.StatusNotFound, "cattery not found")
+		return echo.NewHTTPError(http.StatusNotFound, "Owner not found")
 	}
 
 	h.Logger.Infof("Handler GetOwnerByID OK")
@@ -46,8 +46,6 @@ func (h *OwnerHandler) GetOwnerByID(c echo.Context) error {
 }
 
 func (h *OwnerHandler) GetAllOwners(c echo.Context) error {
-
-	// Log de entrada da função
 	h.Logger.Infof("Handler GetAllOwners")
 
 	owners, err := h.OwnerService.GetAllOwners()
@@ -56,49 +54,81 @@ func (h *OwnerHandler) GetAllOwners(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get all owners")
 	}
 
-	// Log de saída da função
 	h.Logger.Infof("Handler GetAllOwners OK")
 	return c.JSON(http.StatusOK, owners)
 }
 
 func (h *OwnerHandler) GetOwnerByCPF(c echo.Context) error {
-    // Log de entrada da função
-    h.Logger.Infof("Handler GetOwnerByCPF")
+	h.Logger.Infof("Handler GetOwnerByCPF")
 
-    cpf := c.Param("cpf")
-    owner, err := h.OwnerService.GetOwnerByCPF(cpf)
-    if err != nil {
-        h.Logger.WithError(err).Error("Failed to get owner by CPF")
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get owner by CPF")
-    }
+	cpf := c.Param("cpf")
+	owner, err := h.OwnerService.GetOwnerByCPF(cpf)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to get owner by CPF")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get owner by CPF")
+	}
 
-    // Log de saída da função
-    h.Logger.Infof("Handler GetOwnerByCPF OK")
-    return c.JSON(http.StatusOK, owner)
+	h.Logger.Infof("Handler GetOwnerByCPF OK")
+	return c.JSON(http.StatusOK, owner)
 }
 
 func (h *OwnerHandler) CreateOwner(c echo.Context) error {
-    // Log de entrada da função
-    h.Logger.Infof("Handler CreateOwner")
+	h.Logger.Infof("Handler CreateOwner")
 
-    var owner owner.OwnerMongo
-    if err := c.Bind(&owner); err != nil {
-        h.Logger.WithError(err).Error("Failed to parse request body")
-        return echo.NewHTTPError(http.StatusBadRequest, "Failed to parse request body")
-    }
+	var owner owner.Owner
+	if err := c.Bind(&owner); err != nil {
+		h.Logger.WithError(err).Error("Failed to parse request body")
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to parse request body")
+	}
 
-    createdOwner, err := h.OwnerService.CreateOwner(&owner)
-    if err != nil {
-        h.Logger.WithError(err).Error("Failed to create owner")
-        return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create owner")
-    }
+	createdOwner, err := h.OwnerService.CreateOwner(&owner)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to create owner")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create owner")
+	}
 
-    // Log de saída da função
-    h.Logger.Infof("Handler CreateOwner OK")
-    return c.JSON(http.StatusCreated, createdOwner)
+	h.Logger.Infof("Handler CreateOwner OK")
+	return c.JSON(http.StatusCreated, createdOwner)
 }
 
+func (h *OwnerHandler) UpdateOwner(c echo.Context) error {
+	h.Logger.Infof("Handler UpdateOwner")
 
+	id := c.Param("id")
+	h.Logger.WithFields(logrus.Fields{
+		"id": id,
+	}).Info("Updating Owner")
 
+	owner := new(owner.Owner)
+	if err := c.Bind(owner); err != nil {
+		h.Logger.WithError(err).Error("Failed to parse request body")
+		return echo.NewHTTPError(http.StatusBadRequest, "Failed to parse request body")
+	}
 
+	updatedOwner, err := h.OwnerService.UpdateOwner(id, owner)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to update owner")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update owner")
+	}
 
+	h.Logger.Infof("Handler UpdateOwner OK")
+	return c.JSON(http.StatusOK, updatedOwner)
+}
+
+func (h *OwnerHandler) DeleteOwnerByID(c echo.Context) error {
+	h.Logger.Infof("Handler DeleteOwnerByID")
+
+	id := c.Param("id")
+	h.Logger.WithFields(logrus.Fields{
+		"id": id,
+	}).Info("Deleting Owner")
+
+	err := h.OwnerService.DeleteOwnerByID(id)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to delete owner")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete owner")
+	}
+
+	h.Logger.Infof("Handler DeleteOwnerByID OK")
+	return c.NoContent(http.StatusOK)
+}

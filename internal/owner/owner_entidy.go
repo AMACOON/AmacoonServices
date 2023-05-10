@@ -1,20 +1,27 @@
 package owner
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	
+	"gorm.io/gorm"
+)
 
-type OwnerMongo struct {
-	ID           primitive.ObjectID `bson:"_id,omitempty"`
-	Email        string             `bson:"email"`
-	PasswordHash string             `bson:"passwordHash"`
-	Name         string             `bson:"name"`
-	CPF          string             `bson:"cpf"`
-	Address      string             `bson:"address"`
-	City         string             `bson:"city"`
-	State        string             `bson:"state"`
-	ZipCode      string             `bson:"zipCode"`
-	CountryID    primitive.ObjectID `bson:"countryId"`
-	Phone        string             `bson:"phone"`
-	Valid        bool               `bson:"valid"`
-	ValidId      string             `bson:"validId"`
-	Observation  string             `bson:"observation"`
+type Owner struct {
+	gorm.Model
+	Email        string
+	PasswordHash string
+	Name         string
+	CPF          string
+	Address      string
+	City         string
+	State        string
+	ZipCode      string
+	CountryID        *uint                  `gorm:"foreignKey:CountryID"`
+	Phone        string
+	Valid        bool
+	ValidId      string
+	Observation  string
+}
+
+func (Owner) TableName() string {
+	return "owners"
 }

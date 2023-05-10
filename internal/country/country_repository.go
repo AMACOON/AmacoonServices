@@ -1,44 +1,32 @@
 package country
 
 import (
-	"context"
-
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 )
 
+
+
 type CountryRepository struct {
-	Client *mongo.Client
+	DB     *gorm.DB
 	Logger *logrus.Logger
 }
 
-func NewCountryRepository(client *mongo.Client, logger *logrus.Logger) *CountryRepository {
+func NewCountryRepository(db *gorm.DB, logger *logrus.Logger) *CountryRepository {
 	return &CountryRepository{
-		Client: client,
+		DB:     db,
 		Logger: logger,
 	}
 }
 
-var database = "amacoon"
-var collection = "countries"
-
-func (r *CountryRepository) GetAllCountries() ([]CountryMongo, error) {
+func (r *CountryRepository) GetAllCountries() ([]Country, error) {
 	r.Logger.Infof("Repository GetAllCountries")
-	var countries []CountryMongo
-	ctx := context.Background()
 
-	filter := bson.M{"isActivated": true}
-	cur, err := r.Client.Database(database).Collection(collection).Find(ctx, filter)
-
-	if err != nil {
+	var countries []Country
+	if err := r.DB.Where("is_activated = ?", true).Find(&countries).Error; err != nil {
 		return nil, err
 	}
-	defer cur.Close(ctx)
 
-	if err := cur.All(ctx, &countries); err != nil {
-		return nil, err
-	}
 	r.Logger.Infof("Repository GetAllCountries OK")
 	return countries, nil
 }

@@ -8,8 +8,11 @@ import (
 	"github.com/scuba13/AmacoonServices/config"
 
 	//"github.com/scuba13/AmacoonServices/config/migrate"
+
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
+	"github.com/scuba13/AmacoonServices/internal/catservice"
 	"github.com/scuba13/AmacoonServices/internal/cattery"
 	"github.com/scuba13/AmacoonServices/internal/color"
 	"github.com/scuba13/AmacoonServices/internal/country"
@@ -44,28 +47,47 @@ func main() {
 
 	// Connect to Mongo
 	mongo := setupMongo(cfg, logger)
+	//s3 := setupS3(cfg, logger)
 
-	//db:= setupDatabase(cfg, logger)
+	db := setupDatabase(cfg, logger)
+
+	db.AutoMigrate(&breed.Breed{},
+		&breed.BreedCompatibility{},
+		&color.Color{},
+		&country.Country{},
+		&owner.Owner{},
+		&federation.Federation{},
+		&cattery.Cattery{},
+		&title.Title{},
+		&cat.Cat{},
+		&cat.TitlesCat{},
+		&litter.Litter{},
+		&litter.KittenLitter{},
+		&transfer.Transfer{},
+		&titlerecognition.TitleRecognition{},
+		&titlerecognition.TitleData{},
+
+	)
+
+	//dbOld:= setupDatabaseOld(cfg, logger)
+
 	logger.Info("Inicio Migração")
 
-	//    migrate.InsertTitles(mongo)
-	//    migrate.PopulateCountries(db,mongo)
-	//    migrate.MigrateBreeds(db,mongo)
-	//    migrate.MigrateColors(db,mongo)
-	//    migrate.MigrateOwners(db,mongo)
-	//    migrate.MigrateFederations(db,mongo)
-	//    migrate.MigrateCattery(db,mongo)
-	//    migrate.UpdateOwnerIDInCattery(mongo, 80)
-
-	   //migrate.MigrateCats(db,mongo)
-	   //migrate.MigrateCatsPattentNameToCats1(db,mongo)
-	   //migrate.UpdateCatsWithParentIDs2(mongo)
-	   //migrate.UpdateCatsTempWithPattensIDs3(mongo)
+	//breed.MigrateBreeds(dbOld,db, logger)
+	//color.MigrateColors(dbOld,db, logger)
+	//country.MigrateCountries(dbOld,db, logger)
+	//title.InsertTitles(db, logger)
+	//owner.MigrateOwners(dbOld,db, logger)
+	//federation.MigrateFederations(dbOld,db, logger)
+	//cattery.MigrateCattery(dbOld,db, logger, 0.9)
+	//cat.MigrateCats(dbOld, db)
+	//cat.UpdateCatParents(dbOld, db)
+	//cat.PopulateCatAI(db, mongo)
 
 	logger.Info("Fim Migração")
 
 	// Initialize repositories, handlers, and routes
-	initializeApp(e, logger, mongo)
+	initializeApp(e, logger, db, mongo)
 
 	// Start server
 	logger.Info("Starting Server")
@@ -96,6 +118,17 @@ func setupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 	return db
 }
 
+func setupDatabaseOld(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
+	logger.Info("Connecting DB Old")
+	db, err := config.SetupDBOld(cfg)
+	if err != nil {
+		logger.Fatalf("Failed to initialize DB Old connection: %v", err)
+	}
+
+	logger.Info("Connected DB Old")
+	return db
+}
+
 func setupMongo(cfg *config.Config, logger *logrus.Logger) *mongo.Client {
 	logger.Info("Connecting Mongo")
 	db, err := config.SetupMongo(cfg)
@@ -106,26 +139,38 @@ func setupMongo(cfg *config.Config, logger *logrus.Logger) *mongo.Client {
 	return db
 }
 
-func initializeApp(e *echo.Echo, logger *logrus.Logger, mongo *mongo.Client) {
-	
+func setupS3(cfg *config.Config, logger *logrus.Logger) *s3.S3 {
+	logger.Info("Connecting S3")
+	db, err := config.SetupS3Session(cfg)
+	if err != nil {
+		logger.Fatalf("Failed to initialize s3 connection: %v", err)
+	}
+	logger.Info("Connected S3")
+	return db
+}
+
+func initializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, mongo *mongo.Client) {
+
 	// Initialize repositories
 	logger.Info("Initialize Repositories")
-	catRepo := cat.NewCatRepository(mongo, logger)
-	ownerRepo := owner.NewOwnerRepository(mongo, logger)
-	colorRepo := color.NewColorRepository(mongo, logger)
-	litterRepo := litter.NewLitterRepository(mongo, logger)
-	breedRepo := breed.NewBreedRepository(mongo, logger)
-	countryRepo := country.NewCountryRepository(mongo, logger)
-	transferepo := transfer.NewTransferRepository(mongo, logger)
-	catteryRepo := cattery.NewCatteryRepository(mongo, logger)
-	federationRepo := federation.NewFederationRepository(mongo, logger)
+	catRepo := cat.NewCatRepository(db, logger)
+	ownerRepo := owner.NewOwnerRepository(db, logger)
+	colorRepo := color.NewColorRepository(db, logger)
+	litterRepo := litter.NewLitterRepository(db, logger)
+	breedRepo := breed.NewBreedRepository(db, logger)
+	countryRepo := country.NewCountryRepository(db, logger)
+	transferepo := transfer.NewTransferRepository(db, logger)
+	catteryRepo := cattery.NewCatteryRepository(db, logger)
+	federationRepo := federation.NewFederationRepository(db, logger)
 	protocolRepo := utils.NewProtocolRepository(mongo, logger)
-	titleRepo := title.NewTitleRepository(mongo, logger)
-	titleRecognitionRepo:= titlerecognition.NewTitleRecognitionRepository(mongo, logger)
+	titleRepo := title.NewTitleRepository(db, logger)
+	titleRecognitionRepo := titlerecognition.NewTitleRecognitionRepository(db, logger)
+	catServiceRepo := catservice.NewCatServiceRepository(db, logger)
 	logger.Info("Initialize Repositories OK")
 
 	// Initialize services
 	logger.Info("Initialize Services")
+	//filesService := utils.NewFilesService(s3, logger)
 	protocolService := utils.NewProtocolService(protocolRepo, logger)
 	litterService := litter.NewLitterService(litterRepo, logger, protocolService)
 	transferService := transfer.NewTransferService(transferepo, logger, protocolService)
@@ -137,7 +182,8 @@ func initializeApp(e *echo.Echo, logger *logrus.Logger, mongo *mongo.Client) {
 	catteryService := cattery.NewCatteryService(catteryRepo, logger)
 	federationService := federation.NewCatteryService(federationRepo, logger)
 	titleService := title.NewTitleService(titleRepo, logger)
-	titleRecognitionService := titlerecognition.NewTitleRecognitionService(titleRecognitionRepo,logger,protocolService)
+	titleRecognitionService := titlerecognition.NewTitleRecognitionService(titleRecognitionRepo, logger, protocolService)
+	catServiceService := catservice.NewCatServiceService(catServiceRepo, logger)
 	logger.Info("Initialize Services OK")
 
 	// Initialize handlers
@@ -153,6 +199,7 @@ func initializeApp(e *echo.Echo, logger *logrus.Logger, mongo *mongo.Client) {
 	federationHandler := handler.NewFederationHandler(federationService, logger)
 	titleHandler := handler.NewTitleHandler(titleService, logger)
 	titleRecognitionHandler := handler.NewTitleRecognitionHandler(titleRecognitionService, logger)
+	catServiceHandler := handler.NewCatServiceHandler(catServiceService, logger)
 	logger.Info("Initialize Handlers OK")
 
 	// Initialize router and routes
@@ -160,7 +207,7 @@ func initializeApp(e *echo.Echo, logger *logrus.Logger, mongo *mongo.Client) {
 	routes.NewRouter(catHandler, ownerHandler, colorHandler,
 		litterHandler, breedHandler, countryHandler,
 		transferHandler, catteryHandler, federationHandler,
-		titleHandler, titleRecognitionHandler, logger, e)
+		titleHandler, titleRecognitionHandler, catServiceHandler, logger, e)
 	logger.Info("Initialize Router and Routes OK")
 
 }

@@ -1,13 +1,19 @@
 package cattery
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	
+	"gorm.io/gorm"
 )
 
-type CatteryMongo struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
-	Name        string             `bson:"name"`
-	BreederName string             `bson:"breederName"`
-	OwnerID     primitive.ObjectID `bson:"ownerID"`
-	CountryID   primitive.ObjectID `bson:"countryId"`
+type Cattery struct {
+	gorm.Model
+	Name        string
+	BreederName string
+	OwnerID          *uint                  `gorm:"foreignKey:OwnerID"`
+	CountryID        *uint                  `gorm:"foreignKey:CountryID"`
 }
+
+func (Cattery) TableName() string {
+    return "catteries"
+}
+

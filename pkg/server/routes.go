@@ -20,6 +20,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	federationHandler *handler.FederationHandler,
 	titleHandler *handler.TitleHandler,
 	titleRecognitionHandler *handler.TitleRecognitionHandler,
+	catServiceHandler *handler.CatServiceHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -40,6 +41,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupFederationRoutes(e, federationHandler)
 	setupTitlesRoutes(e, titleHandler)
 	setupTitleRecognitionRoutes(e, titleRecognitionHandler)
+	setupCatServiceRoutes(e, catServiceHandler)
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -62,9 +64,16 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	e.GET("/cats/:id", catHandler.GetCatsCompleteByID)
-	e.GET("/cats/:registration/registration", catHandler.GetCatCompleteByRegistration)
-	e.GET("/cats", catHandler.GetCatsByOwnerAndGender)
-	e.GET("/cats/:ownerId/owner", catHandler.GetAllByOwner)
+	// e.GET("/cats/:registration/registration", catHandler.GetCatCompleteByRegistration)
+	// e.GET("/cats", catHandler.GetCatsByOwnerAndGender)
+	// e.GET("/cats/:ownerId/owner", catHandler.GetAllByOwner)
+}
+
+func setupCatServiceRoutes(e *echo.Echo, catServiceHandler *handler.CatServiceHandler) {
+	e.GET("/catservice/:id", catServiceHandler.GetCatServiceByID)
+	// e.GET("/catservice/:registration/registration", catServiceHandler.GetCatServiceByRegistration)
+	// e.GET("/catservice", catServiceHandler.GetAllCatsServiceByOwnerAndGender)
+	// e.GET("/catservice/:ownerId/owner", catServiceHandler.GetAllCatsServiceByOwner)
 }
 
 func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
@@ -81,32 +90,27 @@ func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {
 func setupLitterRoutes(e *echo.Echo, litterHandler *handler.LitterHandler) {
 	e.POST("/litters", litterHandler.CreateLitter)
 	e.GET("/litters/:id", litterHandler.GetLitterByID)
+	e.PUT("/litters/:id", litterHandler.UpdateLitter)
 	e.PUT("/litters/:id/status", litterHandler.UpdateLitterStatus)
-	e.GET("/litters/:id/files", litterHandler.GetLitterFilesByID)
 	e.GET("/litters/:requesterID/requesterID", litterHandler.GetAllLittersByRequesterID)
-	e.PATCH("/litters/:id", litterHandler.UpdateLitter)
-	e.POST("/litters/:id/files", litterHandler.AddLitterFiles)
+
 }
 
 func setupTransferRoutes(e *echo.Echo, transferHandler *handler.TransferHandler) {
 	e.POST("/transfers", transferHandler.CreateTransfer)
 	e.GET("/transfers/:id", transferHandler.GetTransferByID)
+	e.PUT("/transfers/:id", transferHandler.UpdateTransfer)
 	e.PUT("/transfers/:id/status", transferHandler.UpdateTransferStatus)
 	e.GET("/transfers/:requesterID/requesterID", transferHandler.GetAllTransfersByRequesterID)
-	e.GET("/transfers/:id/files", transferHandler.GetTransferFilesByID)
-	e.POST("/transfers/:id/files", transferHandler.AddTransferFiles)
-	e.PUT("/transfers/:id", transferHandler.UpdateTransfer)
 }
 
 func setupTitleRecognitionRoutes(e *echo.Echo, titleRecognitionHandler *handler.TitleRecognitionHandler) {
 	e.POST("/titles-recognition", titleRecognitionHandler.CreateTitleRecognition)
 	e.GET("/titles-recognition/:id", titleRecognitionHandler.GetTitleRecognitionByID)
+	e.PUT("/titles-recognition/:id", titleRecognitionHandler.UpdateTitlesRecognition)
 	e.PUT("/titles-recognition/:id/status", titleRecognitionHandler.UpdateTitleRecognitionStatus)
 	e.GET("/titles-recognition/:requesterID/requesterID", titleRecognitionHandler.GetAllTitleRecognitionsByRequesterID)
-	e.GET("/titles-recognition/:id/files", titleRecognitionHandler.GetTitleRecognitionFilesByID)
-	e.POST("/titles-recognition/:id/files", titleRecognitionHandler.AddTitlesReconitionFiles)
-	e.PUT("/titles-recognition/:id", titleRecognitionHandler.UpdateTitlesRecognition)
-	}
+}
 
 func setupBreedRoutes(e *echo.Echo, breedHandler *handler.BreedHandler) {
 	e.GET("/breeds", breedHandler.GetAllBreeds)

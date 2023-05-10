@@ -17,7 +17,7 @@ func NewCatteryService(federationRepo *FederationRepository, logger *logrus.Logg
 	}
 }
 
-func (s *FederationService) GetAllFederations() ([]FederationMongo, error) {
+func (s *FederationService) GetAllFederations() ([]Federation, error) {
     s.Logger.Infof("Service GetAllFederations")
     federations, err := s.FederationRepo.GetAllFederations()
     if err != nil {
@@ -28,7 +28,7 @@ func (s *FederationService) GetAllFederations() ([]FederationMongo, error) {
     return federations, nil
 }
 
-func (s *FederationService) GetFederationByID(id string) (*FederationMongo, error) {
+func (s *FederationService) GetFederationByID(id string) (*Federation, error) {
 	s.Logger.Infof("Service GetFederationByID")
     cattery, err := s.FederationRepo.GetFederationByID(id)
 	if err != nil {

@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/spf13/viper"
 )
 
@@ -16,6 +18,8 @@ type Config struct {
 	MongoDBPort     string
 	MongoDBName     string
 	ServerPort      string
+	AwsAccessKeyId string
+	AwsSecretAccessKey string
 }
 
 func LoadConfig() *Config {
@@ -25,6 +29,7 @@ func LoadConfig() *Config {
 
 	err := viper.ReadInConfig()
 	if err != nil {
+		fmt.Println(err)
 		panic("Falha ao ler o arquivo de configuração")
 	}
 
@@ -40,5 +45,7 @@ func LoadConfig() *Config {
 		MongoDBPort:     viper.GetString("mongodb.port"),
 		MongoDBName:     viper.GetString("mongodb.name"),
 		ServerPort:      viper.GetString("server.port"),
+		AwsAccessKeyId: viper.GetString("aws.AwsAccessKeyId"),
+		AwsSecretAccessKey: viper.GetString("aws.awsSecretAccessKey"),
 	}
 }

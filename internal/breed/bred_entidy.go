@@ -1,19 +1,27 @@
 package breed
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"gorm.io/gorm"
 )
 
-type BreedMongo struct {
-	ID           primitive.ObjectID `bson:"_id,omitempty"`
-	BreedCode      string             `bson:"breedCode"`
-	BreedName    string             `bson:"breedName"`
-	BreedCategory int                `bson:"breedCategory"`
-	BreedByGroup string             `bson:"breedByGroup"`
+type Breed struct {
+	gorm.Model
+	BreedCode     string `gorm:"type:varchar(191);unique"`
+	BreedName     string
+	BreedCategory int
+	BreedByGroup  string
 }
 
-type BreedCompatibilityMongo struct {
-	ID     primitive.ObjectID `bson:"_id,omitempty"`
-	BreedCode1 string             `bson:"breedCode1"`
-	BreedCode2 string             `bson:"breedCode2"`
+func (Breed) TableName() string {
+	return "breeds"
+}
+
+type BreedCompatibility struct {
+	gorm.Model
+	BreedCode1 string
+	BreedCode2 string
+}
+
+func (BreedCompatibility) TableName() string {
+	return "breed_compatibilities"
 }

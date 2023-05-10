@@ -1,39 +1,31 @@
 package title
 
 import (
-	"context"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"fmt"
+
+	"gorm.io/gorm"
 	"github.com/sirupsen/logrus"
 )
 
 type TitleRepository struct {
-	Client *mongo.Client
+	DB     *gorm.DB
 	Logger *logrus.Logger
 }
 
-func NewTitleRepository(client *mongo.Client, logger *logrus.Logger) *TitleRepository {
+func NewTitleRepository(db *gorm.DB, logger *logrus.Logger) *TitleRepository {
 	return &TitleRepository{
-		Client: client,
+		DB:     db,
 		Logger: logger,
 	}
 }
 
-var database = "amacoon"
-var collection = "titles"
-
-func (r *TitleRepository) GetAllTitles() ([]TitleMongo, error) {
-
+func (r *TitleRepository) GetAllTitles() ([]Title, error) {
 	r.Logger.Infof("Repository GetAllTitles")
-	var titles []TitleMongo
-	cursor, err := r.Client.Database(database).Collection(collection).Find(context.Background(), bson.M{})
-	if err != nil {
-		return nil, err
-	}
-	if err = cursor.All(context.Background(), &titles); err != nil {
-		return nil, err
+	var titles []Title
+	result := r.DB.Find(&titles)
+	if result.Error != nil {
+		return nil, fmt.Errorf("error fetching titles: %v", result.Error)
 	}
 	r.Logger.Infof("Repository GetAllTitles OK")
 	return titles, nil
 }
-

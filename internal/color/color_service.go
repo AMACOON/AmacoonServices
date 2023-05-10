@@ -17,7 +17,7 @@ func NewColorService(colorRepo *ColorRepository, logger *logrus.Logger) *ColorSe
 	}
 }
 
-func (s *ColorService) GetAllColorsByBreed(breedCode string) ([]ColorMongo, error) {
+func (s *ColorService) GetAllColorsByBreed(breedCode string) ([]Color, error) {
 	s.Logger.Infof("GetAllColorsByBreed")
 	colors, err := s.ColorRepo.GetAllColorsByBreed(breedCode)
 	if err != nil {

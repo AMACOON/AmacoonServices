@@ -1,12 +1,16 @@
 package country
 
 import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
+    "gorm.io/gorm"
 )
 
-type CountryMongo struct {
-	ID           primitive.ObjectID `bson:"_id,omitempty"`
-	Code         string             `bson:"code"`
-	Name         string             `bson:"name"`
-	IsActivated  bool               `bson:"isActivated"`
+type Country struct {
+    gorm.Model
+    Code        string
+    Name        string
+    IsActivated bool
+}
+
+func (Country) TableName() string {
+    return "countries"
 }

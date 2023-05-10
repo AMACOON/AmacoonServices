@@ -1,154 +1,101 @@
 package titlerecognition
 
 import (
-	"context"
-
-	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 )
 
 type TitleRecognitionRepository struct {
-	DB     *mongo.Client
+	DB     *gorm.DB
 	Logger *logrus.Logger
 }
 
-func NewTitleRecognitionRepository(db *mongo.Client, logger *logrus.Logger) *TitleRecognitionRepository {
+func NewTitleRecognitionRepository(db *gorm.DB, logger *logrus.Logger) *TitleRecognitionRepository {
 	return &TitleRecognitionRepository{
 		DB:     db,
 		Logger: logger,
 	}
 }
 
-var database = "amacoon"
-var collection = "title_recognition"
+func (r *TitleRecognitionRepository) CreateTitleRecognition(titleRecognition TitleRecognition) (TitleRecognition, error) {
+	r.Logger.Infof("Repository CreateTitleRecognition")
 
-func (r *TitleRecognitionRepository) GetTitleRecognitionByID(id string) (TitleRecognitionMongo, error) {
-	r.Logger.Infof("Repository GetTitleRecognitionByID")
-	var titleRecognition TitleRecognitionMongo
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return TitleRecognitionMongo{}, err
+	// Start a new transaction
+	tx := r.DB.Begin()
+
+	// Rollback in case of an error
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Create the TitleRecognition record
+	if err := tx.Create(&titleRecognition).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Error("failed to create TitleRecognition")
+		return TitleRecognition{}, err
 	}
-	filter := bson.M{"_id": objID}
-	err = r.DB.Database(database).Collection(collection).FindOne(context.Background(), filter).Decode(&titleRecognition)
+
+	// If everything goes well, commit the transaction
+	tx.Commit()
+
+	r.Logger.Infof("Repository CreateTitleRecognition OK")
+	return titleRecognition, nil
+}
+
+func (r *TitleRecognitionRepository) GetTitleRecognitionByID(id uint) (TitleRecognition, error) {
+	r.Logger.Infof("Repository GetTitleRecognitionByID")
+	var titleRecognition TitleRecognition
+	
+	err := r.DB.Preload("Titles").First(&titleRecognition, id).Error
 	if err != nil {
-		return TitleRecognitionMongo{}, err
+		return TitleRecognition{}, err
 	}
 
 	r.Logger.Infof("Repository GetTitleRecognitionByID OK")
 	return titleRecognition, nil
 }
 
-func (r *TitleRecognitionRepository) CreateTitleRecognition(titleRecognition TitleRecognitionMongo) (TitleRecognitionMongo, error) {
-	r.Logger.Infof("Repository CreateTitleRecognition")
+func (r *TitleRecognitionRepository) UpdateTitleRecognition(id uint, titleRecognition TitleRecognition) error {
+	r.Logger.Infof("Repository UpdateTitleRecognition")
 
-	res, err := r.DB.Database(database).Collection(collection).InsertOne(context.Background(), titleRecognition)
+	err := r.DB.Model(&TitleRecognition{}).Where("id = ?", id).Updates(titleRecognition).Error
 	if err != nil {
-		return TitleRecognitionMongo{}, err
+		return err
 	}
 
-	titleRecognition.ID = res.InsertedID.(primitive.ObjectID)
-	r.Logger.Infof("Repository CreateTitleRecognition OK")
-	return titleRecognition, nil
+	r.Logger.Infof("Repository UpdateTitleRecognition OK")
+	return nil
 }
 
-func (r *TitleRecognitionRepository) UpdateTitleRecognitionStatus(id string, status string) error {
+
+func (r *TitleRecognitionRepository) UpdateTitleRecognitionStatus(id uint, status string) error {
 	r.Logger.Infof("Repository UpdateTitleRecognitionStatus")
 
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-	filter := bson.M{"_id": objID}
-	update := bson.M{"$set": bson.M{"status": status}}
-	_, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		return err
-	}
+	var titleRecognition TitleRecognition
+    result := r.DB.Model(&titleRecognition).Where("id = ?", id).Update("status", status)
+    if result.Error != nil {
+        return result.Error
+    }
 
 	r.Logger.Infof("Repository UpdateTitleRecognitionStatus OK")
 	return nil
 }
 
-func (r *TitleRecognitionRepository) AddTitleRecognitionFiles(id string, files []utils.Files) error {
-	r.Logger.Infof("Repository AddTitleRecognitionFiles id %s", id)
 
-	r.Logger.Infof("Repository AddTitleRecognitionFiles OK")
-	return nil
-}
 
-func (r *TitleRecognitionRepository) GetAllTitleRecognitionByRequesterID(requesterID string) ([]TitleRecognitionMongo, error) {
+func (r *TitleRecognitionRepository) GetAllTitleRecognitionByRequesterID(requesterID string) ([]TitleRecognition, error) {
 	r.Logger.Infof("Repository GetAllTitlesByRequesterID")
-	objID, err := primitive.ObjectIDFromHex(requesterID)
-	if err != nil {
+	var titlesRecognition []TitleRecognition
+	if err := r.DB.Where("requester_id = ?", requesterID).Find(&titlesRecognition).Error; err != nil {
 		return nil, err
 	}
-	filter := bson.M{"requesterID": objID}
-	cur, err := r.DB.Database(database).Collection(collection).Find(context.Background(), filter)
-	if err != nil {
-		return nil, err
-	}
-	defer cur.Close(context.Background())
-	var titles []TitleRecognitionMongo
-	for cur.Next(context.Background()) {
-		var title TitleRecognitionMongo
-		err := cur.Decode(&title)
-		if err != nil {
-			return nil, err
-		}
-		titles = append(titles, title)
-	}
-	if err := cur.Err(); err != nil {
-		return nil, err
-	}
+
 	r.Logger.Infof("Repository GetAllTitlesByRequesterID OK")
-	return titles, nil
+	return titlesRecognition, nil
 }
 
-func (r *TitleRecognitionRepository) GetTitleRecognitionFilesByID(id string) ([]utils.Files, error) {
-	r.Logger.Infof("Repository GetTitleRecognitionFilesByID")
-
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		r.Logger.Errorf("error parsing id to ObjectID: %v", err)
-		return nil, err
-	}
-	filter := bson.M{"_id": objID}
-	result := r.DB.Database(database).Collection(collection).FindOne(context.Background(), filter)
-	if err := result.Err(); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, nil
-		}
-		return nil, err
-	}
-	var titleRecognition TitleRecognitionMongo
-	if err := result.Decode(&titleRecognition); err != nil {
-		return nil, err
-	}
-	r.Logger.Infof("Repository GetTitleRecognitionFilesByID OK")
-	return titleRecognition.Files, nil
-}
-
-func (r *TitleRecognitionRepository) UpdateTitleRecognition(id string, titleRecognition TitleRecognitionMongo) error {
-	r.Logger.Infof("Repository UpdateTitleRecognition")
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		r.Logger.Errorf("error parsing id to ObjectID: %v", err)
-		return err
-	}
-
-	filter := bson.M{"_id": objID}
-	update := bson.M{"$set": titleRecognition}
-	_, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		return err
-	}
-	r.Logger.Infof("Repository UpdateTitleRecognition OK")
-	return nil
-}
 
 
 

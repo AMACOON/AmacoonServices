@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/scuba13/AmacoonServices/internal/breed"
+	"strconv"
 )
 
 type BreedHandler struct {
@@ -40,18 +41,22 @@ func (h *BreedHandler) GetBreedByID(c echo.Context) error {
 
 	// Log de entrada da função
 	h.Logger.Infof("Handler GetBreedByID")
-	id := c.Param("id")
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to parse Breed ID")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid Breed ID")
+	}
 
 	h.Logger.WithFields(logrus.Fields{
 		"id": id,
-	}).Info("Getting Brred by ID")
+	}).Info("Getting Breed by ID")
 
-	breed, err := h.BreedService.GetBreedByID(id)
+	breed, err := h.BreedService.GetBreedByID(uint(id))
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to get Breed by ID")
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	
+
 	if breed == nil {
 		h.Logger.WithFields(logrus.Fields{
 			"id": id,
@@ -63,4 +68,3 @@ func (h *BreedHandler) GetBreedByID(c echo.Context) error {
 	h.Logger.Infof("Handler GetBreedByID OK")
 	return c.JSON(http.StatusOK, breed)
 }
-

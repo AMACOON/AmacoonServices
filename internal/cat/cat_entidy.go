@@ -3,36 +3,58 @@ package cat
 import (
 	"time"
 
-	"github.com/scuba13/AmacoonServices/internal/utils"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/scuba13/AmacoonServices/internal/breed"
+	"github.com/scuba13/AmacoonServices/internal/cattery"
+	"github.com/scuba13/AmacoonServices/internal/color"
+	"github.com/scuba13/AmacoonServices/internal/country"
+	"github.com/scuba13/AmacoonServices/internal/federation"
+	"github.com/scuba13/AmacoonServices/internal/owner"
+	"gorm.io/gorm"
 )
 
-type CatMongo struct {
-	ID               primitive.ObjectID `bson:"_id,omitempty"`
-	Name             string             `bson:"name"`
-	Registration     string             `bson:"registration"`
-	RegistrationType string             `bson:"registrationType"`
-	Microchip        string             `bson:"microchip"`
-	Gender           string             `bson:"gender"`
-	Birthdate        time.Time          `bson:"birthdate"`
-	Neutered         bool               `bson:"neutered"`
-	Validated        bool               `bson:"validated"`
-	Observation      string             `bson:"observation"`
-	Fifecat          bool               `bson:"fifecat"`
-	Titles           []TitlesCatsMongo  `bson:"titles"`
-	FederationID     primitive.ObjectID `bson:"federationId"`
-	BreedID          primitive.ObjectID `bson:"breedId"`
-	ColorID          primitive.ObjectID `bson:"colorId"`
-	FatherID         primitive.ObjectID `bson:"fatherId"`
-	MotherID         primitive.ObjectID `bson:"motherId"`
-	CatteryID        primitive.ObjectID `bson:"catteryId"`
-	OwnerID          primitive.ObjectID `bson:"ownerId"`
-	CountryID        primitive.ObjectID `bson:"countryId"`
-	Files            []utils.Files      `bson:"files"`
+type Cat struct {
+	gorm.Model
+	Name             string                 `gorm:"column:name"`
+	Registration     string                 `gorm:"column:registration"`
+	RegistrationType string                 `gorm:"column:registration_type"`
+	Microchip        string                 `gorm:"column:microchip"`
+	Gender           string                 `gorm:"column:gender"`
+	Birthdate        time.Time              `gorm:"column:birthdate"`
+	Neutered         bool                   `gorm:"column:neutered"`
+	Validated        bool                   `gorm:"column:validated"`
+	Observation      string                 `gorm:"column:observation"`
+	Fifecat          bool                   `gorm:"column:fifecat"`
+	MotherID         *uint                  `gorm:"column:mother_id"`
+	MotherName       string                 `gorm:"-"`
+	FatherID         *uint                  `gorm:"column:father_id"`
+	FatherName       string                 `gorm:"-"`
+	FederationID     *uint                  `gorm:"column:federation_id"`
+	Federation       *federation.Federation `gorm:"foreignKey:FederationID"`
+	BreedID          *uint                  `gorm:"column:breed_id"`
+	Breed            *breed.Breed           `gorm:"foreignKey:BreedID"`
+	ColorID          *uint                  `gorm:"column:color_id"`
+	Color            *color.Color           `gorm:"foreignKey:ColorID"`
+	CatteryID        *uint                  `gorm:"column:cattery_id"`
+	Cattery          *cattery.Cattery       `gorm:"foreignKey:CatteryID"`
+	OwnerID          *uint                  `gorm:"column:owner_id"`
+	Owner            *owner.Owner           `gorm:"foreignKey:OwnerID"`
+	CountryID        *uint                  `gorm:"column:country_id"`
+	Country          *country.Country       `gorm:"foreignKey:CountryID"`
+	//Files            []utils.Files
 }
 
-type TitlesCatsMongo struct {
-	TitleID      primitive.ObjectID `bson:"id"`
-	Date         time.Time          `bson:"date"`
-	FederationID primitive.ObjectID `bson:"federationId"`
+func (Cat) TableName() string {
+	return "cats"
+}
+
+type TitlesCat struct {
+	gorm.Model
+	CatID        uint
+	TitleID      uint `gorm:"foreignkey:TitleID"`
+	Date         time.Time
+	FederationID uint `gorm:"foreignkey:FederationID"`
+}
+
+func (TitlesCat) TableName() string {
+	return "titles_cats"
 }
