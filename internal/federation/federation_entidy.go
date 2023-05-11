@@ -16,4 +16,3 @@ type Federation struct {
 func (Federation) TableName() string {
 	return "federations"
 }
-

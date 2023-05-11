@@ -28,8 +28,9 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 		Preload("Color").
 		Preload("Cattery").
 		Preload("Country").
-		Preload("Owner").
+		Preload("Owner.Country").
 		Preload("Federation").
+		Preload("Titles.Titles").
 		Where("id = ?", id).First(&cat)
 
 	if cat.FatherID != nil {

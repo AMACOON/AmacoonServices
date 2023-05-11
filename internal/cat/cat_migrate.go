@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/gorm"
 	"errors"
+	"fmt"
 )
 
 const batchSize = 200
@@ -143,6 +144,9 @@ func MigrateCats(dbOld *gorm.DB, dbNew *gorm.DB) {
 				CatteryID:        catteryID,
 				OwnerID:          uintPtr(ownerID),
 				CountryID:        countryID,
+				FatherNameTemp:   cleanParentName(cat.FatherName),
+				MotherNameTemp:   cleanParentName(cat.MotherName),
+
 			}
 
 			result = dbNew.Create(&catGorm)
@@ -167,64 +171,64 @@ func MigrateCats(dbOld *gorm.DB, dbNew *gorm.DB) {
 	log.Printf("%d cats have no title.\n", len(noTitleCats))
 }
 
-func UpdateCatParents(dbOld *gorm.DB, dbNew *gorm.DB) error {
-    // 1. Consulte todos os gatos na tabela de origem (gatos)
-    var catTables []CatTable
-    result := dbOld.Unscoped().Find(&catTables)
+func UpdateCatParents(db *gorm.DB) error {
+    // 1. Consulte todos os gatos na tabela
+    var cats []Cat
+    result := db.Find(&cats)
     if result.Error != nil {
         return result.Error
     }
 
-    // 2. Itere sobre todos os gatos e atualize os IDs dos pais na tabela de destino (cats)
-    for _, catTable := range catTables {
-        cleanedFatherName := cleanParentName(catTable.FatherName)
-        cleanedMotherName := cleanParentName(catTable.MotherName)
+    count := 0 // Inicialize o contador
 
+    // 2. Itere sobre todos os gatos e atualize os IDs dos pais na tabela
+    for _, cat := range cats {
         // Busque o ID do pai e da mãe na tabela cats usando os nomes limpos
         var fatherID, motherID *uint
-        if cleanedFatherName != "" {
+        if cat.FatherNameTemp != "" {
             var father Cat
-            result := dbNew.Where("name = ?", cleanedFatherName).First(&father)
+            result := db.Where("name LIKE ?", "%" + cat.FatherNameTemp + "%").First(&father)
             if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
                 return result.Error
             }
             fatherID = &father.ID
         }
 
-        if cleanedMotherName != "" {
+        if cat.MotherNameTemp != "" {
             var mother Cat
-            result := dbNew.Where("name = ?", cleanedMotherName).First(&mother)
+            result := db.Where("name LIKE ?", "%" + cat.MotherNameTemp + "%").First(&mother)
             if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
                 return result.Error
             }
             motherID = &mother.ID
         }
 
-        // Atualize o registro na tabela cats com os IDs dos pais
-        var cat Cat
-        result = dbNew.First(&cat, catTable.CatID)
-        if result.Error != nil {
-            return result.Error
-        }
+        // Atualize o registro correspondente na tabela cats com os IDs dos pais
+        if fatherID != nil || motherID != nil {
+            if fatherID != nil {
+                cat.FatherID = fatherID
+            }
+            if motherID != nil {
+                cat.MotherID = motherID
+            }
+            result = db.Save(&cat)
+            if result.Error != nil {
+                return result.Error
+            }
 
-        if fatherID != nil {
-            catFatherID := uint(*fatherID)
-            cat.FatherID = &catFatherID
-        }
-
-        if motherID != nil {
-            catMotherID := uint(*motherID)
-            cat.MotherID = &catMotherID
-        }
-
-        result = dbNew.Save(&cat)
-        if result.Error != nil {
-            return result.Error
+            count++ // Incremente o contador
         }
     }
 
+    fmt.Printf("Número de gatos atualizados: %d\n", count) // Imprime o contador
+
     return nil
 }
+
+
+
+
+
 
 
 

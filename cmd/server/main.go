@@ -81,7 +81,7 @@ func main() {
 	//federation.MigrateFederations(dbOld,db, logger)
 	//cattery.MigrateCattery(dbOld,db, logger, 0.9)
 	//cat.MigrateCats(dbOld, db)
-	//cat.UpdateCatParents(dbOld, db)
+	//cat.UpdateCatParents(db)
 	//cat.PopulateCatAI(db, mongo)
 
 	logger.Info("Fim Migração")

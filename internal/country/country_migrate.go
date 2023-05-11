@@ -32,7 +32,7 @@ func MigrateCountries(dbOld, dbNew *gorm.DB, logger *logrus.Logger) error {
         c := Country{
             Code:        country.CountryCode,
             Name:        country.CountryName,
-            IsActivated: country.Activate == "S",
+            IsActivated: country.Activate == "s",
         }
         var count int64
         dbNew.Model(&Country{}).Where("code = ?", c.Code).Count(&count)

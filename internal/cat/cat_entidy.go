@@ -9,6 +9,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/country"
 	"github.com/scuba13/AmacoonServices/internal/federation"
 	"github.com/scuba13/AmacoonServices/internal/owner"
+	"github.com/scuba13/AmacoonServices/internal/title"
 	"gorm.io/gorm"
 )
 
@@ -40,6 +41,9 @@ type Cat struct {
 	Owner            *owner.Owner           `gorm:"foreignKey:OwnerID"`
 	CountryID        *uint                  `gorm:"column:country_id"`
 	Country          *country.Country       `gorm:"foreignKey:CountryID"`
+	Titles           []TitlesCat            `gorm:"foreignKey:CatID"`
+	FatherNameTemp   string                 
+	MotherNameTemp   string
 	//Files            []utils.Files
 }
 
@@ -50,7 +54,8 @@ func (Cat) TableName() string {
 type TitlesCat struct {
 	gorm.Model
 	CatID        uint
-	TitleID      uint `gorm:"foreignkey:TitleID"`
+	TitleID      uint
+	Titles       *title.Title `gorm:"foreignkey:TitleID"`
 	Date         time.Time
 	FederationID uint `gorm:"foreignkey:FederationID"`
 }

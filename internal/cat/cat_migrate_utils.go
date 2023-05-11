@@ -146,6 +146,8 @@ func cleanParentName(name string) string {
 	// Remover a vírgula e o asterisco
 	name = strings.ReplaceAll(name, ",", "")
 	name = strings.ReplaceAll(name, "*", "")
+	name = strings.ReplaceAll(name, "\\", "")
+
 
 	// Converter a string para minúsculas
 	name = strings.ToLower(name)
@@ -193,6 +195,8 @@ func cleanParentName(name string) string {
 	// Remover espaços extras entre as palavras
 	space := regexp.MustCompile(`\s+`)
 	cleanedName = space.ReplaceAllString(cleanedName, " ")
+	
+
 
 	return cleanedName
 }
