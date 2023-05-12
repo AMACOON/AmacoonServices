@@ -13,18 +13,20 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v2
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Install lightsailctl
+      run: |
+        curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "lightsailctl"
+        chmod +x lightsailctl
+        sudo mv lightsailctl /usr/local/bin/
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        push: true
-        tags: scuba13/amacoon_service:latest
+    - name: Build Docker image
+      run: docker build -t amacoon-service .
+
+    - name: Push Docker image to Lightsail
+      run: |
+        aws lightsail push-container-image --service-name amacoon \
+        --label amacoon-service \
+        --image amacoon-service
 
     - name: Trigger Deploy to AWS Lightsail
       uses: peter-evans/repository-dispatch@v1
