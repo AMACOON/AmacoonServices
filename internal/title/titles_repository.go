@@ -1,26 +1,31 @@
-// This file is a repository for the title entity.
-// Make a function that returns a list of all titles by type.
-// Path: internal/title/titles_repository.go.
- 
 package title
 
 import (
-	"context"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
+	"fmt"
+
+	"gorm.io/gorm"
+	"github.com/sirupsen/logrus"
 )
 
-
-
-func GetAllTitlesByType(client *mongo.Client) ([]TitlesMongo, error) {
-	var titles []TitlesMongo
-	cursor, err := client.Database("amacoon").Collection("titles").Find(context.Background(), bson.M{})
-	if err != nil {
-		return nil, err
-	}
-	if err = cursor.All(context.Background(), &titles); err != nil {
-		return nil, err
-	}
-	return titles, nil
+type TitleRepository struct {
+	DB     *gorm.DB
+	Logger *logrus.Logger
 }
 
+func NewTitleRepository(db *gorm.DB, logger *logrus.Logger) *TitleRepository {
+	return &TitleRepository{
+		DB:     db,
+		Logger: logger,
+	}
+}
+
+func (r *TitleRepository) GetAllTitles() ([]Title, error) {
+	r.Logger.Infof("Repository GetAllTitles")
+	var titles []Title
+	result := r.DB.Find(&titles)
+	if result.Error != nil {
+		return nil, fmt.Errorf("error fetching titles: %v", result.Error)
+	}
+	r.Logger.Infof("Repository GetAllTitles OK")
+	return titles, nil
+}

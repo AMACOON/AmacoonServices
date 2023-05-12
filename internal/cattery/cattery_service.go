@@ -17,7 +17,7 @@ func NewCatteryService(catteryRepo *CatteryRepository, logger *logrus.Logger) *C
 	}
 }
 
-func (s *CatteryService) GetAllCatteries() ([]CatteryMongo, error) {
+func (s *CatteryService) GetAllCatteries() ([]Cattery, error) {
     s.Logger.Infof("Service GetAllCatteries")
     catteries, err := s.CatteryRepo.GetAllCatteries()
     if err != nil {
@@ -28,7 +28,7 @@ func (s *CatteryService) GetAllCatteries() ([]CatteryMongo, error) {
     return catteries, nil
 }
 
-func (s *CatteryService) GetCatteryByID(id string) (*CatteryMongo, error) {
+func (s *CatteryService) GetCatteryByID(id string) (*Cattery, error) {
 	s.Logger.Infof("Service GetCatteryByID")
     cattery, err := s.CatteryRepo.GetCatteryByID(id)
 	if err != nil {

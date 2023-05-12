@@ -1,62 +1,47 @@
 package cattery
 
 import (
-	"context"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 )
 
 type CatteryRepository struct {
-	DB     *mongo.Client
+	DB     *gorm.DB
 	Logger *logrus.Logger
 }
 
-func NewCatteryRepository(db *mongo.Client, logger *logrus.Logger) *CatteryRepository {
+func NewCatteryRepository(db *gorm.DB, logger *logrus.Logger) *CatteryRepository {
 	return &CatteryRepository{
 		DB:     db,
 		Logger: logger,
 	}
 }
 
-var database = "amacoon"
-var collection = "catteries"
-
-func (r *CatteryRepository) GetCatteryByID(id string) (*CatteryMongo, error) {
+func (r *CatteryRepository) GetCatteryByID(id string) (*Cattery, error) {
 	r.Logger.Infof("Repository GetCatteryByID")
-	objID, err := primitive.ObjectIDFromHex(id)
+	uintID, err := strconv.ParseUint(id, 10, 64)
 	if err != nil {
 		r.Logger.WithError(err).Errorf("invalid id: %s", id)
 		return nil, err
-
 	}
-	filter := bson.M{"_id": objID}
-	var cattery CatteryMongo
-	err = r.DB.Database(database).Collection(collection).FindOne(context.Background(), filter).Decode(&cattery)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			r.Logger.WithError(err).Errorf("breed not found")
-			return nil, err
-		}
+	var cattery Cattery
+	if err := r.DB.First(&cattery, uintID).Error; err != nil {
+		r.Logger.WithError(err).Errorf("failed to get cattery with ID %s", id)
 		return nil, err
 	}
-	r.Logger.Infof("Repository GetBreedByID OK")
+	r.Logger.Infof("Repository GetCatteryByID OK")
 	return &cattery, nil
 }
 
-func (r *CatteryRepository) GetAllCatteries() ([]CatteryMongo, error) {
-    r.Logger.Infof("Repository GetAllCatteries")
-	var federations []CatteryMongo
-    cursor, err := r.DB.Database(database).Collection(collection).Find(context.Background(), bson.M{})
-    if err != nil {
-        return nil, err
-    }
-    if err = cursor.All(context.Background(), &federations); err != nil {
-        r.Logger.WithError(err).Errorf("error with cursor: %v", err)
+func (r *CatteryRepository) GetAllCatteries() ([]Cattery, error) {
+	r.Logger.Infof("Repository GetAllCatteries")
+	var catteries []Cattery
+	if err := r.DB.Find(&catteries).Error; err != nil {
+		r.Logger.WithError(err).Errorf("failed to get all catteries")
 		return nil, err
-    }
+	}
 	r.Logger.Infof("Repository GetAllCatteries OK")
-    return federations, nil
+	return catteries, nil
 }

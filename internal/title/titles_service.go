@@ -1,21 +1,33 @@
- package title
+package title
 
+import (
+	
+	"github.com/sirupsen/logrus"
+)
 
+type TitleService struct {
+	TitleRepo *TitleRepository
+	Logger        *logrus.Logger
+}
 
-// func getFullName(cat Cat) string {
-// 	var prefix, suffix string
+func NewTitleService(titleRepo *TitleRepository, logger *logrus.Logger) *TitleService {
+	return &TitleService{
+		TitleRepo: titleRepo,
+		Logger:       logger,
+	}
+}
 
-// 	for _, title := range cat.Titles {
-// 		if title.Type == "Championship/Premiorship Titles" {
-// 			prefix += title.Code + " "
-// 		} else if title.Type == "Winner Titles" {
-// 			prefix += title.Code + " " + title.Date.Format("2006") + " "
-// 		} else if title.Type == "Merit Titles" {
-// 			suffix += " " + title.Code
-// 		}
-// 	}
+func (s *TitleService) GetAllTitles() ([]Title, error) {
+	s.Logger.Infof("Service GetAllTitles")
+	
+	titles, err := s.TitleRepo.GetAllTitles()
+	if err != nil {
+		s.Logger.WithError(err).Error("Failed to get all countries")
+		return nil, err
+	}
+	s.Logger.Infof("Service GetAllTitles OK")
+	return titles, nil
+}
 
-// 	return prefix + cat.Name + suffix
-// }
 
 

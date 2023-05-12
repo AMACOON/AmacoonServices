@@ -1,9 +1,9 @@
 db:
-  username: amacoon001_add1
-  password: armin013
+  username: catclubsystem
+  password: 2010mainecoon2010
   host: mysql.catclubsystem.com
   port: 3306
-  name: amacoon01
+  name: catclubsystem
 mongodb:
   username: amacoonservice
   password: 2010mainecoon2010

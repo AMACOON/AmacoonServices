@@ -1,39 +1,53 @@
 package litter
 
 import (
-	"context"
-
-	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"gorm.io/gorm"
 )
 
 type LitterRepository struct {
-	DB     *mongo.Client
+	DB     *gorm.DB
 	Logger *logrus.Logger
 }
 
-func NewLitterRepository(db *mongo.Client, logger *logrus.Logger) *LitterRepository {
+func NewLitterRepository(db *gorm.DB, logger *logrus.Logger) *LitterRepository {
 	return &LitterRepository{
 		DB:     db,
 		Logger: logger,
 	}
 }
 
-var database = "amacoon"
-var collection = "litters"
+func (r *LitterRepository) CreateLitter(litter Litter) (Litter, error) {
+	r.Logger.Infof("Repository CreateLitter")
 
-func (r *LitterRepository) GetLitterByID(id string) (Litter, error) {
-	r.Logger.Infof("Repository GetLitterByID")
-	var litter Litter
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
+	// Start a new transaction
+	tx := r.DB.Begin()
+
+	// Rollback in case of an error
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Create the Litter record
+	if err := tx.Create(&litter).Error; err != nil {
+		tx.Rollback()
 		return Litter{}, err
 	}
-	filter := bson.M{"_id": objID}
-	err = r.DB.Database(database).Collection(collection).FindOne(context.Background(), filter).Decode(&litter)
+
+	// If everything goes well, commit the transaction
+	tx.Commit()
+
+	r.Logger.Infof("Repository CreateLitter OK")
+	return litter, nil
+}
+
+func (r *LitterRepository) GetLitterByID(id uint) (Litter, error) {
+	r.Logger.Infof("Repository GetLitterByID")
+	var litter Litter
+	
+	err := r.DB.Preload("KittenData").First(&litter, id).Error
 	if err != nil {
 		return Litter{}, err
 	}
@@ -42,126 +56,44 @@ func (r *LitterRepository) GetLitterByID(id string) (Litter, error) {
 	return litter, nil
 }
 
-func (r *LitterRepository) CreateLitter(litter Litter) (Litter, error) {
-	r.Logger.Infof("Repository CreateLitter")
-		
-		res, err := r.DB.Database(database).Collection(collection).InsertOne(context.Background(), litter)
-		if err != nil {
-			return Litter{}, err
-		}
-	
-		litter.ID = res.InsertedID.(primitive.ObjectID)
-	r.Logger.Infof("Repository CreateLitter OK")
-	return litter, nil
-}
+func (r *LitterRepository) UpdateLitter(id uint, litter Litter) error {
+    r.Logger.Infof("Repository UpdateLitter")
+    litter.ID = id
 
-func (r *LitterRepository) UpdateLitterStatus(id string, status string) error {
-	r.Logger.Infof("Repository UpdateLitterStatus")
-
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
-	filter := bson.M{"_id": objID}
-	update := bson.M{"$set": bson.M{"status": status}}
-	_, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		return err
-	}
-
-	r.Logger.Infof("Repository UpdateLitterStatus OK")
-	return nil
-}
-
-func (r *LitterRepository) AddLitterFiles(id string, files []utils.Files) error {
-    r.Logger.Infof("Repository AddLitterFiles id %s", id)
-    objID, err := primitive.ObjectIDFromHex(id)
-    if err != nil {
+    if err := r.DB.Save(&litter).Error; err != nil {
+        r.Logger.Errorf("error updating litter: %v", err)
         return err
     }
 
-    // Atribui um novo ObjectID a cada arquivo
-    for i := range files {
-        files[i].ID = primitive.NewObjectID()
-    }
-
-    filter := bson.M{"_id": objID}
-    update := bson.M{"$push": bson.M{"files": bson.M{"$each": files}}}
-    _, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
-    if err != nil {
-        return err
-    }
-    r.Logger.Infof("Repository AddLitterFiles OK")
+    r.Logger.Infof("Repository UpdateLitter OK")
     return nil
 }
 
+func (r *LitterRepository) UpdateLitterStatus(id uint, status string) error {
+    r.Logger.Infof("Repository UpdateLitterStatus")
+    
+    err := r.DB.Model(&Litter{}).Where("id = ?", id).Update("status", status).Error
+    if err != nil {
+        return err
+    }
+    
+    r.Logger.Infof("Repository UpdateLitterStatus OK")
+    return nil
+}
 
-func (r *LitterRepository) GetAllLittersByRequesterID(ownerID string) ([]Litter, error) {
+func (r *LitterRepository) GetAllLittersByRequesterID(requesterID uint) ([]Litter, error) {
 	r.Logger.Infof("Repository GetAllLittersByRequesterID")
-	objID, err := primitive.ObjectIDFromHex(ownerID)
-	if err != nil {
-		return nil, err
-	}
-	filter := bson.M{"requesterID": objID}
-	cur, err := r.DB.Database(database).Collection(collection).Find(context.Background(), filter)
-	if err != nil {
-		return nil, err
-	}
-	defer cur.Close(context.Background())
+
 	var litters []Litter
-	for cur.Next(context.Background()) {
-		var litter Litter
-		err := cur.Decode(&litter)
-		if err != nil {
-			return nil, err
-		}
-		litters = append(litters, litter)
-	}
-	if err := cur.Err(); err != nil {
+	if err := r.DB.Where("requester_id = ?", requesterID).Find(&litters).Error; err != nil {
 		return nil, err
 	}
+
 	r.Logger.Infof("Repository GetAllLittersByRequesterID OK")
 	return litters, nil
 }
 
-func (r *LitterRepository) GetLitterFilesByID(id string) ([]utils.Files, error) {
-	r.Logger.Infof("Repository GetLitterFilesByID")
 
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		r.Logger.Errorf("error parsing id to ObjectID: %v", err)
-		return nil, err
-	}
-	filter := bson.M{"_id": objID}
-	result := r.DB.Database(database).Collection(collection).FindOne(context.Background(), filter)
-	if err := result.Err(); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, nil
-		}
-		return nil, err
-	}
-	var litter Litter
-	if err := result.Decode(&litter); err != nil {
-		return nil, err
-	}
-	r.Logger.Infof("Repository GetLitterFilesByID OK")
-	return litter.Files, nil
-}
 
-func (r *LitterRepository) UpdateLitter(id string, litter Litter) error {
-	r.Logger.Infof("Repository UpdateLitter")
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		r.Logger.Errorf("error parsing id to ObjectID: %v", err)
-		return err
-	}
 
-	filter := bson.M{"_id": objID}
-	update := bson.M{"$set": litter}
-	_, err = r.DB.Database(database).Collection(collection).UpdateOne(context.Background(), filter, update)
-	if err != nil {
-		return err
-	}
-	r.Logger.Infof("Repository UpdateLitter OK")
-	return nil
-}
+

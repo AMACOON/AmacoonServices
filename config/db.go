@@ -6,17 +6,11 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"context"
 	"time"
-	
-
+	"github.com/sirupsen/logrus"
 )
 
-func SetupDB(config *Config) (*gorm.DB, error) {
-	
+func SetupDB(config *Config, logger *logrus.Logger) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.DBUsername,
 		config.DBPassword,
@@ -24,44 +18,58 @@ func SetupDB(config *Config) (*gorm.DB, error) {
 		config.DBPort,
 		config.DBName,
 	)
-	
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+
+	var db *gorm.DB
+	var err error
+
+	for retries := 5; retries >= 0; retries-- {
+		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		if err == nil {
+			break
+		}
+
+		logger.Warnf("Failed to connect to database: %v", err)
+
+		if retries > 0 {
+			logger.Infof("Retrying in 5 seconds...")
+			time.Sleep(time.Second * 5)
+		}
 	}
-	
+
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	// Set pool configurations (you can adjust these numbers based on your application's needs)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
 	return db, nil
 }
 
-func SetupMongo(config *Config) (*mongo.Client, error) {
-	// Define a string de conexão com o MongoDB
-	mongoURI := fmt.Sprintf("mongodb://%s:%s@%s:%s/%s",
-		config.MongoDBUsername,
-		config.MongoDBPassword,
-		config.MongoDBHost,
-		config.MongoDBPort,
-		config.MongoDBName,
+
+
+func SetupDBOld(config *Config) (*gorm.DB, error) {
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		"amacoon001_add1",
+		"armin013",
+		config.DBHost,
+		config.DBPort,
+		"amacoon01",
 	)
 
-
-	// Define as opções de conexão com o MongoDB
-	opts := options.Client().ApplyURI(mongoURI)
-
-	// Cria um contexto com timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Conecta ao MongoDB
-	client, err := mongo.Connect(ctx, opts)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
+		log.Fatalf("failed to connect to database: %v", err)
+		
 	}
 
-	// Testa a conexão com o MongoDB
-	if err := client.Ping(ctx, nil); err != nil {
-		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
-	}
-
-	return client, nil
+	return db, nil
 }
-
