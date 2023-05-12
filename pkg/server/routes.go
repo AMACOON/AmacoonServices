@@ -30,6 +30,7 @@ func NewRouter(catHandler *handler.CatHandler,
 
 	e.HTTPErrorHandler = customHTTPErrorHandler
 
+	setupHealthChecks(e)
 	setupCatRoutes(e, catHandler)
 	setupOwnerRoutes(e, ownerHandler)
 	setupColorRoutes(e, colorHandler)
@@ -61,6 +62,13 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 		c.Logger().Error(err)
 	}
 }
+
+func setupHealthChecks(e *echo.Echo) {
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	})
+}
+
 
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	catGroup := e.Group("/cats")
