@@ -1,6 +1,6 @@
 module github.com/scuba13/AmacoonServices
 
-go 1.20
+go 1.19
 
 require (
 	github.com/agext/levenshtein v1.2.3
