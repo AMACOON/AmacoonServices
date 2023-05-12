@@ -6,9 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/scuba13/AmacoonServices/config"
-
-	//"github.com/scuba13/AmacoonServices/config/migrate"
-
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
@@ -66,7 +63,7 @@ func main() {
 		&transfer.Transfer{},
 		&titlerecognition.TitleRecognition{},
 		&titlerecognition.TitleData{},
-
+		&utils.Protocol{},
 	)
 
 	//dbOld:= setupDatabaseOld(cfg, logger)
@@ -162,7 +159,7 @@ func initializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, mongo *mong
 	transferepo := transfer.NewTransferRepository(db, logger)
 	catteryRepo := cattery.NewCatteryRepository(db, logger)
 	federationRepo := federation.NewFederationRepository(db, logger)
-	protocolRepo := utils.NewProtocolRepository(mongo, logger)
+	protocolRepo := utils.NewProtocolRepository(db, logger)
 	titleRepo := title.NewTitleRepository(db, logger)
 	titleRecognitionRepo := titlerecognition.NewTitleRecognitionRepository(db, logger)
 	catServiceRepo := catservice.NewCatServiceRepository(db, logger)

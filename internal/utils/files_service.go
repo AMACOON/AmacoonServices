@@ -37,7 +37,7 @@ func (s *FilesService) SaveFiles(protocolNumber string, files []*multipart.FileH
 		defer src.Close()
 
 		fileName := file.Filename
-		filePath := filepath.Join("uploads", protocolNumber, fileName)
+		filePath := filepath.Join("services", protocolNumber, fileName)
 
 		buf := new(bytes.Buffer)
 		if _, err := io.Copy(buf, src); err != nil {

@@ -34,6 +34,7 @@ func (h *LitterHandler) CreateLitter(c echo.Context) error {
 		h.Logger.WithError(err).Error("failed to create litter")
 		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create litter")
 	}
+	h.Logger.Infof("Handler CreateLitter OK")
 	return c.JSON(http.StatusCreated, createdLitter)
 }
 

@@ -1,8 +1,15 @@
 package utils
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"gorm.io/gorm"
+)
 
 type Protocol struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty"`
-	Protocol string             `bson:"protocol"`
+	gorm.Model
+	Protocol string `gorm:"column:protocol"`
+}
+
+
+func (Protocol) TableName() string {
+    return "service_protocols"
 }

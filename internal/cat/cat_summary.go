@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"encoding/json"
+
 	"github.com/sashabaranov/go-openai"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
-	"encoding/json"
 )
 
 type CatAI struct {
@@ -55,7 +56,6 @@ func generateCatSummary(cat Cat) string {
 	return summary
 }
 
-
 func getEmbedding(summary string) []float32 {
 	key := "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"
 	client := openai.NewClient(key)
@@ -64,8 +64,7 @@ func getEmbedding(summary string) []float32 {
 	params := openai.EmbeddingRequest{
 		Model: openai.AdaEmbeddingV2,
 		Input: []string{summary},
-		User: "Scuba13",
-		
+		User:  "Scuba13",
 	}
 
 	// Faça a chamada da API para obter os embeddings
@@ -93,14 +92,13 @@ func PopulateCatAISummary(db *gorm.DB, mongo *mongo.Client) {
 	fmt.Println("Populating cat_ai table...")
 	var cats []Cat
 	db.Preload("Breed").
-    Preload("Color").
-    Preload("Cattery").
-    Preload("Country").
-    Preload("Owner").
-    Preload("Federation").
-	Limit(100).Find(&cats)
-	
-	
+		Preload("Color").
+		Preload("Cattery").
+		Preload("Country").
+		Preload("Owner").
+		Preload("Federation").
+		Limit(100).Find(&cats)
+
 	for _, cat := range cats {
 		fmt.Println("cat :", cat.Name)
 		if cat.FatherID != nil {
@@ -108,7 +106,7 @@ func PopulateCatAISummary(db *gorm.DB, mongo *mongo.Client) {
 			db.Select("name").Where("id = ?", cat.FatherID).First(&father)
 			cat.FatherName = father.Name
 		}
-	
+
 		if cat.MotherID != nil {
 			var mother Cat
 			db.Select("name").Where("id = ?", cat.MotherID).First(&mother)
@@ -131,8 +129,6 @@ func PopulateCatAISummary(db *gorm.DB, mongo *mongo.Client) {
 	}
 }
 
-
-
 func PopulateCatAI(db *gorm.DB, mongo *mongo.Client) {
 	fmt.Println("Populating cat_ai table...")
 	var cats []Cat
@@ -140,8 +136,9 @@ func PopulateCatAI(db *gorm.DB, mongo *mongo.Client) {
 		Preload("Color").
 		Preload("Cattery").
 		Preload("Country").
-		Preload("Owner").
+		Preload("Owner.Country").
 		Preload("Federation").
+		Preload("Titles.Titles").
 		Limit(100).Find(&cats)
 
 	for _, cat := range cats {
@@ -179,4 +176,3 @@ func PopulateCatAI(db *gorm.DB, mongo *mongo.Client) {
 		}
 	}
 }
-

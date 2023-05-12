@@ -71,9 +71,9 @@ func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 
 func setupCatServiceRoutes(e *echo.Echo, catServiceHandler *handler.CatServiceHandler) {
 	e.GET("/catservice/:id", catServiceHandler.GetCatServiceByID)
-	// e.GET("/catservice/:registration/registration", catServiceHandler.GetCatServiceByRegistration)
-	// e.GET("/catservice", catServiceHandler.GetAllCatsServiceByOwnerAndGender)
-	// e.GET("/catservice/:ownerId/owner", catServiceHandler.GetAllCatsServiceByOwner)
+	e.GET("/catservice/:registration/registration", catServiceHandler.GetCatServiceByRegistration)
+	e.GET("/catservice", catServiceHandler.GetAllCatsServiceByOwnerAndGender)
+	e.GET("/catservice/:ownerId/owner", catServiceHandler.GetAllCatsServiceByOwner)
 }
 
 func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
