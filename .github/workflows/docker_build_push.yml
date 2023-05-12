@@ -34,7 +34,6 @@ jobs:
         aws lightsail push-container-image --service-name amacoon \
         --label amacoon-service \
         --image amacoon-service
-        --debug
 
     - name: Trigger Deploy to AWS Lightsail
       uses: peter-evans/repository-dispatch@v1
