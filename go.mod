@@ -1,12 +1,12 @@
 module github.com/scuba13/AmacoonServices
 
-go 1.19
+go 1.20
 
 require (
 	github.com/agext/levenshtein v1.2.3
-	github.com/aws/aws-sdk-go v1.44.261
+	github.com/aws/aws-sdk-go v1.44.262
 	github.com/labstack/echo/v4 v4.10.2
-	github.com/sashabaranov/go-openai v1.9.3
+	github.com/sashabaranov/go-openai v1.9.4
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.15.0
 	go.mongodb.org/mongo-driver v1.11.6
@@ -29,7 +29,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/montanaflynn/stats v0.7.0 // indirect
+	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.7 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/afero v1.9.5 // indirect
