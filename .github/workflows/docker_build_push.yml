@@ -28,7 +28,7 @@ jobs:
         run: docker build -t amacoon-service .
         
       - name: Tag Docker image
-        run: docker tag amacoon-nginx:latest 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:service
+        run: docker tag amacoon-service:latest 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:service
       
       
       - name: Push Docker image to ECR
