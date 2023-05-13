@@ -35,9 +35,9 @@ jobs:
         run: docker push 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:service
     
 
-      # - name: Trigger Deploy to AWS Lightsail
-      #   uses: peter-evans/repository-dispatch@v1
-      #   with:
-      #     token: ${{ secrets.REPO_ACCESS_TOKEN }}
-      #     repository: scuba13/AmacoonDocker
-      #     event-type: new_docker_image
+      - name: Trigger Deploy to AWS Lightsail
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: scuba13/AmacoonDocker
+          event-type: new_docker_image
