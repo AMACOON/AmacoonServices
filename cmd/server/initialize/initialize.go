@@ -19,9 +19,11 @@ import (
 	routes "github.com/scuba13/AmacoonServices/pkg/server"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"github.com/aws/aws-sdk-go/service/s3"
+
 )
 
-func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB) {
+func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s3.S3) {
 
 	// Initialize repositories
 	logger.Info("Initialize Repositories")
@@ -42,9 +44,9 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB) {
 
 	// Initialize services
 	logger.Info("Initialize Services")
-	//filesService := utils.NewFilesService(s3, logger)
+	filesService := utils.NewFilesService(s3Client, logger)
 	protocolService := utils.NewProtocolService(protocolRepo, logger)
-	litterService := litter.NewLitterService(litterRepo, logger, protocolService)
+	litterService := litter.NewLitterService(litterRepo, logger, protocolService, filesService)
 	transferService := transfer.NewTransferService(transferepo, logger, protocolService)
 	catService := cat.NewCatService(catRepo, logger)
 	breedService := breed.NewBreedService(breedRepo, logger)
@@ -72,6 +74,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB) {
 	titleHandler := handler.NewTitleHandler(titleService, logger)
 	titleRecognitionHandler := handler.NewTitleRecognitionHandler(titleRecognitionService, logger)
 	catServiceHandler := handler.NewCatServiceHandler(catServiceService, logger)
+	filesHandler := handler.NewFilesHandler(filesService, logger)
 	logger.Info("Initialize Handlers OK")
 
 	// Initialize router and routes
@@ -79,7 +82,8 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB) {
 	routes.NewRouter(catHandler, ownerHandler, colorHandler,
 		litterHandler, breedHandler, countryHandler,
 		transferHandler, catteryHandler, federationHandler,
-		titleHandler, titleRecognitionHandler, catServiceHandler, logger, e)
+		titleHandler, titleRecognitionHandler, catServiceHandler, filesHandler,
+		logger, e)
 	logger.Info("Initialize Router and Routes OK")
 
 }

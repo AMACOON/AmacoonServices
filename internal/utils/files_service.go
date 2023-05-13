@@ -27,7 +27,7 @@ func NewFilesService(s3Client *s3.S3, logger *logrus.Logger) *FilesService {
 func (s *FilesService) SaveFiles(protocolNumber string, files []*multipart.FileHeader) ([]Files, error) {
 	savedFiles := []Files{}
 
-	bucket := "your-bucket-name" // Atualize com o nome do seu bucket
+	bucket := "amacoondocs" // Atualize com o nome do seu bucket
 
 	for _, file := range files {
 		src, err := file.Open()

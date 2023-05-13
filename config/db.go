@@ -60,7 +60,7 @@ func SetupDBOld(config *Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		"amacoon001_add1",
 		"armin013",
-		config.DBHost,
+		"mysql.catclubsystem.com",
 		config.DBPort,
 		"amacoon01",
 	)

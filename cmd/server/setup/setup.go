@@ -39,7 +39,7 @@ func SetupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 		logger.Fatalf("Failed to initialize DB connection: %v", err)
 	}
 
-	logger.Info("Connected DB")
+	//logger.Info("Connected DB")
 
 	logger.Info("AutoMigrate DB")
 	db.AutoMigrate(&breed.Breed{},
@@ -59,7 +59,8 @@ func SetupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 		&titlerecognition.TitleData{},
 		&utils.Protocol{},
 	)
-
+	logger.Info("AutoMigrate DB OK")
+	logger.Info("Connected DB OK")
 	return db
 }
 
@@ -76,7 +77,7 @@ func SetupDatabaseOld(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 
 func SetupS3(cfg *config.Config, logger *logrus.Logger) *s3.S3 {
 	logger.Info("Connecting S3")
-	db, err := config.SetupS3Session(cfg)
+	db, err := config.SetupS3Session(cfg, logger)
 	if err != nil {
 		logger.Fatalf("Failed to initialize s3 connection: %v", err)
 	}

@@ -10,15 +10,15 @@ type LitterService struct {
 	LitterRepo      *LitterRepository
 	ProtocolService *utils.ProtocolService
 	Logger          *logrus.Logger
-	//FilesService    *utils.FilesService // adiciona o campo FilesService
+	FilesService    *utils.FilesService // adiciona o campo FilesService
 }
 
-func NewLitterService(litterRepo *LitterRepository, logger *logrus.Logger, protocolService *utils.ProtocolService) *LitterService {
+func NewLitterService(litterRepo *LitterRepository, logger *logrus.Logger, protocolService *utils.ProtocolService, filesService *utils.FilesService) *LitterService {
 	return &LitterService{
 		LitterRepo:      litterRepo,
 		ProtocolService: protocolService,
 		Logger:          logger,
-		//FilesService:    filesService, // adiciona a instância de FilesService
+		FilesService:    filesService, // adiciona a instância de FilesService
 	}
 }
 

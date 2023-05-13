@@ -13,8 +13,8 @@ type Config struct {
 	DBPort         string
 	DBName         string
 	ServerPort      string
-	AwsAccessKeyId string
-	AwsSecretAccessKey string
+	S3AwsAccessKeyId string
+	S3AwsSecretAccessKey string
 }
 
 func LoadConfig() *Config {
@@ -35,7 +35,7 @@ func LoadConfig() *Config {
 		DBPort:         viper.GetString("db.port"),
 		DBName:         viper.GetString("db.name"),
 		ServerPort:      viper.GetString("server.port"),
-		AwsAccessKeyId: viper.GetString("aws.AwsAccessKeyId"),
-		AwsSecretAccessKey: viper.GetString("aws.awsSecretAccessKey"),
+		S3AwsAccessKeyId: viper.GetString("aws.S3AwsAccessKeyId"),
+		S3AwsSecretAccessKey: viper.GetString("aws.S3AwsSecretAccessKey"),
 	}
 }

@@ -3,6 +3,11 @@ package migrate
 import (
 	"gorm.io/gorm"
 	"github.com/sirupsen/logrus"
+	//"github.com/scuba13/AmacoonServices/internal/breed"
+	//"github.com/scuba13/AmacoonServices/internal/color"
+//	"github.com/scuba13/AmacoonServices/internal/country"
+	//"github.com/scuba13/AmacoonServices/internal/title"
+
 )
 
 func MigrateData(db *gorm.DB, dbOld *gorm.DB, logger *logrus.Logger) {

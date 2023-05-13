@@ -38,21 +38,25 @@ func MigrateColors(dbOld, dbNew *gorm.DB, logger *logrus.Logger) error {
             break
         }
 
-        // Converter os dados do modelo antigo para o novo modelo e salvar no banco de dados MySQL
-        for _, color := range colors {
-            c := Color{
+        // Converter os dados do modelo antigo para o novo modelo
+        newColors := make([]Color, len(colors))
+        for i, color := range colors {
+            newColors[i] = Color{
                 BreedCode: color.BreedID,
                 EmsCode:   color.EmsCode,
                 Name:      color.ColorName,
                 Group:     color.Group,
                 SubGroup:  color.SubGroup,
             }
-            if err := dbNew.Create(&c).Error; err != nil {
-                logger.WithError(err).Errorf("Failed to migrate color %d", color.ColorID)
-                return err
-            }
-            logger.Infof("Color %d migrated", color.ColorID)
         }
+
+        // Salvar os novos dados no banco de dados MySQL em lotes
+        if err := dbNew.CreateInBatches(newColors, batchSize).Error; err != nil {
+            logger.WithError(err).Error("Failed to migrate colors")
+            return err
+        }
+
+        logger.Infof("%d colors migrated", len(colors))
 
         offset += batchSize
     }
@@ -60,3 +64,4 @@ func MigrateColors(dbOld, dbNew *gorm.DB, logger *logrus.Logger) error {
     logger.Infof("Colors migration completed successfully")
     return nil
 }
+

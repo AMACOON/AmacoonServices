@@ -21,6 +21,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	titleHandler *handler.TitleHandler,
 	titleRecognitionHandler *handler.TitleRecognitionHandler,
 	catServiceHandler *handler.CatServiceHandler,
+	filesHandler *handler.FilesHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -43,6 +44,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupTitlesRoutes(e, titleHandler)
 	setupTitleRecognitionRoutes(e, titleRecognitionHandler)
 	setupCatServiceRoutes(e, catServiceHandler)
+	setupFilesRoutes(e, filesHandler)
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -153,4 +155,10 @@ func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
 func setupTitlesRoutes(e *echo.Echo, titleHandler *handler.TitleHandler) {
 	titleGroup := e.Group("/titles")
 	titleGroup.GET("", titleHandler.GetAllTitles)
+}
+
+func setupFilesRoutes(e *echo.Echo, filesHandler *handler.FilesHandler) {
+	fileGroup := e.Group("/files")
+	fileGroup.POST("/:protocolNumber", filesHandler.SaveFiles)
+
 }
