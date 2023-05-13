@@ -30,58 +30,74 @@ type OwnerS struct {
 func MigrateOwners(dbOld, dbNew *gorm.DB, logger *logrus.Logger) error {
     logger.Infof("Migrating owners...")
 
-    // Ler os dados do modelo antigo do banco de dados SQL
-    var owners []OwnerS
-    if err := dbOld.Unscoped().Table("expositores").Unscoped().Find(&owners).Error; err != nil {
-        logger.WithError(err).Error("Failed to get owners from old database")
-        return err
-    }
-
-    // Converter os dados do modelo antigo para o novo modelo e salvar no banco de dados MySQL
-    for _, owner := range owners {
-        // Obter o ID do país do banco de dados MySQL para o país do modelo antigo
-        var countryID uint
-        var country country.Country
-        if err := dbNew.Where("code = ?", owner.Country).First(&country).Error; err != nil {
-            logger.WithError(err).Errorf("Failed to get country for owner %d", owner.OwnerID)
+    batchSize := 500 // Defina o tamanho do lote aqui
+    var offset int
+    for {
+        // Ler os dados do modelo antigo do banco de dados SQL
+        var ownersS []OwnerS
+        if err := dbOld.Table("expositores").Offset(offset).Limit(batchSize).Unscoped().Find(&ownersS).Error; err != nil {
+            logger.WithError(err).Error("Failed to get owners from old database")
             return err
         }
-        countryID = country.ID
 
-        // Mapear os dados do proprietário do modelo antigo para o modelo novo
-        o := Owner{
-            Email:        owner.Email,
-            PasswordHash: owner.PasswordHash,
-            Name:         owner.OwnerName,
-            CPF:          owner.CPF,
-            Address:      owner.Address,
-            City:         owner.City,
-            State:        owner.State,
-            ZipCode:      owner.ZipCode,
-            CountryID:    uintPtr(countryID),
-            Phone:        owner.Phone,
-            Valid:        owner.Valid == "S",
-            ValidId:      owner.ValidationID,
-            Observation:  string(owner.Observation),
+        // Sair do loop se não houver mais dados a serem lidos
+        if len(ownersS) == 0 {
+            break
         }
 
-        // Salvar o proprietário no banco de dados MySQL
-        var count int64
-        dbNew.Model(&Owner{}).Where("email = ?", o.Email).Count(&count)
-        if count == 0 {
-            if err := dbNew.Create(&o).Error; err != nil {
-                logger.WithError(err).Errorf("Failed to migrate owner %s", o.Email)
+        // Converter os dados do modelo antigo para o novo modelo e salvar no banco de dados MySQL
+        var newOwners []Owner
+        for _, owner := range ownersS {
+            // Obter o ID do país do banco de dados MySQL para o país do modelo antigo
+            var countryID uint
+            var country country.Country
+            if err := dbNew.Where("code = ?", owner.Country).First(&country).Error; err != nil {
+                logger.WithError(err).Errorf("Failed to get country for owner %d", owner.OwnerID)
                 return err
             }
-            logger.Infof("Owner %s migrated", o.Email)
-        } else {
-            logger.Infof("Owner %s already exists in destination database", o.Email)
+            countryID = country.ID
+
+            // Mapear os dados do proprietário do modelo antigo para o modelo novo
+            o := Owner{
+                Email:        owner.Email,
+                PasswordHash: owner.PasswordHash,
+                Name:         owner.OwnerName,
+                CPF:          owner.CPF,
+                Address:      owner.Address,
+                City:         owner.City,
+                State:        owner.State,
+                ZipCode:      owner.ZipCode,
+                CountryID:    uintPtr(countryID),
+                Phone:        owner.Phone,
+                Valid:        owner.Valid == "S",
+                ValidId:      owner.ValidationID,
+                Observation:  string(owner.Observation),
+            }
+
+            var count int64
+            dbNew.Model(&Owner{}).Where("email = ?", o.Email).Count(&count)
+            if count == 0 {
+                newOwners = append(newOwners, o)
+            } else {
+                logger.Infof("Owner %s already exists in destination database", o.Email)
+            }
         }
+
+        // Inserir novos proprietários em lote
+        if len(newOwners) > 0 {
+            if err := dbNew.CreateInBatches(newOwners, batchSize).Error; err != nil {
+                logger.WithError(err).Errorf("Failed to migrate owners in batches")
+                return err
+            }
+        }
+
+        offset += batchSize
     }
 
     logger.Infof("Owners migration completed successfully")
     return nil
 }
+
 
 
 func uintPtr(n uint) *uint {

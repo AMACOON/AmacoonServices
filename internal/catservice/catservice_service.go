@@ -52,13 +52,14 @@ func (s *CatServiveService) GetAllCatsServiceByOwner(ownerID string) ([]CatServi
 	return cat, nil
 }
 
-func (s *CatServiveService) GetCatServiceByRegistration(registration string) ([]CatServiceData, error) {
+func (s *CatServiveService) GetCatServiceByRegistration(registration string) (*CatServiceData, error) {
 	s.Logger.Infof("Service GetCatServiceByRegistration")
-	cats, err := s.CatServiceRepo.GetCatServiceByRegistration(registration)
+	cat, err := s.CatServiceRepo.GetCatServiceByRegistration(registration)
 	if err != nil {
 		s.Logger.WithError(err).Error("Failed to get cats by Owner from repo")
 		return nil, err
 	}
 	s.Logger.Infof("Service GetAllByOwner OK")
-	return cats, nil
+	return cat, nil
 }
+

@@ -23,7 +23,7 @@ func (r *CatServiceRepository) GetCatServiceByID(id string) (*CatServiceData, er
 	var catServiceData CatServiceData
 
 	err := r.DB.Table("cats").
-		Select("cats.id, cats.name, cats.registration, cats.microchip, breeds.breed_name, colors.name as color_name, colors.ems_code as ems_code, cats.gender, fathers.name as father_name, mothers.name as mother_name").
+		Select("cats.id, cats.name, cats.registration, cats.microchip, breeds.breed_name, colors.name as color_name, colors.ems_code as ems_code, cats.gender, fathers.name as father_name, mothers.name as mother_name, cats.owner_id").
 		Joins("left join breeds on cats.breed_id = breeds.id").
 		Joins("left join colors on cats.color_id = colors.id").
 		Joins("left join cats fathers on cats.father_id = fathers.id").
@@ -37,8 +37,7 @@ func (r *CatServiceRepository) GetCatServiceByID(id string) (*CatServiceData, er
 	err = r.DB.Table("owners").
 		Select("owners.id, owners.name, owners.cpf, owners.address, owners.city, owners.state, owners.zip_code, countries.name as country_name, owners.phone").
 		Joins("left join countries on owners.country_id = countries.id").
-		Joins("left join cats on owners.id = cats.owner_id").
-		Where("cats.id = ?", id).
+		Where("owners.id = ?", cat.OwnerID).
 		First(&owner).Error
 	if err != nil {
 		return &catServiceData, err
@@ -49,6 +48,7 @@ func (r *CatServiceRepository) GetCatServiceByID(id string) (*CatServiceData, er
 
 	return &catServiceData, nil
 }
+
 
 func (r *CatServiceRepository) GetAllCatsServiceByOwnerAndGender(ownerID string, gender string) ([]CatServiceData, error) {
 	var catServicesData []CatServiceData
@@ -110,32 +110,34 @@ func (r *CatServiceRepository) GetAllCatsServiceByOwner(ownerID string) ([]CatSe
 	return catServicesData, nil
 }
 
-func (r *CatServiceRepository) GetCatServiceByRegistration(registration string) ([]CatServiceData, error) {
-	var catServicesData []CatServiceData
+func (r *CatServiceRepository) GetCatServiceByRegistration(registration string) (*CatServiceData, error) {
+	var cat CatService
+	var owner OwnerService
+	var catServiceData CatServiceData
 
-	rows, err := r.DB.Table("cats").
-		Select("cats.id, cats.name, cats.registration, cats.microchip, breeds.breed_name, colors.name as color_name, colors.ems_code as ems_code, cats.gender, fathers.name as father_name, mothers.name as mother_name, owners.id as owner_id, owners.name as owner_name, owners.cpf, owners.address, owners.city, owners.state, owners.zip_code, countries.name as country_name, owners.phone").
+	err := r.DB.Table("cats").
+		Select("cats.id, cats.name, cats.registration, cats.microchip, breeds.breed_name, colors.name as color_name, colors.ems_code as ems_code, cats.gender, fathers.name as father_name, mothers.name as mother_name, cats.owner_id").
 		Joins("left join breeds on cats.breed_id = breeds.id").
 		Joins("left join colors on cats.color_id = colors.id").
 		Joins("left join cats fathers on cats.father_id = fathers.id").
 		Joins("left join cats mothers on cats.mother_id = mothers.id").
-		Joins("left join owners on owners.id = cats.owner_id").
-		Joins("left join countries on owners.country_id = countries.id").
 		Where("cats.registration = ?", registration).
-		Rows()
+		First(&cat).Error
 	if err != nil {
-		return catServicesData, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var catServiceData CatServiceData
-		err = rows.Scan(&catServiceData.CatData.ID, &catServiceData.CatData.Name, &catServiceData.CatData.Registration, &catServiceData.CatData.Microchip, &catServiceData.CatData.BreedName, &catServiceData.CatData.ColorName, &catServiceData.CatData.EmsCode, &catServiceData.CatData.Gender, &catServiceData.CatData.FatherName, &catServiceData.CatData.MotherName, &catServiceData.OwnerData.ID, &catServiceData.OwnerData.Name, &catServiceData.OwnerData.CPF, &catServiceData.OwnerData.Address, &catServiceData.OwnerData.City, &catServiceData.OwnerData.State, &catServiceData.OwnerData.ZipCode, &catServiceData.OwnerData.CountryName, &catServiceData.OwnerData.Phone)
-		if err != nil {
-			return catServicesData, err
-		}
-		catServicesData = append(catServicesData, catServiceData)
+		return &catServiceData, err
 	}
 
-	return catServicesData, nil
+	err = r.DB.Table("owners").
+		Select("owners.id, owners.name, owners.cpf, owners.address, owners.city, owners.state, owners.zip_code, countries.name as country_name, owners.phone").
+		Joins("left join countries on owners.country_id = countries.id").
+		Where("owners.id = ?", cat.OwnerID).
+		First(&owner).Error
+	if err != nil {
+		return &catServiceData, err
+	}
+
+	catServiceData.CatData = cat
+	catServiceData.OwnerData = owner
+
+	return &catServiceData, nil
 }

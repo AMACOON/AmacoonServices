@@ -16,10 +16,10 @@ import (
 type Cat struct {
 	gorm.Model
 	Name             string                 `gorm:"column:name"`
-	Registration     string                 `gorm:"column:registration"`
+	Registration     string                 `gorm:"column:registration;index"`
 	RegistrationType string                 `gorm:"column:registration_type"`
 	Microchip        string                 `gorm:"column:microchip"`
-	Gender           string                 `gorm:"column:gender"`
+	Gender           string                 `gorm:"column:gender;index"`
 	Birthdate        time.Time              `gorm:"column:birthdate"`
 	Neutered         bool                   `gorm:"column:neutered"`
 	Validated        bool                   `gorm:"column:validated"`
@@ -37,7 +37,7 @@ type Cat struct {
 	Color            *color.Color           `gorm:"foreignKey:ColorID"`
 	CatteryID        *uint                  `gorm:"column:cattery_id"`
 	Cattery          *cattery.Cattery       `gorm:"foreignKey:CatteryID"`
-	OwnerID          *uint                  `gorm:"column:owner_id"`
+	OwnerID          *uint                  `gorm:"column:owner_id;index"`
 	Owner            *owner.Owner           `gorm:"foreignKey:OwnerID"`
 	CountryID        *uint                  `gorm:"column:country_id"`
 	Country          *country.Country       `gorm:"foreignKey:CountryID"`

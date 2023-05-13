@@ -104,7 +104,7 @@ func (h *CatServiceHandler) GetAllCatsServiceByOwner(c echo.Context) error {
 
 func (h *CatServiceHandler) GetCatServiceByRegistration(c echo.Context) error {
 	h.Logger.Infof("Handler GetCatServiceByRegistration")
-	resgistration := c.QueryParam("resgistration")
+	resgistration := c.Param("registration")
 	
 
 	h.Logger.WithFields(logrus.Fields{

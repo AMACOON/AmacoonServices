@@ -22,6 +22,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	titleRecognitionHandler *handler.TitleRecognitionHandler,
 	catServiceHandler *handler.CatServiceHandler,
 	filesHandler *handler.FilesHandler,
+	userHandler *handler.UserHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -45,6 +46,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupTitleRecognitionRoutes(e, titleRecognitionHandler)
 	setupCatServiceRoutes(e, catServiceHandler)
 	setupFilesRoutes(e, filesHandler)
+	setupUserRoutes(e, userHandler)
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -75,9 +77,7 @@ func setupHealthChecks(e *echo.Echo) {
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	catGroup := e.Group("/cats")
 	catGroup.GET("/:id", catHandler.GetCatsCompleteByID)
-	// catGroup.GET("/:registration/registration", catHandler.GetCatCompleteByRegistration)
-	// catGroup.GET("", catHandler.GetCatsByOwnerAndGender)
-	// catGroup.GET("/:ownerId/owner", catHandler.GetAllByOwner)
+	catGroup.GET("/:ownerId/owner", catHandler.GetCatCompleteByAllByOwner)
 }
 
 
@@ -162,3 +162,9 @@ func setupFilesRoutes(e *echo.Echo, filesHandler *handler.FilesHandler) {
 	fileGroup.POST("/:protocolNumber", filesHandler.SaveFiles)
 
 }
+
+func setupUserRoutes(e *echo.Echo, userHandler *handler.UserHandler) {
+	userGroup := e.Group("/users")
+	userGroup.POST("/login", userHandler.Login)
+}
+

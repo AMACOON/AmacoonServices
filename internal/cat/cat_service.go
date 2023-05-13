@@ -30,39 +30,18 @@ func (s *CatService) GetCatsCompleteByID(id string) (*Cat, error) {
 	return cats, nil
 }
 
-// func (s *CatService) GetCatsByOwnerAndGender(ownerID string, gender string) ([]*Cat, error) {
-// 	s.Logger.Infof("Service GetCatsByOwnerAndGender")
-// 	cats, err := s.CatRepo.GetAllByOwnerAndGender(ownerID, gender)
-// 	if err != nil {
-// 		s.Logger.WithError(err).Error("Failed to get cats by Owner and Gender from repo")
-// 		return nil, err
-// 	}
-	
-// 	s.Logger.Infof("Service GetCatsByOwnerAndGender OK")
-// 	return cats, nil
-// }
 
-// func (s *CatService) GetCatCompleteByRegistration(registration string) (*Cat, error) {
-// 	s.Logger.Infof("Service GetCatCompleteByRegistration")
-// 	cat, err := s.CatRepo.GetCatCompleteByRegistration(registration)
-// 	if err != nil {
-// 		s.Logger.WithError(err).Errorf("Failed to get cat by registration '%s' from repo", registration)
-// 		return nil, err
-// 	}
-// 	s.Logger.Infof("Service GetCatCompleteByRegistration OK")
-// 	return cat, nil
-// }
 
-// func (s *CatService) GetAllByOwner(ownerID string) ([]*Cat, error) {
-// 	s.Logger.Infof("Service GetAllByOwner")
-// 	cats, err := s.CatRepo.GetAllByOwner(ownerID)
-// 	if err != nil {
-// 		s.Logger.WithError(err).Error("Failed to get cats by Owner from repo")
-// 		return nil, err
-// 	}
-// 	s.Logger.Infof("Service GetAllByOwner OK")
-// 	return cats, nil
-// }
+func (s *CatService) GetCatCompleteByAllByOwner(ownerID string) ([]*Cat, error) {
+	s.Logger.Infof("Service GetCatCompleteByAllByOwner")
+	cats, err := s.CatRepo.GetCatCompleteByAllByOwner(ownerID)
+	if err != nil {
+		s.Logger.WithError(err).Error("Failed to get cats by Owner from repo")
+		return nil, err
+	}
+	s.Logger.Infof("Service GetCatCompleteByAllByOwner OK")
+	return cats, nil
+}
 
 
 // func GetFullName(cat *CatComplete) string {

@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/labstack/echo/v4"
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
@@ -15,12 +16,11 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/title"
 	"github.com/scuba13/AmacoonServices/internal/titlerecognition"
 	"github.com/scuba13/AmacoonServices/internal/transfer"
+	"github.com/scuba13/AmacoonServices/internal/user"
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	routes "github.com/scuba13/AmacoonServices/pkg/server"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"github.com/aws/aws-sdk-go/service/s3"
-
 )
 
 func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s3.S3) {
@@ -40,6 +40,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	titleRepo := title.NewTitleRepository(db, logger)
 	titleRecognitionRepo := titlerecognition.NewTitleRecognitionRepository(db, logger)
 	catServiceRepo := catservice.NewCatServiceRepository(db, logger)
+	userRepo := user.NewUserRepository(db, logger)
 	logger.Info("Initialize Repositories OK")
 
 	// Initialize services
@@ -58,6 +59,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	titleService := title.NewTitleService(titleRepo, logger)
 	titleRecognitionService := titlerecognition.NewTitleRecognitionService(titleRecognitionRepo, logger, protocolService)
 	catServiceService := catservice.NewCatServiceService(catServiceRepo, logger)
+	userService := user.NewUserService(userRepo, logger)
 	logger.Info("Initialize Services OK")
 
 	// Initialize handlers
@@ -75,6 +77,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	titleRecognitionHandler := handler.NewTitleRecognitionHandler(titleRecognitionService, logger)
 	catServiceHandler := handler.NewCatServiceHandler(catServiceService, logger)
 	filesHandler := handler.NewFilesHandler(filesService, logger)
+	userHandler := handler.NewUserHandler(userService, logger)
 	logger.Info("Initialize Handlers OK")
 
 	// Initialize router and routes
@@ -82,7 +85,8 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	routes.NewRouter(catHandler, ownerHandler, colorHandler,
 		litterHandler, breedHandler, countryHandler,
 		transferHandler, catteryHandler, federationHandler,
-		titleHandler, titleRecognitionHandler, catServiceHandler, filesHandler,
+		titleHandler, titleRecognitionHandler, catServiceHandler,
+		filesHandler, userHandler,
 		logger, e)
 	logger.Info("Initialize Router and Routes OK")
 
