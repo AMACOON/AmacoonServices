@@ -52,9 +52,11 @@ WORKDIR /app
 
 # Copiar o binário compilado e quaisquer outros arquivos necessários
 COPY --from=builder /app/main /app/main
+COPY --from=builder /app/config.yaml /app/config.yaml
 
 # Definir a porta que a aplicação irá utilizar
 EXPOSE 8080
 
 # Executar a aplicação compilada
 CMD ["/app/main"]
+
