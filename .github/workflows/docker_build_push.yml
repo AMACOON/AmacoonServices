@@ -10,41 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out repository
-      uses: actions/checkout@v2
+      - name: Check out repository
+        uses: actions/checkout@v2
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build Docker image
+        run: docker build -t amacoon-service .
+        
+      - name: Tag Docker image
+        run: docker tag amacoon-nginx:latest 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:service
+      
+      
+      - name: Push Docker image to ECR
+        run: docker push 222377488320.dkr.ecr.us-east-1.amazonaws.com/amacoon:service
     
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
 
-    - name: Install lightsailctl
-      run: |
-        curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "lightsailctl"
-        chmod +x lightsailctl
-        sudo mv lightsailctl /usr/local/bin/
-
-    - name: Build Docker image
-      run: docker build -t amacoon-service .
-
-    - name: Push Docker image to Lightsail and save image reference
-      id: push_image
-      run: |
-        OUTPUT=$(aws lightsail push-container-image --service-name amacoon --label amacoon-service --image amacoon-service)
-        IMAGE_REF=$(echo "$OUTPUT" | grep 'Refer to this image as' | awk '{print $6}')
-        echo "::set-output name=image_ref::$IMAGE_REF"
-
-    
-    - name: Use image reference
-      run: echo "The image reference is ${{ steps.push_image.outputs.image_ref }}"
-
-    - name: Trigger Deploy to AWS Lightsail
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: scuba13/AmacoonDocker
-        event-type: new_docker_image
-        client-payload: '{"image_ref": ${{ steps.push_image.outputs.image_ref }}, "service": "amacoonservice"}'
-
+      # - name: Trigger Deploy to AWS Lightsail
+      #   uses: peter-evans/repository-dispatch@v1
+      #   with:
+      #     token: ${{ secrets.REPO_ACCESS_TOKEN }}
+      #     repository: scuba13/AmacoonDocker
+      #     event-type: new_docker_image
