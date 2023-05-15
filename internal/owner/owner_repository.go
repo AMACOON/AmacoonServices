@@ -3,6 +3,7 @@ package owner
 import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type OwnerRepository struct {
@@ -99,3 +100,25 @@ func (r *OwnerRepository) DeleteOwnerByID(id uint) error {
 	r.Logger.Infof("Repository DeleteOwnerByID OK")
 	return nil
 }
+
+func (r *OwnerRepository) Login(loginRequest LoginRequest) (*Owner, error) {
+	r.Logger.Info("Repository Login")
+	
+	user := &Owner{}
+	if err := r.DB.Where("email = ?", loginRequest.Email).First(user).Error; err != nil {
+		r.Logger.WithError(err).Errorf("User not found or password incorrect %v", loginRequest.Email)
+		return nil, err
+	}
+
+	// Comparar a senha fornecida com a senha armazenada
+	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(loginRequest.Password))
+	if err != nil {
+		r.Logger.WithError(err).Errorf("User not found or password incorrect")
+		return nil, err
+	}
+
+	// A senha está correta, retornar o usuário
+	r.Logger.Info("Repository Login OK")
+	return user, nil
+}
+

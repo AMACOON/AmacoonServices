@@ -98,6 +98,18 @@ func (s *OwnerService) DeleteOwnerByID(idStr string) error {
 	return nil
 }
 
+func (s *OwnerService) Login(loginRequest LoginRequest) (*Owner, error) {
+	s.Logger.Info("Service Login")
+
+	user, err := s.OwnerRepo.Login(loginRequest)
+	if err != nil {
+		return nil, err
+	}
+	
+	s.Logger.Info("Service Login OK")
+	return user, nil
+}
+
 
 
 

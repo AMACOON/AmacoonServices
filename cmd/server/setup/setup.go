@@ -17,7 +17,6 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/titlerecognition"
 	"github.com/scuba13/AmacoonServices/internal/transfer"
 	"github.com/scuba13/AmacoonServices/internal/utils"
-	"github.com/scuba13/AmacoonServices/internal/user"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -59,7 +58,7 @@ func SetupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 		&titlerecognition.TitleRecognition{},
 		&titlerecognition.TitleData{},
 		&utils.Protocol{},
-		&user.User{},
+		
 
 	)
 	logger.Info("AutoMigrate DB OK")
