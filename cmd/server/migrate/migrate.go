@@ -7,7 +7,7 @@ import (
 	// "github.com/scuba13/AmacoonServices/internal/color"
 	// "github.com/scuba13/AmacoonServices/internal/country"
 	// "github.com/scuba13/AmacoonServices/internal/title"
-	//"github.com/scuba13/AmacoonServices/internal/owner"
+	"github.com/scuba13/AmacoonServices/internal/owner"
 	//"github.com/scuba13/AmacoonServices/internal/cattery"
 	//"github.com/scuba13/AmacoonServices/internal/federation"
 	//"github.com/scuba13/AmacoonServices/internal/cat"
@@ -23,7 +23,7 @@ func MigrateData(db *gorm.DB, dbOld *gorm.DB, logger *logrus.Logger) {
 	//color.MigrateColors(dbOld,db, logger)
 	//country.MigrateCountries(dbOld,db, logger)
 	//title.InsertTitles(db, logger)
-	//owner.MigrateOwners(dbOld,db, logger)
+	owner.MigrateOwners(dbOld,db, logger)
 	//user.MigrateOwnersToUsers(db, logger)
 	//federation.MigrateFederations(dbOld,db, logger)
 	//cattery.MigrateCattery(dbOld,db, logger, 0.9)

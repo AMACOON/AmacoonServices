@@ -22,7 +22,6 @@ func NewRouter(catHandler *handler.CatHandler,
 	titleRecognitionHandler *handler.TitleRecognitionHandler,
 	catServiceHandler *handler.CatServiceHandler,
 	filesHandler *handler.FilesHandler,
-	userHandler *handler.UserHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -46,7 +45,6 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupTitleRecognitionRoutes(e, titleRecognitionHandler)
 	setupCatServiceRoutes(e, catServiceHandler)
 	setupFilesRoutes(e, filesHandler)
-	setupUserRoutes(e, userHandler)
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -87,6 +85,7 @@ func setupCatServiceRoutes(e *echo.Echo, catServiceHandler *handler.CatServiceHa
 	catServiceGroup.GET("/:registration/registration", catServiceHandler.GetCatServiceByRegistration)
 	catServiceGroup.GET("", catServiceHandler.GetAllCatsServiceByOwnerAndGender)
 	catServiceGroup.GET("/:ownerId/owner", catServiceHandler.GetAllCatsServiceByOwner)
+	
 }
 
 func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
@@ -95,6 +94,7 @@ func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
 	ownerGroup.GET("", ownerHandler.GetAllOwners)
 	ownerGroup.GET("/:cpf/cpf", ownerHandler.GetOwnerByCPF)
 	ownerGroup.POST("", ownerHandler.CreateOwner)
+	ownerGroup.POST("/login", ownerHandler.Login)
 }
 
 func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {
@@ -161,10 +161,5 @@ func setupFilesRoutes(e *echo.Echo, filesHandler *handler.FilesHandler) {
 	fileGroup := e.Group("/files")
 	fileGroup.POST("/:protocolNumber", filesHandler.SaveFiles)
 
-}
-
-func setupUserRoutes(e *echo.Echo, userHandler *handler.UserHandler) {
-	userGroup := e.Group("/users")
-	userGroup.POST("/login", userHandler.Login)
 }
 
