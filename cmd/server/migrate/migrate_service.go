@@ -1,8 +1,6 @@
 package migrate
 
 import (
-	"sync"
-
 	"time"
 
 	"github.com/scuba13/AmacoonServices/internal/breed"
@@ -32,75 +30,54 @@ func NewMigrateService(db *gorm.DB, dbOld *gorm.DB, logger *logrus.Logger) *Migr
 	}
 }
 
-func (s *MigrateService) MigrateData1(db *gorm.DB, dbOld *gorm.DB, logger *logrus.Logger) {
-	logger.Info("Inicio Migração Breeds, Colors, Countries, Titles, Clubs")
+func (s *MigrateService) MigrateData(db *gorm.DB, dbOld *gorm.DB, logger *logrus.Logger) {
+	logger.Info("Inicio Migração")
 
-	var wg sync.WaitGroup
-	wg.Add(5)
+	logger.Info("Inicio Migração Breed")
+	breed.MigrateBreeds(dbOld, db, logger)
+	logger.Info("Fim Migração Breed")
 
-	go func() {
-		defer wg.Done()
-		breed.MigrateBreeds(dbOld, db, logger)
-	}()
+	logger.Info("Inicio Migração Color")
+	color.MigrateColors(dbOld, db, logger)
+	logger.Info("Fim Migração Color")
 
-	go func() {
-		defer wg.Done()
-		color.MigrateColors(dbOld, db, logger)
-	}()
+	logger.Info("Inicio Migração Country")
+	country.MigrateCountries(dbOld, db, logger)
+	logger.Info("Fim Migração Country")
 
-	go func() {
-		defer wg.Done()
-		country.MigrateCountries(dbOld, db, logger)
-	}()
+	logger.Info("Inicio Migração Title")
+	title.InsertTitles(db, logger)
+	logger.Info("Fim Migração Title")
 
-	go func() {
-		defer wg.Done()
-		title.InsertTitles(db, logger)
-	}()
+	logger.Info("Inicio Migração Club")
+	club.MigrateClubs(dbOld, db, logger)
+	logger.Info("Fim Migração Club")
+	logger.Info("Inicio Migração Owner")
+	owner.MigrateOwners(dbOld, db, logger)
+	logger.Info("Fim Migração Owner")
 
-	go func() {
-		defer wg.Done()
-		club.MigrateClubs(dbOld, db, logger)
-	}()
+	logger.Info("Inicio Migração Federation")
+	federation.MigrateFederations(dbOld, db, logger)
+	logger.Info("Fim Migração Federation")
 
-	wg.Wait()
-
-	logger.Info("Fim Migração Breeds, Colors, Countries, Titles")
-}
-
-func (s *MigrateService) MigrateData2(db *gorm.DB, dbOld *gorm.DB, logger *logrus.Logger) {
-	logger.Info("Inicio Migração Owner, Owner Club Federation, Cattery")
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
-		owner.MigrateOwners(dbOld, db, logger)
-	}()
-
-	go func() {
-		defer wg.Done()
-		federation.MigrateFederations(dbOld, db, logger)
-	}()
-
-	wg.Wait()
+	logger.Info("Inicio Migração Owner Club")
 	owner.MigrateOwnersClubs(dbOld, db, logger)
+	logger.Info("Fim Migração Owner Club")
+
+	logger.Info("Inicio Migração Cattery")
 	cattery.MigrateCattery(dbOld, db, logger, 0.9)
-	logger.Info("Fim Migração Owner,Owner Club, Federation, Cattery")
-}
+	logger.Info("Fim Migração Cattery")
 
-func (s *MigrateService) MigrateData3(dbOld *gorm.DB, db *gorm.DB, logger *logrus.Logger) {
-	logger.Info("Iniciando Migração de Cats")
-
+	logger.Info("Inicio Migração Cat")
 	cat.MigrateCats(dbOld, db)
+	logger.Info("Fim Migração Cat")
 
 	logger.Info("Aguardando 10 segundos...")
 	time.Sleep(10 * time.Second)
 
-	logger.Info("Migração de Cats concluída. Iniciando atualização de Cat Parents")
-
+	logger.Info("Inicio Migração Cat Parents")
 	cat.UpdateCatParents(db)
+	logger.Info("Fim Migração Cat Parents")
 
-	logger.Info("Atualização de Cat Parents concluída")
+	logger.Info("Fim Migração")
 }
