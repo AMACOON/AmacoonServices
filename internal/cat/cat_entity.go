@@ -42,7 +42,7 @@ type Cat struct {
 	CountryID        *uint                  `gorm:"column:country_id"`
 	Country          *country.Country       `gorm:"foreignKey:CountryID"`
 	Titles           []TitlesCat            `gorm:"foreignKey:CatID"`
-	FatherNameTemp   string                 
+	FatherNameTemp   string
 	MotherNameTemp   string
 	//Files            []utils.Files
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/titlerecognition"
 	"github.com/scuba13/AmacoonServices/internal/transfer"
 	"github.com/scuba13/AmacoonServices/internal/utils"
+	"github.com/scuba13/AmacoonServices/internal/club"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -47,6 +48,7 @@ func SetupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 		&color.Color{},
 		&country.Country{},
 		&owner.Owner{},
+		&owner.OwnerClub{},
 		&federation.Federation{},
 		&cattery.Cattery{},
 		&title.Title{},
@@ -58,6 +60,7 @@ func SetupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 		&titlerecognition.TitleRecognition{},
 		&titlerecognition.TitleData{},
 		&utils.Protocol{},
+		&club.Club{},
 		
 
 	)
