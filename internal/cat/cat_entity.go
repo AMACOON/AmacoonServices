@@ -61,5 +61,5 @@ type TitlesCat struct {
 }
 
 func (TitlesCat) TableName() string {
-	return "titles_cats"
+	return "cats_titles"
 }
