@@ -32,7 +32,7 @@ func main() {
 	s3 := setup.SetupS3(cfg, logger)
 
 	// Migrate data
-	migrate.MigrateData(db,dbOld, logger)
+	//migrate.MigrateData(db,dbOld, logger)
 
 	// Initialize repositories, handlers, and routes
 	initialize.InitializeApp(e, logger, db, s3)
