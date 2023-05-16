@@ -70,11 +70,16 @@ func MigrateCattery(dbOld, dbNew *gorm.DB, logger *logrus.Logger, minSimilarity 
 			logger.Warnf("country not found for cattery with breeder ID %s and country code %s", catterySQL.ID, catterySQL.BreederCountry)
 		}
 
+		var ownerIDPtr *uint
+		if ownerID != 0 {
+			ownerIDPtr = &ownerID
+		}
+
 		catteryModel := &Cattery{
 			Name:        catterySQL.Name,
 			BreederName: catterySQL.BreederName,
-			OwnerID:      uintPtr(ownerID),
-			CountryID:    uintPtr(countryID),
+			OwnerID:     ownerIDPtr,
+			CountryID:   uintPtr(countryID),
 		}
 
 		if err := dbNew.Create(&catteryModel).Error; err != nil {
@@ -85,6 +90,7 @@ func MigrateCattery(dbOld, dbNew *gorm.DB, logger *logrus.Logger, minSimilarity 
 	logger.Infof("Catteries migration completed successfully")
 	return nil
 }
+
 
 func Max(a, b int) int {
 	if a > b {

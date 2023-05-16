@@ -72,7 +72,7 @@ func (s *MigrateService) MigrateData2(db *gorm.DB, dbOld *gorm.DB, logger *logru
 	logger.Info("Inicio Migração Owner, Owner Club Federation, Cattery")
 
 	var wg sync.WaitGroup
-	wg.Add(3)
+	wg.Add(2)
 
 	go func() {
 		defer wg.Done()
@@ -81,15 +81,11 @@ func (s *MigrateService) MigrateData2(db *gorm.DB, dbOld *gorm.DB, logger *logru
 
 	go func() {
 		defer wg.Done()
-		owner.MigrateOwnersClubs(dbOld, db, logger)
-	}()
-
-	go func() {
-		defer wg.Done()
 		federation.MigrateFederations(dbOld, db, logger)
 	}()
 
 	wg.Wait()
+	owner.MigrateOwnersClubs(dbOld, db, logger)
 	cattery.MigrateCattery(dbOld, db, logger, 0.9)
 	logger.Info("Fim Migração Owner,Owner Club, Federation, Cattery")
 }
