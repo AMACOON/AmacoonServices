@@ -71,13 +71,11 @@ func setupHealthChecks(e *echo.Echo) {
 	})
 }
 
-
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	catGroup := e.Group("/cats")
 	catGroup.GET("/:id", catHandler.GetCatsCompleteByID)
 	catGroup.GET("/:ownerId/owner", catHandler.GetCatCompleteByAllByOwner)
 }
-
 
 func setupCatServiceRoutes(e *echo.Echo, catServiceHandler *handler.CatServiceHandler) {
 	catServiceGroup := e.Group("/catservice")
@@ -85,7 +83,7 @@ func setupCatServiceRoutes(e *echo.Echo, catServiceHandler *handler.CatServiceHa
 	catServiceGroup.GET("/:registration/registration", catServiceHandler.GetCatServiceByRegistration)
 	catServiceGroup.GET("", catServiceHandler.GetAllCatsServiceByOwnerAndGender)
 	catServiceGroup.GET("/:ownerId/owner", catServiceHandler.GetAllCatsServiceByOwner)
-	
+
 }
 
 func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
@@ -162,4 +160,3 @@ func setupFilesRoutes(e *echo.Echo, filesHandler *handler.FilesHandler) {
 	fileGroup.POST("/:protocolNumber", filesHandler.SaveFiles)
 
 }
-

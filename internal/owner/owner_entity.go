@@ -1,6 +1,7 @@
 package owner
 
 import (
+	"github.com/scuba13/AmacoonServices/internal/club"
 	"github.com/scuba13/AmacoonServices/internal/country"
 	"gorm.io/gorm"
 )
@@ -26,4 +27,18 @@ type Owner struct {
 
 func (Owner) TableName() string {
 	return "owners"
+}
+
+type OwnerClub struct {
+	gorm.Model
+	OwnerID   *uint
+	Owner     *Owner `gorm:"foreignKey:OwnerID" json:"-"`
+	ClubID    *uint
+	Club      *club.Club `gorm:"foreignKey:ClubID"`
+	Associate string
+	Valid     bool
+}
+
+func (OwnerClub) TableName() string {
+	return "owners_clubs"
 }
