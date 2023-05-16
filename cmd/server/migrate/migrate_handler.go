@@ -20,22 +20,23 @@ func NewMigrateHandler(service *MigrateService, logger *logrus.Logger) *MigrateH
 }
 
 func (h *MigrateHandler) MigrateData1(c echo.Context) error {
-	h.MigrateService.MigrateData1(h.MigrateService.DB, h.MigrateService.DBOld, h.Logger)
+	go h.MigrateService.MigrateData1(h.MigrateService.DB, h.MigrateService.DBOld, h.Logger)
 
-	return c.String(http.StatusOK, "Data 1 migrated successfully")
+	return c.String(http.StatusOK, "Data 1 migration started")
 }
 
 func (h *MigrateHandler) MigrateData2(c echo.Context) error {
-	h.MigrateService.MigrateData2(h.MigrateService.DB, h.MigrateService.DBOld, h.Logger)
+	go h.MigrateService.MigrateData2(h.MigrateService.DB, h.MigrateService.DBOld, h.Logger)
 
-	return c.String(http.StatusOK, "Data 2 migrated successfully")
+	return c.String(http.StatusOK, "Data 2 migration started")
 }
 
 func (h *MigrateHandler) MigrateData3(c echo.Context) error {
-	h.MigrateService.MigrateData3(h.MigrateService.DBOld, h.MigrateService.DB, h.Logger)
+	go h.MigrateService.MigrateData3(h.MigrateService.DBOld, h.MigrateService.DB, h.Logger)
 
-	return c.String(http.StatusOK, "Data 3 migrated successfully")
+	return c.String(http.StatusOK, "Data 3 migration started")
 }
+
 
 func SetupRouter(service *MigrateService, logger *logrus.Logger, e *echo.Echo) {
 	handler := NewMigrateHandler(service, logger)
