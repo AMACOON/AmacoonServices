@@ -58,7 +58,7 @@ func SetupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 		&litter.KittenLitter{},
 		&transfer.Transfer{},
 		&titlerecognition.TitleRecognition{},
-		&titlerecognition.TitleData{},
+		&titlerecognition.Title{},
 		&utils.Protocol{},
 		&club.Club{},
 		
