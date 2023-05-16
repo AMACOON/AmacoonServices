@@ -11,7 +11,7 @@ type TitleRecognition struct {
 	gorm.Model
 	CatData        catservice.CatService   `gorm:"embedded;embeddedPrefix:cat_"`
 	OwnerData      catservice.OwnerService `gorm:"embedded;embeddedPrefix:owner_"`
-	Titles         []TitleData             `gorm:"foreignKey:TitleRecognitionID"`
+	Titles         []Title            `gorm:"foreignKey:TitleRecognitionID"`
 	Status         string
 	ProtocolNumber string
 	RequesterID    string
@@ -21,7 +21,7 @@ func (TitleRecognition) TableName() string {
 	return "service_title_recognition"
 }
 
-type TitleData struct {
+type Title struct {
 	gorm.Model
 	TitleRecognitionID uint // Esta é a chave estrangeira para a tabela title_recognition
 	TitleID            uint
@@ -32,6 +32,6 @@ type TitleData struct {
 	Judge              string
 }
 
-func (TitleData) TableName() string {
-	return "service_title_data"
+func (Title) TableName() string {
+	return "service_title_recognition_titles"
 }
