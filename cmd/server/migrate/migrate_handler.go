@@ -19,33 +19,18 @@ func NewMigrateHandler(service *MigrateService, logger *logrus.Logger) *MigrateH
 	}
 }
 
-func (h *MigrateHandler) MigrateData1(c echo.Context) error {
-	go h.MigrateService.MigrateData1(h.MigrateService.DB, h.MigrateService.DBOld, h.Logger)
+func (h *MigrateHandler) MigrateData(c echo.Context) error {
+	
+	go h.MigrateService.MigrateData(h.MigrateService.DB, h.MigrateService.DBOld, h.Logger)
 
-	return c.String(http.StatusOK, "Data 1 migration started")
-}
-
-func (h *MigrateHandler) MigrateData2(c echo.Context) error {
-	go h.MigrateService.MigrateData2(h.MigrateService.DB, h.MigrateService.DBOld, h.Logger)
-
-	return c.String(http.StatusOK, "Data 2 migration started")
-}
-
-func (h *MigrateHandler) MigrateData3(c echo.Context) error {
-	go h.MigrateService.MigrateData3(h.MigrateService.DBOld, h.MigrateService.DB, h.Logger)
-
-	return c.String(http.StatusOK, "Data 3 migration started")
+	return c.String(http.StatusOK, "Data migration started")
 }
 
 
 func SetupRouter(service *MigrateService, logger *logrus.Logger, e *echo.Echo) {
-	handler := NewMigrateHandler(service, logger)
-
 	
-
-	e.GET("/migrate/data1", handler.MigrateData1)
-	e.GET("/migrate/data2", handler.MigrateData2)
-	e.GET("/migrate/data3", handler.MigrateData3)
-
+	handler := NewMigrateHandler(service, logger)
+	
+	e.GET("/migrate/data1", handler.MigrateData)
 	
 }
