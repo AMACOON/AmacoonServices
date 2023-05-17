@@ -3,6 +3,7 @@ package owner
 import (
 	"github.com/sirupsen/logrus"
     "strconv"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type OwnerService struct {
@@ -54,31 +55,46 @@ func (s *OwnerService) GetOwnerByCPF(cpf string) (*Owner, error) {
 	return owner, nil
 }
 
+
+
 func (s *OwnerService) CreateOwner(owner *Owner) (*Owner, error) {
 	s.Logger.Infof("Service CreateOwner")
+
+	// Gerar o hash da senha antes de salvar
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(owner.PasswordHash), bcrypt.DefaultCost)
+	if err != nil {
+		s.Logger.WithError(err).Error("failed to generate password hash")
+		return nil, err
+	}
+
+	owner.PasswordHash = string(hashedPassword) // Atualizar o campo PasswordHash com o hash gerado
+	owner.Valid = false
+
 	createdOwner, err := s.OwnerRepo.CreateOwner(owner)
 	if err != nil {
 		s.Logger.WithError(err).Error("failed to create owner")
 		return nil, err
 	}
+
 	s.Logger.Infof("Service CreateOwner OK")
 	return createdOwner, nil
 }
 
-func (s *OwnerService) UpdateOwner(idStr string, updatedOwner *Owner) (*Owner, error) {
+
+func (s *OwnerService) UpdateOwner(idStr string, updatedOwner *Owner) error {
 	s.Logger.Infof("Service UpdateOwner")
 	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		s.Logger.WithError(err).Errorf("Invalid owner ID: %s", idStr)
-		return nil, err
+		return err
 	}
-	owner, err := s.OwnerRepo.UpdateOwner(uint(id), updatedOwner)
+	err = s.OwnerRepo.UpdateOwner(uint(id), updatedOwner)
 	if err != nil {
 		s.Logger.WithError(err).Error("failed to update owner")
-		return nil, err
+		return err
 	}
 	s.Logger.Infof("Service UpdateOwner OK")
-	return owner, nil
+	return nil
 }
 
 

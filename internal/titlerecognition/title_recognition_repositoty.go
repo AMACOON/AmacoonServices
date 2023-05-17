@@ -60,14 +60,42 @@ func (r *TitleRecognitionRepository) GetTitleRecognitionByID(id uint) (TitleReco
 func (r *TitleRecognitionRepository) UpdateTitleRecognition(id uint, titleRecognition TitleRecognition) error {
 	r.Logger.Infof("Repository UpdateTitleRecognition")
 
-	err := r.DB.Model(&TitleRecognition{}).Where("id = ?", id).Updates(titleRecognition).Error
-	if err != nil {
+	// Start a new transaction
+	tx := r.DB.Begin()
+
+	// Rollback in case of an error
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Atualizar os campos do registro na tabela "title_recognition"
+	if err := tx.Model(&TitleRecognition{}).Where("id = ?", id).Updates(titleRecognition).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error updating title recognition with id %v", id)
+		return err
+	}
+
+	// Atualizar os campos dos títulos relacionados na tabela "service_title_recognition_titles"
+	for _, title := range titleRecognition.Titles {
+		if err := tx.Model(&Title{}).Where("id = ?", title.ID).Updates(title).Error; err != nil {
+			tx.Rollback()
+			r.Logger.WithError(err).Errorf("error updating title recognition title record with id %v", title.ID)
+			return err
+		}
+	}
+
+	// If everything goes well, commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		r.Logger.WithError(err).Errorf("error committing transaction")
 		return err
 	}
 
 	r.Logger.Infof("Repository UpdateTitleRecognition OK")
 	return nil
 }
+
 
 
 func (r *TitleRecognitionRepository) UpdateTitleRecognitionStatus(id uint, status string) error {

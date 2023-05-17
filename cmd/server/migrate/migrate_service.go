@@ -12,6 +12,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/federation"
 	"github.com/scuba13/AmacoonServices/internal/owner"
 	"github.com/scuba13/AmacoonServices/internal/title"
+	"github.com/scuba13/AmacoonServices/internal/judge"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -52,6 +53,11 @@ func (s *MigrateService) MigrateData(db *gorm.DB, dbOld *gorm.DB, logger *logrus
 	logger.Info("Inicio Migração Club")
 	club.MigrateClubs(dbOld, db, logger)
 	logger.Info("Fim Migração Club")
+
+	logger.Info("Inicio Migração Judges")
+	judge.MigrateJudges(dbOld, db, logger)
+	logger.Info("Fim Migração Judges")
+	
 	logger.Info("Inicio Migração Owner")
 	owner.MigrateOwners(dbOld, db, logger)
 	logger.Info("Fim Migração Owner")

@@ -178,7 +178,7 @@ func MigrateOwnersClubs(dbOld, dbNew *gorm.DB, logger *logrus.Logger) error {
 		ownerClubData := OwnerClub{
 			OwnerID:   uintPtr(ownerId),
 			ClubID:    uintPtr(ownerClub.ClubID),
-			Associate: ownerClub.Associate,
+			Associate: ownerClub.Associate == "s",
 			Valid:     valid,
 		}
 

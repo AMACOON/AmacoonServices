@@ -4,6 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"golang.org/x/crypto/bcrypt"
+	"errors"
 )
 
 type OwnerRepository struct {
@@ -21,14 +22,16 @@ func NewOwnerRepository(db *gorm.DB, logger *logrus.Logger) *OwnerRepository {
 func (r *OwnerRepository) GetOwnerByID(id uint) (*Owner, error) {
 	r.Logger.Infof("Repository GetOwnerByID")
 	var owner Owner
-	if err := r.DB.First(&owner, id).Error; err != nil {
+	if err := r.DB.
+	Preload("Clubs").
+	Preload("Clubs.Club").
+	First(&owner, id).Error; err != nil {
 		r.Logger.WithError(err).Errorf("error getting owner by id: %v", id)
 		return nil, err
 	}
 	r.Logger.Infof("Repository GetOwnerByID OK")
 	return &owner, nil
 }
-
 
 func (r *OwnerRepository) GetAllOwners() ([]Owner, error) {
 	r.Logger.Infof("Repository GetAllOwners")
@@ -52,8 +55,6 @@ func (r *OwnerRepository) GetOwnerByCPF(cpf string) (*Owner, error) {
 	return &owner, nil
 }
 
-
-
 func (r *OwnerRepository) CreateOwner(owner *Owner) (*Owner, error) {
 	r.Logger.Infof("Repository CreateOwner")
 	if err := r.DB.Create(owner).Error; err != nil {
@@ -64,31 +65,39 @@ func (r *OwnerRepository) CreateOwner(owner *Owner) (*Owner, error) {
 	return owner, nil
 }
 
-func (r *OwnerRepository) UpdateOwner(id uint, owner *Owner) (*Owner, error) {
+func (r *OwnerRepository) UpdateOwner(id uint, owner *Owner) error {
     r.Logger.Infof("Repository UpdateOwner")
+
+    // Verificar se o registro existe
     var existingOwner Owner
-    if err := r.DB.First(&existingOwner, id).Error; err != nil {
-        r.Logger.WithError(err).Errorf("error finding owner with id %v", id)
-        return nil, err
+    result := r.DB.First(&existingOwner, id)
+    if result.Error != nil {
+        if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+            r.Logger.Errorf("owner with id %v not found", id)
+            return result.Error
+        }
+        r.Logger.Errorf("error finding owner with id %v: %v", id, result.Error)
+        return result.Error
     }
-    existingOwner.Name = owner.Name
-    existingOwner.CPF = owner.CPF
-    existingOwner.Address = owner.Address
-    existingOwner.City = owner.City
-    existingOwner.State = owner.State
-    existingOwner.ZipCode = owner.ZipCode
-    existingOwner.CountryID = owner.CountryID
-    existingOwner.Phone = owner.Phone
-    existingOwner.Valid = owner.Valid
-    existingOwner.ValidId = owner.ValidId
-    existingOwner.Observation = owner.Observation
-    if err := r.DB.Save(&existingOwner).Error; err != nil {
-        r.Logger.WithError(err).Errorf("error updating owner with id %v", id)
-        return nil, err
+
+    // Atualizar os campos do proprietário na tabela "owners"
+    if err := r.DB.Model(&existingOwner).Updates(owner).Error; err != nil {
+        r.Logger.Errorf("error updating owner: %v", err)
+        return err
     }
+
+    // Atualizar os campos dos clubes relacionados na tabela "owners_clubs"
+    for _, club := range owner.Clubs {
+        if err := r.DB.Model(&OwnerClub{}).Where("id = ?", club.ID).Updates(club).Error; err != nil {
+            r.Logger.Errorf("error updating owner club record with id %v: %v", club.ID, err)
+            return err
+        }
+    }
+
     r.Logger.Infof("Repository UpdateOwner OK")
-    return &existingOwner, nil
+    return nil
 }
+
 
 
 func (r *OwnerRepository) DeleteOwnerByID(id uint) error {
