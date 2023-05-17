@@ -29,7 +29,6 @@ func (r *OwnerRepository) GetOwnerByID(id uint) (*Owner, error) {
 	return &owner, nil
 }
 
-
 func (r *OwnerRepository) GetAllOwners() ([]Owner, error) {
 	r.Logger.Infof("Repository GetAllOwners")
 	var owners []Owner
@@ -51,8 +50,6 @@ func (r *OwnerRepository) GetOwnerByCPF(cpf string) (*Owner, error) {
 	r.Logger.Infof("Repository GetOwnerByCPF OK")
 	return &owner, nil
 }
-
-
 
 func (r *OwnerRepository) CreateOwner(owner *Owner) (*Owner, error) {
 	r.Logger.Infof("Repository CreateOwner")
@@ -89,7 +86,6 @@ func (r *OwnerRepository) UpdateOwner(id uint, owner *Owner) (*Owner, error) {
     r.Logger.Infof("Repository UpdateOwner OK")
     return &existingOwner, nil
 }
-
 
 func (r *OwnerRepository) DeleteOwnerByID(id uint) error {
 	r.Logger.Infof("Repository DeleteOwnerByID")

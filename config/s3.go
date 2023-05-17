@@ -26,3 +26,4 @@ func SetupS3Session(config *Config, logger *logrus.Logger) (*s3.S3, error) {
 
     return svc, nil
 }
+

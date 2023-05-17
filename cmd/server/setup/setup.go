@@ -8,16 +8,17 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
 	"github.com/scuba13/AmacoonServices/internal/cattery"
+	"github.com/scuba13/AmacoonServices/internal/club"
 	"github.com/scuba13/AmacoonServices/internal/color"
 	"github.com/scuba13/AmacoonServices/internal/country"
 	"github.com/scuba13/AmacoonServices/internal/federation"
+	"github.com/scuba13/AmacoonServices/internal/judge"
 	"github.com/scuba13/AmacoonServices/internal/litter"
 	"github.com/scuba13/AmacoonServices/internal/owner"
 	"github.com/scuba13/AmacoonServices/internal/title"
 	"github.com/scuba13/AmacoonServices/internal/titlerecognition"
 	"github.com/scuba13/AmacoonServices/internal/transfer"
 	"github.com/scuba13/AmacoonServices/internal/utils"
-	"github.com/scuba13/AmacoonServices/internal/club"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -32,6 +33,28 @@ func SetupLogger() *logrus.Logger {
 	logger.Info("Logger Initialized")
 	return logger
 }
+
+// func SetupLogger() *logrus.Logger {
+// 	logger := logrus.New()
+// 	logger.SetLevel(logrus.InfoLevel)
+// 	logger.SetFormatter(&logrus.TextFormatter{
+// 		FullTimestamp: true,
+// 	})
+
+// 	sess := session.Must(session.NewSession(aws.NewConfig().WithRegion("us-east-1").WithCredentials(credentials.NewSharedCredentials("", ""))))
+// 	hook, err := cloudwatchlogs.NewHook("log-group", "log-stream", sess)
+// 	if err != nil {
+// 		logger.WithError(err).Error("Failed to create CloudWatch Logs hook")
+// 	} else {
+// 		logger.Hooks.Add(hook)
+// 	}
+
+// 	logger.SetOutput(os.Stdout)
+// 	logger.Info("Logger Initialized")
+
+// 	return logger
+// }
+
 
 func SetupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 	logger.Info("Connecting DB")
@@ -61,6 +84,7 @@ func SetupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 		&titlerecognition.Title{},
 		&utils.Protocol{},
 		&club.Club{},
+		&judge.Judge{},
 		
 
 	)
