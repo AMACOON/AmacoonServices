@@ -7,6 +7,7 @@ import (
 	"github.com/scuba13/AmacoonServices/config"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	
 )
 
 func main() {
@@ -34,6 +35,7 @@ func main() {
 	// Migrate data
 	MigrateService:= migrate.NewMigrateService(db, dbOld, logger) 
 	migrate.SetupRouter(MigrateService, logger, e)
+	
 	
 	// Initialize repositories, handlers, and routes
 	initialize.InitializeApp(e, logger, db, s3)

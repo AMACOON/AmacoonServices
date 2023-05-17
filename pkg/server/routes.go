@@ -92,6 +92,8 @@ func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
 	ownerGroup.GET("", ownerHandler.GetAllOwners)
 	ownerGroup.GET("/:cpf/cpf", ownerHandler.GetOwnerByCPF)
 	ownerGroup.POST("", ownerHandler.CreateOwner)
+	ownerGroup.PUT("/:id", ownerHandler.UpdateOwner)
+	ownerGroup.DELETE("/:id", ownerHandler.DeleteOwnerByID)
 	ownerGroup.POST("/login", ownerHandler.Login)
 }
 

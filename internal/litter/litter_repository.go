@@ -57,17 +57,44 @@ func (r *LitterRepository) GetLitterByID(id uint) (Litter, error) {
 }
 
 func (r *LitterRepository) UpdateLitter(id uint, litter Litter) error {
-    r.Logger.Infof("Repository UpdateLitter")
-    litter.ID = id
+	r.Logger.Infof("Repository UpdateLitter")
 
-    if err := r.DB.Save(&litter).Error; err != nil {
-        r.Logger.Errorf("error updating litter: %v", err)
-        return err
-    }
+	// Start a new transaction
+	tx := r.DB.Begin()
 
-    r.Logger.Infof("Repository UpdateLitter OK")
-    return nil
+	// Rollback in case of an error
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Atualizar os campos específicos da ninhada na tabela "service_litters"
+	if err := tx.Model(&litter).Where("id = ?", id).Updates(litter).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error updating litter with id %v", id)
+		return err
+	}
+
+	// Atualizar os campos específicos dos gatinhos na tabela "service_kittens_litters"
+	for _, updatedKitten := range litter.KittenData {
+		if err := tx.Model(&KittenLitter{}).Where("id = ?", updatedKitten.ID).Updates(updatedKitten).Error; err != nil {
+			tx.Rollback()
+			r.Logger.WithError(err).Errorf("error updating kitten litter record with id %v", updatedKitten.ID)
+			return err
+		}
+	}
+
+	// If everything goes well, commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		r.Logger.WithError(err).Errorf("error committing transaction")
+		return err
+	}
+
+	r.Logger.Infof("Repository UpdateLitter OK")
+	return nil
 }
+
 
 func (r *LitterRepository) UpdateLitterStatus(id uint, status string) error {
     r.Logger.Infof("Repository UpdateLitterStatus")

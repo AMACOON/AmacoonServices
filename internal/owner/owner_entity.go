@@ -23,6 +23,7 @@ type Owner struct {
 	ValidId      string
 	Observation  string
 	IsAdmin      bool
+	Clubs        []OwnerClub
 }
 
 func (Owner) TableName() string {
@@ -32,10 +33,9 @@ func (Owner) TableName() string {
 type OwnerClub struct {
 	gorm.Model
 	OwnerID   *uint
-	Owner     *Owner `gorm:"foreignKey:OwnerID" json:"-"`
 	ClubID    *uint
 	Club      *club.Club `gorm:"foreignKey:ClubID"`
-	Associate string
+	Associate bool
 	Valid     bool
 }
 

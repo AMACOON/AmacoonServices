@@ -105,14 +105,14 @@ func (h *OwnerHandler) UpdateOwner(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "Failed to parse request body")
 	}
 
-	updatedOwner, err := h.OwnerService.UpdateOwner(id, owner)
+	err := h.OwnerService.UpdateOwner(id, owner)
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to update owner")
 		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update owner")
 	}
 
 	h.Logger.Infof("Handler UpdateOwner OK")
-	return c.JSON(http.StatusOK, updatedOwner)
+	return c.NoContent(http.StatusOK)
 }
 
 func (h *OwnerHandler) DeleteOwnerByID(c echo.Context) error {

@@ -42,5 +42,5 @@ type KittenLitter struct {
 }
 
 func (KittenLitter) TableName() string {
-	return "service_kittens_litters"
+	return "service_litters_kittens"
 }
