@@ -124,6 +124,44 @@ func (r *TitleRecognitionRepository) GetAllTitleRecognitionByRequesterID(request
 	return titlesRecognition, nil
 }
 
+func (r *TitleRecognitionRepository) DeleteTitleRecognition(id uint) error {
+	r.Logger.Infof("Repository DeleteTitleRecognition")
+
+	// Start a new transaction
+	tx := r.DB.Begin()
+
+	// Rollback in case of an error
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Delete all related titles from the "service_title_recognition_titles" table
+	if err := tx.Where("title_recognition_id = ?", id).Delete(&Title{}).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error deleting title recognition title record with title recognition id %v", id)
+		return err
+	}
+
+	// Delete the record from the "title_recognition" table
+	if err := tx.Delete(&TitleRecognition{}, id).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error deleting title recognition by id: %v", id)
+		return err
+	}
+
+	// If everything goes well, commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		r.Logger.WithError(err).Errorf("error committing transaction")
+		return err
+	}
+
+	r.Logger.Infof("Repository DeleteTitleRecognition OK")
+	return nil
+}
+
+
 
 
 

@@ -25,6 +25,7 @@ func (r *OwnerRepository) GetOwnerByID(id uint) (*Owner, error) {
 	if err := r.DB.
 	Preload("Clubs").
 	Preload("Clubs.Club").
+	Preload("Country").
 	First(&owner, id).Error; err != nil {
 		r.Logger.WithError(err).Errorf("error getting owner by id: %v", id)
 		return nil, err
@@ -98,17 +99,93 @@ func (r *OwnerRepository) UpdateOwner(id uint, owner *Owner) error {
     return nil
 }
 
-
-
 func (r *OwnerRepository) DeleteOwnerByID(id uint) error {
 	r.Logger.Infof("Repository DeleteOwnerByID")
-	if err := r.DB.Delete(&Owner{}, id).Error; err != nil {
-		r.Logger.WithError(err).Errorf("error deleting owner by id: %v", id)
+
+	// Start a new transaction
+	tx := r.DB.Begin()
+
+	// Rollback in case of an error
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var owner Owner
+	if err := tx.First(&owner, id).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error finding owner with id %v", id)
 		return err
 	}
+
+	// Delete the clubs associated with this owner from "owners_clubs"
+	if err := tx.Where("owner_id = ?", id).Delete(&OwnerClub{}).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error deleting owner club records with owner id %v", id)
+		return err
+	}
+
+	// Delete the owner from "owners"
+	if err := tx.Delete(&owner).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error deleting owner with id %v", id)
+		return err
+	}
+
+	// If everything goes well, commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		r.Logger.WithError(err).Errorf("error committing transaction")
+		return err
+	}
+
 	r.Logger.Infof("Repository DeleteOwnerByID OK")
 	return nil
 }
+
+func (r *OwnerRepository) CheckOwnerExistence(name, email, cpf string) (bool, error) {
+    r.Logger.Infof("Repository CheckOwnerExistence")
+
+    var count int64
+    result := r.DB.Model(&Owner{}).Where("name = ? OR email = ? OR cpf = ?", name, email, cpf).Count(&count)
+    if result.Error != nil {
+        r.Logger.WithError(result.Error).Error("error checking owner existence")
+        return false, result.Error
+    }
+
+    r.Logger.Infof("Repository CheckOwnerExistence OK")
+    return count > 0, nil
+}
+
+func (r *OwnerRepository) UpdateValidOwner(id uint, validID string) error {
+	r.Logger.Infof("Repository UpdateValidOwner")
+
+	var existingOwner Owner
+	result := r.DB.First(&existingOwner, id)
+	if result.Error != nil {
+		r.Logger.WithError(result.Error).Errorf("error finding owner with id %v", id)
+		return result.Error
+	}
+
+	if existingOwner.ValidId != validID {
+		r.Logger.Errorf("validation ID mismatch for owner with id %v", id)
+		return result.Error
+	}
+
+	result = r.DB.Model(&Owner{}).Where("id = ?", id).Updates(map[string]interface{}{
+		"valid": true,
+	})
+	if result.Error != nil {
+		r.Logger.WithError(result.Error).Errorf("error updating owner with id %v", id)
+		return result.Error
+	}
+
+	r.Logger.Infof("Repository UpdateValidOwner OK")
+	return nil
+}
+
+
+
 
 func (r *OwnerRepository) Login(loginRequest LoginRequest) (*Owner, error) {
 	r.Logger.Info("Repository Login")

@@ -1,41 +1,37 @@
 package config
 
 import (
-	"fmt"
+	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
-type Config struct {
-	DBUsername     string
-	DBPassword     string
-	DBHost         string
-	DBPort         string
-	DBName         string
-	ServerPort      string
-	S3AwsAccessKeyId string
-	S3AwsSecretAccessKey string
-}
+func LoadConfig(logger *logrus.Logger) {
+	// Check which environment we are in
+	env := os.Getenv("APP_ENV")
 
-func LoadConfig() *Config {
-	viper.SetConfigName("config")
+	var configFile string
+
+	switch env {
+	case "production":
+		logger.Println("Production Config Set")
+		configFile = "config.prod"
+	case "local":
+		logger.Println("Local Config Set")
+		configFile = "config.local"
+	default:
+		logger.Println("Unknown environment, using local config")
+		configFile = "config.local"
+	}
+
+	viper.SetConfigName(configFile)
 	viper.AddConfigPath(".")
 	viper.SetConfigType("yaml")
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		fmt.Println(err)
-		panic("Falha ao ler o arquivo de configuração")
+	if err := viper.ReadInConfig(); err != nil {
+		logger.Println("Error reading config file, ", err)
 	}
 
-	return &Config{
-		DBUsername:     viper.GetString("db.username"),
-		DBPassword:     viper.GetString("db.password"),
-		DBHost:         viper.GetString("db.host"),
-		DBPort:         viper.GetString("db.port"),
-		DBName:         viper.GetString("db.name"),
-		ServerPort:      viper.GetString("server.port"),
-		S3AwsAccessKeyId: viper.GetString("aws.S3AwsAccessKeyId"),
-		S3AwsSecretAccessKey: viper.GetString("aws.S3AwsSecretAccessKey"),
-	}
+	viper.AutomaticEnv()
 }

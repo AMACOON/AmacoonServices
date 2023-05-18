@@ -1,20 +1,25 @@
 package owner
 
 import (
+	"strconv"
+
 	"github.com/sirupsen/logrus"
-    "strconv"
 	"golang.org/x/crypto/bcrypt"
+	"github.com/scuba13/AmacoonServices/internal/utils"
+	"fmt"
 )
 
 type OwnerService struct {
-	OwnerRepo *OwnerRepository
-	Logger    *logrus.Logger
+	OwnerRepo         *OwnerRepository
+	OwnerEmailService *OwnerEmailService
+	Logger            *logrus.Logger
 }
 
-func NewOwnerService(ownerRepo *OwnerRepository, logger *logrus.Logger) *OwnerService {
+func NewOwnerService(ownerRepo *OwnerRepository, ownerEmailService *OwnerEmailService, logger *logrus.Logger) *OwnerService {
 	return &OwnerService{
-		OwnerRepo: ownerRepo,
-		Logger:    logger,
+		OwnerRepo:         ownerRepo,
+		OwnerEmailService: ownerEmailService,
+		Logger:            logger,
 	}
 }
 
@@ -33,6 +38,7 @@ func (s *OwnerService) GetOwnerByID(idStr string) (*Owner, error) {
 	s.Logger.Info("Service GetOwnerByID OK")
 	return owner, nil
 }
+
 func (s *OwnerService) GetAllOwners() ([]Owner, error) {
 	s.Logger.Infof("Service GetAllOwners")
 	owners, err := s.OwnerRepo.GetAllOwners()
@@ -55,10 +61,20 @@ func (s *OwnerService) GetOwnerByCPF(cpf string) (*Owner, error) {
 	return owner, nil
 }
 
-
-
 func (s *OwnerService) CreateOwner(owner *Owner) (*Owner, error) {
 	s.Logger.Infof("Service CreateOwner")
+
+	// Verificar se já existe um proprietário com o mesmo nome, e-mail ou CPF
+	exists, err := s.OwnerRepo.CheckOwnerExistence(owner.Name, owner.Email, owner.CPF)
+	if err != nil {
+		s.Logger.WithError(err).Error("failed to check owner existence")
+		return nil, err
+	}
+	if exists {
+		err := fmt.Errorf("owner with the same name, email, or CPF already exists")
+		s.Logger.Errorf("owner with same name, email, or CPF already exists")
+		return nil, err
+	}
 
 	// Gerar o hash da senha antes de salvar
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(owner.PasswordHash), bcrypt.DefaultCost)
@@ -67,19 +83,36 @@ func (s *OwnerService) CreateOwner(owner *Owner) (*Owner, error) {
 		return nil, err
 	}
 
-	owner.PasswordHash = string(hashedPassword) // Atualizar o campo PasswordHash com o hash gerado
+	// Gerar o random validação antes de salvar
+	randomString :=utils.GenerateRandomString()
+	
+	// Atualizar o campo PasswordHash com o hash gerado e o campo ValidId com o random gerado
+	owner.PasswordHash = string(hashedPassword) 
+	owner.ValidId = randomString
 	owner.Valid = false
 
-	createdOwner, err := s.OwnerRepo.CreateOwner(owner)
+	_, err = s.OwnerRepo.CreateOwner(owner)
 	if err != nil {
 		s.Logger.WithError(err).Error("failed to create owner")
+		return nil, err
+	}
+
+	// Consultar o proprietário criado para obter Informações adicionais
+	createdOwner, err:= s.GetOwnerByID(strconv.Itoa(int(owner.ID)))
+	if err != nil {
+		s.Logger.WithError(err).Error("failed to get owner by ID")
+		return nil, err
+	}
+	// Enviar email de validação
+	err = s.OwnerEmailService.SendOwnerValidationEmail(createdOwner)
+	if err != nil {
+		s.Logger.WithError(err).Error("failed to send validation email")
 		return nil, err
 	}
 
 	s.Logger.Infof("Service CreateOwner OK")
 	return createdOwner, nil
 }
-
 
 func (s *OwnerService) UpdateOwner(idStr string, updatedOwner *Owner) error {
 	s.Logger.Infof("Service UpdateOwner")
@@ -97,7 +130,6 @@ func (s *OwnerService) UpdateOwner(idStr string, updatedOwner *Owner) error {
 	return nil
 }
 
-
 func (s *OwnerService) DeleteOwnerByID(idStr string) error {
 	s.Logger.Infof("Service DeleteOwnerByID")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -114,6 +146,37 @@ func (s *OwnerService) DeleteOwnerByID(idStr string) error {
 	return nil
 }
 
+func (s *OwnerService) UpdateValidOwner(id string, validID string) error {
+	s.Logger.Infof("Service UpdateValidOwner")
+
+	ownerID, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		s.Logger.WithError(err).Error("failed to parse owner ID")
+		return err
+	}
+
+	err = s.OwnerRepo.UpdateValidOwner(uint(ownerID), validID)
+	if err != nil {
+		s.Logger.WithError(err).Error("failed to update owner")
+		return err
+	}
+	// Consultar o proprietário criado para obter Informações adicionais
+	updateOwner, err:= s.GetOwnerByID(strconv.Itoa(int(ownerID)))
+	if err != nil {
+		s.Logger.WithError(err).Error("failed to get owner by ID")
+		return err
+	}
+		// Enviar email de confirmação
+		err = s.OwnerEmailService.SendOwnerValidationConfirmationEmail(updateOwner)
+		if err != nil {
+			s.Logger.WithError(err).Error("failed to send validation email")
+			return err
+		}
+
+	s.Logger.Infof("Service UpdateValidOwner OK")
+	return nil
+}
+
 func (s *OwnerService) Login(loginRequest LoginRequest) (*Owner, error) {
 	s.Logger.Info("Service Login")
 
@@ -121,12 +184,7 @@ func (s *OwnerService) Login(loginRequest LoginRequest) (*Owner, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	s.Logger.Info("Service Login OK")
 	return user, nil
 }
-
-
-
-
-

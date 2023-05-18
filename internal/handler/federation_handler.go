@@ -28,7 +28,7 @@ func (h *FederationHandler) GetAllFederations(c echo.Context) error {
 	federations, err := h.FederationService.GetAllFederations()
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to get all federations")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get all federations")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	// Log de saída da função

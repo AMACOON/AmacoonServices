@@ -21,6 +21,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	
 )
 
 func SetupLogger() *logrus.Logger {
@@ -56,9 +57,9 @@ func SetupLogger() *logrus.Logger {
 // }
 
 
-func SetupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
+func SetupDatabase(logger *logrus.Logger) *gorm.DB {
 	logger.Info("Connecting DB")
-	db, err := config.SetupDB(cfg, logger)
+	db, err := config.SetupDB(logger)
 	if err != nil {
 		logger.Fatalf("Failed to initialize DB connection: %v", err)
 	}
@@ -93,9 +94,9 @@ func SetupDatabase(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 	return db
 }
 
-func SetupDatabaseOld(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
+func SetupDatabaseOld(logger *logrus.Logger) *gorm.DB {
 	logger.Info("Connecting DB Old")
-	db, err := config.SetupDBOld(cfg)
+	db, err := config.SetupDBOld()
 	if err != nil {
 		logger.Fatalf("Failed to initialize DB Old connection: %v", err)
 	}
@@ -104,12 +105,13 @@ func SetupDatabaseOld(cfg *config.Config, logger *logrus.Logger) *gorm.DB {
 	return db
 }
 
-func SetupS3(cfg *config.Config, logger *logrus.Logger) *s3.S3 {
+func SetupS3(logger *logrus.Logger) *s3.S3 {
 	logger.Info("Connecting S3")
-	db, err := config.SetupS3Session(cfg, logger)
+	db, err := config.SetupS3Session(logger)
 	if err != nil {
 		logger.Fatalf("Failed to initialize s3 connection: %v", err)
 	}
 	logger.Info("Connected S3")
 	return db
 }
+

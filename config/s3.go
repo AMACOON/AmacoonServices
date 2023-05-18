@@ -8,13 +8,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
     "github.com/sirupsen/logrus"
+    "github.com/spf13/viper"
 )
 	
-func SetupS3Session(config *Config, logger *logrus.Logger) (*s3.S3, error) {
+func SetupS3Session(logger *logrus.Logger) (*s3.S3, error) {
     // Crie uma nova sessão AWS
     sess, err := session.NewSession(&aws.Config{
         Region: aws.String("us-east-1"), // Atualize com a região do seu bucket
-		Credentials: credentials.NewStaticCredentials(config.S3AwsAccessKeyId, config.S3AwsSecretAccessKey, ""),
+		Credentials: credentials.NewStaticCredentials(viper.GetString("aws.S3AwsAccessKeyId"), viper.GetString("aws.S3AwsSecretAccessKey"), ""),
     })
     if err != nil {
 		

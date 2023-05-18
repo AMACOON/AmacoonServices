@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"log"
 
+	"time"
+
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"time"
-	"github.com/sirupsen/logrus"
 )
 
-func SetupDB(config *Config, logger *logrus.Logger) (*gorm.DB, error) {
+func SetupDB(logger *logrus.Logger) (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		config.DBUsername,
-		config.DBPassword,
-		config.DBHost,
-		config.DBPort,
-		config.DBName,
+		viper.GetString("db.username"),
+		viper.GetString("db.password"),
+		viper.GetString("db.host"),
+		viper.GetString("db.port"),
+		viper.GetString("db.name"),
 	)
 
 	var db *gorm.DB
@@ -53,22 +55,20 @@ func SetupDB(config *Config, logger *logrus.Logger) (*gorm.DB, error) {
 	return db, nil
 }
 
-
-
-func SetupDBOld(config *Config) (*gorm.DB, error) {
+func SetupDBOld() (*gorm.DB, error) {
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		"amacoon001_add1",
 		"armin013",
 		"mysql.catclubsystem.com",
-		config.DBPort,
+		viper.GetString("db.port"),
 		"amacoon01",
 	)
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
-		
+
 	}
 
 	return db, nil

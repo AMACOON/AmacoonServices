@@ -36,7 +36,7 @@ func (h *FilesHandler) SaveFiles(c echo.Context) error {
 	savedFiles, err := h.FilesService.SaveFiles(protocolNumber, files)
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to save files")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to save files")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	// Log de saída da função

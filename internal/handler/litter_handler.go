@@ -32,7 +32,7 @@ func (h *LitterHandler) CreateLitter(c echo.Context) error {
 	createdLitter, err := h.LitterService.CreateLitter(litter)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to create litter")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create litter")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	h.Logger.Infof("Handler CreateLitter OK")
 	return c.JSON(http.StatusCreated, createdLitter)
@@ -45,7 +45,7 @@ func (h *LitterHandler) GetLitterByID(c echo.Context) error {
 	foundLitter, err := h.LitterService.GetLitterByID(id)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to get litter")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get litter")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	h.Logger.Infof("Handler GetLitterByID OK")
 	return c.JSON(http.StatusOK, foundLitter)
@@ -78,7 +78,7 @@ func (h *LitterHandler) UpdateLitterStatus(c echo.Context) error {
 	err := h.LitterService.UpdateLitterStatus(id, status)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to update litter status")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update litter status")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	h.Logger.Infof("Handler UpdateLitterStatus OK")
 	return c.NoContent(http.StatusOK)
@@ -91,11 +91,25 @@ func (h *LitterHandler) GetAllLittersByRequesterID(c echo.Context) error {
 	litters, err := h.LitterService.GetAllLittersByRequesterID(requesterID)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to get litters by Requester ID")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get litters by Requester ID")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	h.Logger.Infof("Handler GetAllLittersByRequesterID OK")
 	return c.JSON(http.StatusOK, litters)
+}
+
+func (h *LitterHandler) DeleteLitter(c echo.Context) error {
+	h.Logger.Infof("Handler DeleteLitter")
+	id := c.Param("id")
+	
+	err := h.LitterService.DeleteLitter(id)
+	if err != nil {
+		h.Logger.WithError(err).Errorf("failed to delete litter with id %s", id)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	h.Logger.Infof("Handler DeleteLitter OK")
+	return c.NoContent(http.StatusOK)
 }
 
 

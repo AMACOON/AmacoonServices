@@ -32,7 +32,7 @@ func (h *TitleRecognitionHandler) CreateTitleRecognition(c echo.Context) error {
 	createdTitleRecognition, err := h.TitleRecognitionService.CreateTitleRecognition(titleRecognitionReq)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to create title recognition")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create title recognition")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, createdTitleRecognition)
 }
@@ -44,7 +44,7 @@ func (h *TitleRecognitionHandler) GetTitleRecognitionByID(c echo.Context) error 
 	foundTitleRecognition, err := h.TitleRecognitionService.GetTitleRecognitionByID(id)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to get title recognition")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get title recognition")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	h.Logger.Infof("Handler GetTitleRecognitionByID OK")
 	return c.JSON(http.StatusOK, foundTitleRecognition)
@@ -77,12 +77,11 @@ func (h *TitleRecognitionHandler) UpdateTitleRecognitionStatus(c echo.Context) e
 	err := h.TitleRecognitionService.UpdateTitleRecognitionStatus(id, status)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to update title recognition status")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update title recognition status")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	h.Logger.Infof("Handler UpdateTitleRecognitionStatus OK")
 	return c.NoContent(http.StatusOK)
 }
-
 
 func (h *TitleRecognitionHandler) GetAllTitleRecognitionsByRequesterID(c echo.Context) error {
 	h.Logger.Infof("Handler GetAllTitleRecognitionsByRequesterID")
@@ -91,11 +90,25 @@ func (h *TitleRecognitionHandler) GetAllTitleRecognitionsByRequesterID(c echo.Co
 	titleRecognitions, err := h.TitleRecognitionService.GetAllTitleRecognitionsByRequesterID(id)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to get title recognitions by Requester ID")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get title recognitions by Requester ID")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	h.Logger.Infof("Handler GetAllTitleRecognitionsByRequesterID OK")
 	return c.JSON(http.StatusOK, titleRecognitions)
+}
+
+func (h *TitleRecognitionHandler) DeleteTitleRecognition(c echo.Context) error {
+	h.Logger.Infof("Handler DeleteTitleRecognition")
+	
+	id := c.Param("id")
+	err := h.TitleRecognitionService.DeleteTitleRecognition(id)
+	if err != nil {
+		h.Logger.WithError(err).Errorf("failed to delete title recognition with id %s", id)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	h.Logger.Infof("Handler DeleteTitleRecognition OK")
+	return c.NoContent(http.StatusOK)
 }
 
 

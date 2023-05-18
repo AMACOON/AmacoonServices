@@ -51,7 +51,7 @@ func (h *OwnerHandler) GetAllOwners(c echo.Context) error {
 	owners, err := h.OwnerService.GetAllOwners()
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to get all owners")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get all owners")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	h.Logger.Infof("Handler GetAllOwners OK")
@@ -65,7 +65,7 @@ func (h *OwnerHandler) GetOwnerByCPF(c echo.Context) error {
 	owner, err := h.OwnerService.GetOwnerByCPF(cpf)
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to get owner by CPF")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get owner by CPF")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	h.Logger.Infof("Handler GetOwnerByCPF OK")
@@ -84,7 +84,7 @@ func (h *OwnerHandler) CreateOwner(c echo.Context) error {
 	createdOwner, err := h.OwnerService.CreateOwner(&owner)
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to create owner")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to create owner")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	h.Logger.Infof("Handler CreateOwner OK")
@@ -108,7 +108,7 @@ func (h *OwnerHandler) UpdateOwner(c echo.Context) error {
 	err := h.OwnerService.UpdateOwner(id, owner)
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to update owner")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update owner")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	h.Logger.Infof("Handler UpdateOwner OK")
@@ -126,12 +126,38 @@ func (h *OwnerHandler) DeleteOwnerByID(c echo.Context) error {
 	err := h.OwnerService.DeleteOwnerByID(id)
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to delete owner")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to delete owner")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	h.Logger.Infof("Handler DeleteOwnerByID OK")
 	return c.NoContent(http.StatusOK)
 }
+
+func (h *OwnerHandler) UpdateValidOwner(c echo.Context) error {
+	h.Logger.Infof("Handler UpdateValidOwner")
+
+	id := c.Param("id")
+	h.Logger.WithFields(logrus.Fields{
+		"id": id,
+	}).Info("Updating Valid Owner")
+
+	validID := c.Param("validId")
+	
+	err := h.OwnerService.UpdateValidOwner(id, validID)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to update owner validation")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	h.Logger.Infof("Handler UpdateValidOwner OK")
+	return c.String(http.StatusOK, "Owner successfully validated")
+}
+
+
+
+
+
+
 
 func (h *OwnerHandler) Login(c echo.Context) error {
 	h.Logger.Infof("Handler Login")

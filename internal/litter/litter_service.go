@@ -111,4 +111,20 @@ func (s *LitterService) GetAllLittersByRequesterID(requesterID string) ([]Litter
 	return litters, nil
 }
 
+func (s *LitterService) DeleteLitter(id string) error {
+	s.Logger.Infof("Service DeleteLitter")
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return err
+	}
+	err = s.LitterRepo.DeleteLitter(uint(idUint))
+	if err != nil {
+		s.Logger.Errorf("error delete litter from repository: %v", err)
+		return err
+	}
+
+	s.Logger.Infof("Service DeleteLitter OK")
+	return nil
+}
+
 
