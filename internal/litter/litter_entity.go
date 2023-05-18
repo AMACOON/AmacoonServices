@@ -13,14 +13,14 @@ type Litter struct {
 	FatherData     catservice.CatService   `gorm:"embedded;embeddedPrefix:father_"`
 	MotherOwner    catservice.OwnerService `gorm:"embedded;embeddedPrefix:motherOwner_"`
 	FatherOwner    catservice.OwnerService `gorm:"embedded;embeddedPrefix:fatherOwner_"`
-	CatteryName    string                  
-	NumKittens     int                     
-	BirthDate      time.Time              
-	CountryCode    string               
-	Status         string                
-	ProtocolNumber string                  
-	RequesterID    uint                   
-	KittenData     []KittenLitter       
+	CatteryName    string
+	NumKittens     int
+	BirthDate      time.Time
+	CountryCode    string
+	Status         string
+	ProtocolNumber string
+	RequesterID    uint
+	KittenData     []KittenLitter
 }
 
 func (Litter) TableName() string {
@@ -29,16 +29,17 @@ func (Litter) TableName() string {
 
 type KittenLitter struct {
 	gorm.Model
-	Name       string 
-	Gender     string 
-	BreedName  string 
-	ColorName  string 
-	EmsCode    string 
-	ColorNameX string 
-	Microchip  string 
-	Breeding   bool   
-	LitterID   uint    // Esta é a chave estrangeira para a tabela litters
-	
+	Name       string
+	Gender     string
+	BreedName  string
+	ColorName  string
+	EmsCode    string
+	ColorNameX string
+	Microchip  string
+	Breeding   bool
+	LitterID   uint 
+
+
 }
 
 func (KittenLitter) TableName() string {

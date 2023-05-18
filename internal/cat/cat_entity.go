@@ -10,6 +10,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/federation"
 	"github.com/scuba13/AmacoonServices/internal/owner"
 	"github.com/scuba13/AmacoonServices/internal/title"
+	"github.com/scuba13/AmacoonServices/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +18,7 @@ type Cat struct {
 	gorm.Model
 	Name             string                 `gorm:"column:name"`
 	Registration     string                 `gorm:"column:registration;index"`
-	RegistrationType string                 `gorm:"column:registration_type"`
+	RegistrationType string                 `gorm:"column:registration_type;type:enum('LO', 'RX')"`
 	Microchip        string                 `gorm:"column:microchip"`
 	Gender           string                 `gorm:"column:gender;index"`
 	Birthdate        time.Time              `gorm:"column:birthdate"`
@@ -44,7 +45,7 @@ type Cat struct {
 	Titles           []TitlesCat            `gorm:"foreignKey:CatID"`
 	FatherNameTemp   string
 	MotherNameTemp   string
-	//Files            []utils.Files
+	Files            []FilesCat
 }
 
 func (Cat) TableName() string {
@@ -62,4 +63,14 @@ type TitlesCat struct {
 
 func (TitlesCat) TableName() string {
 	return "cats_titles"
+}
+
+type FilesCat struct {
+	gorm.Model
+	CatID    uint
+	FileData utils.Files `gorm:"embedded;embeddedPrefix:cat_file_"`
+}
+
+func (FilesCat) TableName() string {
+	return "cats_files"
 }

@@ -17,5 +17,6 @@ smtp:
   password: Sistema@0013
   systemEmail: sistema@catclubsystem.com
   adminEmail: scuba13@hotmail.com
+  # adminEmail: amacoon@gmail.com
 jwt:
   secret: DonSagaGaiaLacoste
