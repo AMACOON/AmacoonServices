@@ -101,10 +101,44 @@ func (r *OwnerRepository) UpdateOwner(id uint, owner *Owner) error {
 
 func (r *OwnerRepository) DeleteOwnerByID(id uint) error {
 	r.Logger.Infof("Repository DeleteOwnerByID")
-	if err := r.DB.Delete(&Owner{}, id).Error; err != nil {
-		r.Logger.WithError(err).Errorf("error deleting owner by id: %v", id)
+
+	// Start a new transaction
+	tx := r.DB.Begin()
+
+	// Rollback in case of an error
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var owner Owner
+	if err := tx.First(&owner, id).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error finding owner with id %v", id)
 		return err
 	}
+
+	// Delete the clubs associated with this owner from "owners_clubs"
+	if err := tx.Where("owner_id = ?", id).Delete(&OwnerClub{}).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error deleting owner club records with owner id %v", id)
+		return err
+	}
+
+	// Delete the owner from "owners"
+	if err := tx.Delete(&owner).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error deleting owner with id %v", id)
+		return err
+	}
+
+	// If everything goes well, commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		r.Logger.WithError(err).Errorf("error committing transaction")
+		return err
+	}
+
 	r.Logger.Infof("Repository DeleteOwnerByID OK")
 	return nil
 }

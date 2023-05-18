@@ -33,7 +33,7 @@ func (h *TransferHandler) CreateTransfer(c echo.Context) error {
 	createdTransfer, err := h.TransferService.CreateTransfer(transferReq)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to create transfer")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to create transfer")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusCreated, createdTransfer)
 }
@@ -45,7 +45,7 @@ func (h *TransferHandler) GetTransferByID(c echo.Context) error {
 	foundTransfer, err := h.TransferService.GetTransferByID(id)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to get transfer")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get transfer")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	h.Logger.Infof("Handler GetTransferByID OK")
 	return c.JSON(http.StatusOK, foundTransfer)
@@ -78,7 +78,7 @@ func (h *TransferHandler) UpdateTransferStatus(c echo.Context) error {
 	err := h.TransferService.UpdateTransferStatus(id, status)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to update transfer status")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to update transfer status")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 	h.Logger.Infof("Handler UpdateTransferStatus OK")
 	return c.NoContent(http.StatusOK)
@@ -91,7 +91,7 @@ func (h *TransferHandler) GetAllTransfersByRequesterID(c echo.Context) error {
 	transfers, err := h.TransferService.GetAllTransfersByRequesterID(id)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to get transfers by Requester ID")
-		return echo.NewHTTPError(http.StatusInternalServerError, "failed to get transfers by Requester ID")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	h.Logger.Infof("Handler GetAllTransfersByRequesterID OK")

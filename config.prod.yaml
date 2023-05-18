@@ -6,6 +6,7 @@ db:
   name: dbcatclubsystem
 server:
   port: 8080
+  host: https://amacoon.fq8n18ftegddi.us-east-1.cs.amazonlightsail.com
 aws:
   S3AwsAccessKeyId: AKIA4R4F43U6FT2QGREN
   S3AwsSecretAccessKey: 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
@@ -14,3 +15,5 @@ smtp:
   port: 587
   username: sistema@catclubsystem.com
   password: Sistema@0013
+  systemEmail: sistema@catclubsystem.com
+  adminEmail: scuba13@hotmail.com

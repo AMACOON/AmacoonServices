@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/scuba13/AmacoonServices/internal/utils"
+	"fmt"
 )
 
 type OwnerService struct {
@@ -70,6 +71,7 @@ func (s *OwnerService) CreateOwner(owner *Owner) (*Owner, error) {
 		return nil, err
 	}
 	if exists {
+		err := fmt.Errorf("owner with the same name, email, or CPF already exists")
 		s.Logger.Errorf("owner with same name, email, or CPF already exists")
 		return nil, err
 	}

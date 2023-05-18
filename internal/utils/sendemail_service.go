@@ -1,30 +1,29 @@
 package utils
 
 import (
-	"github.com/scuba13/AmacoonServices/config"
 	"github.com/sirupsen/logrus"
-	 "gopkg.in/gomail.v2"
-	"strconv"
+	"github.com/spf13/viper"
+	"gopkg.in/gomail.v2"
 )
 
 type SmtpService struct {
 	Logger *logrus.Logger
-	Config *config.Config
 }
 
-func NewSmtpService(config *config.Config, logger *logrus.Logger) *SmtpService {
+func NewSmtpService(logger *logrus.Logger) *SmtpService {
 	return &SmtpService{
-		Config: config,
 		Logger: logger,
 	}
 }
 
 func (s *SmtpService) SendEmail(from string, to []string, subject string, body string) error {
+	s.Logger.Infof("Sending email from %s to %s", from, to)
+	
 	// Configuração do servidor SMTP
-	smtpHost := s.Config.SMPTHost
-	smtpPort, _ := strconv.Atoi(s.Config.SMTPPort)
-	smtpUsername := s.Config.SMTPUsername
-	smtpPassword := s.Config.SMTPPassword
+	smtpHost := viper.GetString("smtp.host")
+	smtpPort := viper.GetInt("smtp.port")
+	smtpUsername := viper.GetString("smtp.username")
+	smtpPassword := viper.GetString("smtp.password")
 
 	// Cria uma nova mensagem usando a biblioteca GoMail
 	message := gomail.NewMessage()
@@ -38,10 +37,10 @@ func (s *SmtpService) SendEmail(from string, to []string, subject string, body s
 
 	// Envia o e-mail usando o Dialernao, faz sentigo
 	if err := dialer.DialAndSend(message); err != nil {
-		s.Logger.Errorf("Falha ao enviar o e-mail: %v", err)
+		s.Logger.Errorf("Fail to send e-mail: %v", err)
 		return err
 	}
 
-	s.Logger.Println("E-mail enviado com sucesso")
+	s.Logger.Println("Email sent successfully")
 	return nil
 }

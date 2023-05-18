@@ -93,7 +93,6 @@ func (s *TitleRecognitionService) UpdateTitleRecognitionStatus(id string, status
 	return nil
 }
 
-
 func (s *TitleRecognitionService) GetAllTitleRecognitionsByRequesterID(requesterID string) ([]TitleRecognition, error) {
 	s.Logger.Infof("Service GetAllTitleRecognitionsByRequesterID")
 	
@@ -104,6 +103,21 @@ func (s *TitleRecognitionService) GetAllTitleRecognitionsByRequesterID(requester
 	}
 	s.Logger.Infof("Service GetAllTitleRecognitionsByRequesterID OK")
 	return titleRecognitions, nil
+}
+
+func (s *TitleRecognitionService) DeleteTitleRecognition(id string) error {
+	s.Logger.Infof("Service DeleteTitleRecognition")
+
+	idUint, err := strconv.ParseUint(id, 10, 64)
+	if err != nil {
+		return err
+	}
+	if err := s.TitleRecognitionRepo.DeleteTitleRecognition(uint(idUint)); err != nil {
+		s.Logger.WithError(err).Error("failed to update titleRecognition")
+		return err
+	}
+	s.Logger.Infof("Service DeleteTitleRecognition OK")
+	return nil
 }
 
 

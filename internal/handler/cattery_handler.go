@@ -28,7 +28,7 @@ func (h *CatteryHandler) GetAllCatteries(c echo.Context) error {
 	catteries, err := h.CatteryService.GetAllCatteries()
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to get all catteries")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get all catteries")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	// Log de saída da função

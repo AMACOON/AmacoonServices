@@ -95,7 +95,6 @@ func (r *LitterRepository) UpdateLitter(id uint, litter Litter) error {
 	return nil
 }
 
-
 func (r *LitterRepository) UpdateLitterStatus(id uint, status string) error {
     r.Logger.Infof("Repository UpdateLitterStatus")
     
@@ -118,6 +117,50 @@ func (r *LitterRepository) GetAllLittersByRequesterID(requesterID uint) ([]Litte
 
 	r.Logger.Infof("Repository GetAllLittersByRequesterID OK")
 	return litters, nil
+}
+
+func (r *LitterRepository) DeleteLitter(id uint) error {
+	r.Logger.Infof("Repository DeleteLitter")
+
+	// Start a new transaction
+	tx := r.DB.Begin()
+
+	// Rollback in case of an error
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var litter Litter
+	if err := tx.First(&litter, id).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error finding litter with id %v", id)
+		return err
+	}
+
+	// Delete the kittens associated with this litter from "service_kittens_litters"
+	if err := tx.Where("litter_id = ?", id).Delete(&KittenLitter{}).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error deleting kitten litter records with litter id %v", id)
+		return err
+	}
+
+	// Delete the litter from "service_litters"
+	if err := tx.Delete(&litter).Error; err != nil {
+		tx.Rollback()
+		r.Logger.WithError(err).Errorf("error deleting litter with id %v", id)
+		return err
+	}
+
+	// If everything goes well, commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		r.Logger.WithError(err).Errorf("error committing transaction")
+		return err
+	}
+
+	r.Logger.Infof("Repository DeleteLitter OK")
+	return nil
 }
 
 

@@ -111,6 +111,7 @@ func setupLitterRoutes(e *echo.Echo, litterHandler *handler.LitterHandler) {
 	litterGroup.PUT("/:id", litterHandler.UpdateLitter)
 	litterGroup.PUT("/:id/status", litterHandler.UpdateLitterStatus)
 	litterGroup.GET("/:requesterID/requesterID", litterHandler.GetAllLittersByRequesterID)
+	litterGroup.DELETE("/:id", litterHandler.DeleteLitter)
 }
 
 func setupTransferRoutes(e *echo.Echo, transferHandler *handler.TransferHandler) {
@@ -129,6 +130,7 @@ func setupTitleRecognitionRoutes(e *echo.Echo, titleRecognitionHandler *handler.
 	titleRecognitionGroup.PUT("/:id", titleRecognitionHandler.UpdateTitlesRecognition)
 	titleRecognitionGroup.PUT("/:id/status", titleRecognitionHandler.UpdateTitleRecognitionStatus)
 	titleRecognitionGroup.GET("/:requesterID/requesterID", titleRecognitionHandler.GetAllTitleRecognitionsByRequesterID)
+	titleRecognitionGroup.DELETE("/:id", titleRecognitionHandler.DeleteTitleRecognition)
 }
 
 func setupBreedRoutes(e *echo.Echo, breedHandler *handler.BreedHandler) {

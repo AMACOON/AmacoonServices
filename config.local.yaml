@@ -1,0 +1,19 @@
+db:
+  username: catclubsystem
+  password: 2010mainecoon2010
+  host: ls-ad0ef4e184e7a556c4e988f165f81bdb159f5185.cpx4ifio97ko.us-east-1.rds.amazonaws.com
+  port: 3306
+  name: dbcatclubsystem
+server:
+  port: 8080
+  host: localhost
+aws:
+  S3AwsAccessKeyId: AKIA4R4F43U6FT2QGREN
+  S3AwsSecretAccessKey: 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
+smtp:
+  host: smtp.kinghost.net
+  port: 587
+  username: sistema@catclubsystem.com
+  password: Sistema@0013
+  systemEmail: sistema@catclubsystem.com
+  adminEmail: scuba13@hotmail.com

@@ -18,13 +18,12 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/transfer"
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	routes "github.com/scuba13/AmacoonServices/pkg/server"
-	"github.com/scuba13/AmacoonServices/config"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	
 )
 
-func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s3.S3, config *config.Config) {
+func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s3.S3) {
 
 	// Initialize repositories
 	logger.Info("Initialize Repositories")
@@ -47,7 +46,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	logger.Info("Initialize Services")
 	filesService := utils.NewFilesService(s3Client, logger)
 	protocolService := utils.NewProtocolService(protocolRepo, logger)
-	smptService:= utils.NewSmtpService(config,logger)
+	smptService:= utils.NewSmtpService(logger)
 	ownerEmailService := owner.NewOwnerEmailService(smptService, logger)
 	
 	litterService := litter.NewLitterService(litterRepo, logger, protocolService, filesService)

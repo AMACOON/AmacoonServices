@@ -7,6 +7,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
 	"strings"
+	"github.com/spf13/viper"
 )
 
 type OwnerEmailService struct {
@@ -24,14 +25,13 @@ func NewOwnerEmailService(smtpService *utils.SmtpService, logger *logrus.Logger)
 func (s *OwnerEmailService) SendOwnerValidationEmail(owner *Owner) error {
 	s.Logger.Infof("Sending Owner Validation Email %s", owner.Email) // trocar para env from
 
-	from := "sistema@catclubsystem.com"
-	to := []string{"scuba13@hotmail.com"}
+	from := viper.GetString("smtp.systemEmail")
+	to := []string{viper.GetString("smtp.adminEmail")}
 	subject := fmt.Sprintf("Owner Validation Request: %s", owner.Name)
-
+	url := viper.GetString("server.host")
+	
 	// Consulta para obter os nomes dos clubes
 	clubNames:= getClubNamesSeparatedByComma(*owner)
-
-	url := "http://localhost:8080"
 
 	// Configura o Hermes
 	h := hermes.Hermes{

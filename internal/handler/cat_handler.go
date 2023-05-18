@@ -42,7 +42,7 @@ func (h *CatHandler) GetCatsCompleteByID(c echo.Context) error {
 		h.Logger.WithFields(logrus.Fields{
 			"id": id,
 		}).Warn("CatComplete not found by ID")
-		return echo.NewHTTPError(http.StatusNotFound, "CatComplete not found")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	// Log de saída da função

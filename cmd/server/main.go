@@ -7,6 +7,7 @@ import (
 	"github.com/scuba13/AmacoonServices/cmd/server/migrate"
 	"github.com/scuba13/AmacoonServices/cmd/server/setup"
 	"github.com/scuba13/AmacoonServices/config"
+	"github.com/spf13/viper"
 )
 
 func main() {
@@ -22,25 +23,26 @@ func main() {
 	}))
 
 	// Load configuration data
-	cfg := config.LoadConfig()
+	config.LoadConfig(logger)
 
 	//Initialize S3
-	s3 := setup.SetupS3(cfg, logger)
+	s3 := setup.SetupS3(logger)
 
 	// Initialize DB
-	db := setup.SetupDatabase(cfg, logger)
-	dbOld := setup.SetupDatabaseOld(cfg, logger)
+	dbOld := setup.SetupDatabaseOld(logger)
+	db := setup.SetupDatabase(logger)
+	
 
 	// Migrate data
 	MigrateService := migrate.NewMigrateService(db, dbOld, logger)
 	migrate.SetupRouter(MigrateService, logger, e)
 
 	// Initialize repositories, handlers, and routes
-	initialize.InitializeApp(e, logger, db, s3, cfg)
+	initialize.InitializeApp(e, logger, db, s3)
 
 	// Start server
 	logger.Info("Starting Server")
-	if err := e.Start(":" + cfg.ServerPort); err != nil {
+	if err := e.Start(":" + viper.GetString("server.port")); err != nil {
 		logger.Fatalf("Failed to start server: %v", err)
 	}
 }

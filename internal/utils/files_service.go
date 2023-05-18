@@ -2,7 +2,6 @@ package utils
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"mime/multipart"
 	"path/filepath"
@@ -25,6 +24,7 @@ func NewFilesService(s3Client *s3.S3, logger *logrus.Logger) *FilesService {
 }
 
 func (s *FilesService) SaveFiles(protocolNumber string, files []*multipart.FileHeader) ([]Files, error) {
+	s.Logger.Infof("Saving %d files for protocol %s", len(files), protocolNumber)
 	savedFiles := []Files{}
 
 	bucket := "amacoondocs" // Atualize com o nome do seu bucket
@@ -32,7 +32,8 @@ func (s *FilesService) SaveFiles(protocolNumber string, files []*multipart.FileH
 	for _, file := range files {
 		src, err := file.Open()
 		if err != nil {
-			return nil, fmt.Errorf("error opening file: %v", err)
+			s.Logger.Errorf("error opening file: %v", err)
+			return nil, err
 		}
 		defer src.Close()
 
@@ -41,7 +42,8 @@ func (s *FilesService) SaveFiles(protocolNumber string, files []*multipart.FileH
 
 		buf := new(bytes.Buffer)
 		if _, err := io.Copy(buf, src); err != nil {
-			return nil, fmt.Errorf("error copying file: %v", err)
+			s.Logger.Errorf("error copying file: %v", err)
+			return nil, err
 		}
 
 		_, err = s.S3Client.PutObject(&s3.PutObjectInput{
@@ -51,7 +53,8 @@ func (s *FilesService) SaveFiles(protocolNumber string, files []*multipart.FileH
 			ContentType: aws.String(file.Header.Get("Content-Type")),
 		})
 		if err != nil {
-			return nil, fmt.Errorf("error uploading file to S3: %v", err)
+			s.Logger.Errorf("error uploading file to S3: %v", err)
+			return nil, err
 		}
 
 		newFile := Files{
@@ -61,6 +64,6 @@ func (s *FilesService) SaveFiles(protocolNumber string, files []*multipart.FileH
 		}
 		savedFiles = append(savedFiles, newFile)
 	}
-
+	s.Logger.Infof("Saved %d files for protocol %s", len(files), protocolNumber)
 	return savedFiles, nil
 }

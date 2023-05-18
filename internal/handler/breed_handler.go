@@ -29,7 +29,7 @@ func (h *BreedHandler) GetAllBreeds(c echo.Context) error {
 	breeds, err := h.BreedService.GetAllBreeds()
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to get all breeds")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get all breeds")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
 	// Log de saída da função
