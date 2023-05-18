@@ -17,6 +17,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/titlerecognition"
 	"github.com/scuba13/AmacoonServices/internal/transfer"
 	"github.com/scuba13/AmacoonServices/internal/utils"
+	"github.com/scuba13/AmacoonServices/internal/login"
 	routes "github.com/scuba13/AmacoonServices/pkg/server"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -40,6 +41,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	titleRepo := title.NewTitleRepository(db, logger)
 	titleRecognitionRepo := titlerecognition.NewTitleRecognitionRepository(db, logger)
 	catServiceRepo := catservice.NewCatServiceRepository(db, logger)
+	loginRepo := login.NewLoginRepository(db, logger)
 	logger.Info("Initialize Repositories OK")
 
 	// Initialize services
@@ -61,6 +63,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	titleService := title.NewTitleService(titleRepo, logger)
 	titleRecognitionService := titlerecognition.NewTitleRecognitionService(titleRecognitionRepo, logger, protocolService)
 	catServiceService := catservice.NewCatServiceService(catServiceRepo, logger)
+	loginService := login.NewLoginService(loginRepo, logger)
 	logger.Info("Initialize Services OK")
 
 	// Initialize handlers
@@ -78,6 +81,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	titleRecognitionHandler := handler.NewTitleRecognitionHandler(titleRecognitionService, logger)
 	catServiceHandler := handler.NewCatServiceHandler(catServiceService, logger)
 	filesHandler := handler.NewFilesHandler(filesService, logger)
+	loginHandler := handler.NewLoginHandler(loginService, logger)
 	logger.Info("Initialize Handlers OK")
 
 	// Initialize router and routes
@@ -86,7 +90,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 		litterHandler, breedHandler, countryHandler,
 		transferHandler, catteryHandler, federationHandler,
 		titleHandler, titleRecognitionHandler, catServiceHandler,
-		filesHandler,
+		filesHandler, loginHandler,
 		logger, e)
 	logger.Info("Initialize Router and Routes OK")
 

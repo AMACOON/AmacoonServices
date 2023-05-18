@@ -22,7 +22,6 @@ type Owner struct {
 	Valid        bool
 	ValidId      string
 	Observation  string
-	IsAdmin      bool
 	Clubs        []OwnerClub
 }
 

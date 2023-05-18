@@ -16,6 +16,7 @@ func main() {
 
 	// Initialize Echo
 	e := echo.New()
+
 	e.Use(middleware.Recover())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "${time_rfc3339} ${remote_ip} ${method} ${uri} ${status} ${error}\n",
@@ -31,7 +32,6 @@ func main() {
 	// Initialize DB
 	dbOld := setup.SetupDatabaseOld(logger)
 	db := setup.SetupDatabase(logger)
-	
 
 	// Migrate data
 	MigrateService := migrate.NewMigrateService(db, dbOld, logger)

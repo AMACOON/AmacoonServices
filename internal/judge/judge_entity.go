@@ -11,10 +11,12 @@ type Judge struct {
 	Email     string
 	CountryID *uint
 	Country   *country.Country `gorm:"foreignKey:CountryID"`
-	Category1 bool
+	Category1A bool
+	Category1B bool
 	Category2 bool
 	Category3 bool
-	Category4 bool
+	Category4C bool
+	Category4D bool
 }
 
 func (Judge) TableName() string {

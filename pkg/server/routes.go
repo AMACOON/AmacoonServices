@@ -3,11 +3,16 @@ package routes
 import (
 	"net/http"
 
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
 	"github.com/scuba13/AmacoonServices/internal/handler"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	
 )
+
 
 func NewRouter(catHandler *handler.CatHandler,
 	ownerHandler *handler.OwnerHandler,
@@ -22,6 +27,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	titleRecognitionHandler *handler.TitleRecognitionHandler,
 	catServiceHandler *handler.CatServiceHandler,
 	filesHandler *handler.FilesHandler,
+	loginHandler *handler.LoginHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -30,7 +36,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	e.Use(middleware.AddTrailingSlash())
 
 	e.HTTPErrorHandler = customHTTPErrorHandler
-
+	
+	jwtConfig := getJWTConfig()
 	setupHealthChecks(e)
 	setupCatRoutes(e, catHandler)
 	setupOwnerRoutes(e, ownerHandler)
@@ -41,10 +48,12 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupTransferRoutes(e, transferHandler)
 	setupCatteryRoutes(e, catteryHandler)
 	setupFederationRoutes(e, federationHandler)
-	setupTitlesRoutes(e, titleHandler)
+	setupTitlesRoutes(e, titleHandler, jwtConfig)
 	setupTitleRecognitionRoutes(e, titleRecognitionHandler)
 	setupCatServiceRoutes(e, catServiceHandler)
 	setupFilesRoutes(e, filesHandler)
+	setupLoginRoutes(e, loginHandler)
+	
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -64,6 +73,13 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 		c.Logger().Error(err)
 	}
 }
+func getJWTConfig() echojwt.Config {
+	secret := viper.GetString("jwt.secret")
+	return echojwt.Config{
+		SigningKey: []byte(secret),
+	}
+}
+
 
 func setupHealthChecks(e *echo.Echo) {
 	e.GET("/", func(c echo.Context) error {
@@ -73,6 +89,7 @@ func setupHealthChecks(e *echo.Echo) {
 
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	catGroup := e.Group("/cats")
+	//catGroup.Use(echojwt.WithConfig(jwtConfig))
 	catGroup.GET("/:id", catHandler.GetCatsCompleteByID)
 	catGroup.GET("/:ownerId/owner", catHandler.GetCatCompleteByAllByOwner)
 }
@@ -95,8 +112,7 @@ func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
 	ownerGroup.PUT("/:id", ownerHandler.UpdateOwner)
 	ownerGroup.DELETE("/:id", ownerHandler.DeleteOwnerByID)
 	ownerGroup.GET("/:id/:validId/valid", ownerHandler.UpdateValidOwner)
-	ownerGroup.POST("/login", ownerHandler.Login)
-	
+
 }
 
 func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {
@@ -156,8 +172,9 @@ func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
 	countryGroup.GET("", countryHandler.GetAllCountry)
 }
 
-func setupTitlesRoutes(e *echo.Echo, titleHandler *handler.TitleHandler) {
+func setupTitlesRoutes(e *echo.Echo, titleHandler *handler.TitleHandler, jwtConfig echojwt.Config) {
 	titleGroup := e.Group("/titles")
+	titleGroup.Use(echojwt.WithConfig(jwtConfig))
 	titleGroup.GET("", titleHandler.GetAllTitles)
 }
 
@@ -166,3 +183,10 @@ func setupFilesRoutes(e *echo.Echo, filesHandler *handler.FilesHandler) {
 	fileGroup.POST("/:protocolNumber", filesHandler.SaveFiles)
 
 }
+
+func setupLoginRoutes(e *echo.Echo, loginHandler *handler.LoginHandler) {
+	ownerGroup := e.Group("/login")
+	ownerGroup.POST("/authenticate", loginHandler.Login)
+
+}
+

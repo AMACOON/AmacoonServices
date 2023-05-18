@@ -10,7 +10,7 @@ type Club struct {
 	Nickname string
 	Email string
 	Login string
-	Password string
+	PasswordHash string
 	Permission int
 	}
 
