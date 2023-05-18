@@ -87,8 +87,7 @@ func SetupDatabase(logger *logrus.Logger) *gorm.DB {
 		&club.Club{},
 		&judge.Judge{},
 		
-
-	)
+	 )
 	logger.Info("AutoMigrate DB OK")
 	logger.Info("Connected DB OK")
 	return db

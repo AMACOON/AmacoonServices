@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
+	//"github.com/golang-jwt/jwt/v4"
 )
 
 type CatHandler struct {
@@ -24,6 +25,15 @@ func NewCatHandler(catService *cat.CatService, logger *logrus.Logger) *CatHandle
 
 func (h *CatHandler) GetCatsCompleteByID(c echo.Context) error {
 
+	// userToken, ok := c.Get("user").(*jwt.Token)
+	// if !ok {
+	// 	h.Logger.Errorln("Failed to get CatComplete by ID")
+	// 	return echo.NewHTTPError(http.StatusInternalServerError, "Erro ao obter o token")
+	// }
+	// claims := userToken.Claims.(jwt.MapClaims)
+	// userID := claims["sub"].(string)
+	
+	//h.Logger.Infof("userID: %s", userID)
 	// Log de entrada da função
 	h.Logger.Infof("Handler GetCatsCompleteByID")
 	id := c.Param("id")

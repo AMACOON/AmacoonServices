@@ -94,7 +94,7 @@ func MigrateOwners(dbOld, dbNew *gorm.DB, logger *logrus.Logger) error {
 				Valid:        owner.Valid == "s",
 				ValidId:      owner.ValidationID,
 				Observation:  string(owner.Observation),
-				IsAdmin:      false, // Inicialmente, todos os usuários não são administradores
+				
 			}
 
 			var count int64

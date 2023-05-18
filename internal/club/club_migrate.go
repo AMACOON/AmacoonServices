@@ -1,8 +1,9 @@
 package club
 
 import (
-	"gorm.io/gorm"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type ClubS struct {
@@ -20,47 +21,53 @@ func (ClubS) TableName() string {
 	return "clubes"
 }
 
-
 func MigrateClubs(dbOld *gorm.DB, dbNew *gorm.DB, logger *logrus.Logger) error {
-    logger.Infof("Migrating clubs...")
+	logger.Infof("Migrating clubs...")
 
-    var clubsSource []ClubS
-    if err := dbOld.Unscoped().Find(&clubsSource).Error; err != nil {
-        logger.WithError(err).Error("Failed to get clubs from old database")
-        return err
-    }
+	var clubsSource []ClubS
+	if err := dbOld.Unscoped().Find(&clubsSource).Error; err != nil {
+		logger.WithError(err).Error("Failed to get clubs from old database")
+		return err
+	}
 
-    var clubsDestination []Club
-    for _, clubSource := range clubsSource {
-        clubDestination := Club{
-            Name:       clubSource.Name,
-            Nickname:   clubSource.Nickname,
-            Email:      clubSource.Email,
-            Login:      clubSource.Login,
-            Password:   clubSource.Password,
-            Permission: convertPermission(clubSource.Permission), // Convert permission value, if necessary
-        }
-        clubsDestination = append(clubsDestination, clubDestination)
-    }
+	var clubsDestination []Club
+	for _, clubSource := range clubsSource {
 
-    if err := dbNew.Create(&clubsDestination).Error; err != nil {
-        logger.WithError(err).Error("Failed to migrate clubs to new database")
-        return err
-    }
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(clubSource.Password), bcrypt.DefaultCost)
+		if err != nil {
+			logger.WithError(err).Errorf("Failed to hash password for club %s", clubSource.Name)
+			return err
+		}
 
-    logger.Infof("Clubs migration completed successfully")
-    return nil
+		clubDestination := Club{
+			Name:         clubSource.Name,
+			Nickname:     clubSource.Nickname,
+			Email:        clubSource.Email,
+			Login:        clubSource.Login,
+			PasswordHash: string(hashedPassword),
+			Permission:   convertPermission(clubSource.Permission), // Convert permission value, if necessary
+		}
+		clubsDestination = append(clubsDestination, clubDestination)
+	}
+
+	if err := dbNew.Create(&clubsDestination).Error; err != nil {
+		logger.WithError(err).Error("Failed to migrate clubs to new database")
+		return err
+	}
+
+	logger.Infof("Clubs migration completed successfully")
+	return nil
 }
 
 func convertPermission(permission string) int {
-    switch permission {
-    case "1":
-        return 1
-    case "2":
-        return 2
-    case "3":
-        return 3
-    default:
-        return 0
-    }
+	switch permission {
+	case "1":
+		return 1
+	case "2":
+		return 2
+	case "3":
+		return 3
+	default:
+		return 0
+	}
 }

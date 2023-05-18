@@ -47,11 +47,14 @@ func MigrateJudges(dbOld, dbNew *gorm.DB, logger *logrus.Logger) error {
 			judgeModel = Judge{
 				Name:      judge.Nome,
 				Email:     judge.Email,
+		
 				CountryID: uintPtr(countryModel.ID),
-				Category1: judge.Cat1 == "s",
+				Category1A: judge.Cat1 == "s",
+				Category1B: judge.Cat1 == "s",
 				Category2: judge.Cat2 == "s",
 				Category3: judge.Cat3 == "s",
-				Category4: judge.Cat4 == "s",
+				Category4C: judge.Cat4 == "s",
+				Category4D: judge.Cat4 == "s",
 			}
 
 			if err := dbNew.Create(&judgeModel).Error; err != nil {

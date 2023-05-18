@@ -5,7 +5,9 @@ go 1.20
 require (
 	github.com/agext/levenshtein v1.2.3
 	github.com/aws/aws-sdk-go v1.44.262
+	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.1.2
+	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/matcornic/hermes/v2 v2.1.0
 	github.com/sirupsen/logrus v1.9.0
@@ -25,6 +27,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect

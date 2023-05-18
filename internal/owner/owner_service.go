@@ -3,10 +3,11 @@ package owner
 import (
 	"strconv"
 
+	"fmt"
+
+	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/scuba13/AmacoonServices/internal/utils"
-	"fmt"
 )
 
 type OwnerService struct {
@@ -84,10 +85,10 @@ func (s *OwnerService) CreateOwner(owner *Owner) (*Owner, error) {
 	}
 
 	// Gerar o random validação antes de salvar
-	randomString :=utils.GenerateRandomString()
-	
+	randomString := utils.GenerateRandomString()
+
 	// Atualizar o campo PasswordHash com o hash gerado e o campo ValidId com o random gerado
-	owner.PasswordHash = string(hashedPassword) 
+	owner.PasswordHash = string(hashedPassword)
 	owner.ValidId = randomString
 	owner.Valid = false
 
@@ -98,7 +99,7 @@ func (s *OwnerService) CreateOwner(owner *Owner) (*Owner, error) {
 	}
 
 	// Consultar o proprietário criado para obter Informações adicionais
-	createdOwner, err:= s.GetOwnerByID(strconv.Itoa(int(owner.ID)))
+	createdOwner, err := s.GetOwnerByID(strconv.Itoa(int(owner.ID)))
 	if err != nil {
 		s.Logger.WithError(err).Error("failed to get owner by ID")
 		return nil, err
@@ -161,30 +162,18 @@ func (s *OwnerService) UpdateValidOwner(id string, validID string) error {
 		return err
 	}
 	// Consultar o proprietário criado para obter Informações adicionais
-	updateOwner, err:= s.GetOwnerByID(strconv.Itoa(int(ownerID)))
+	updateOwner, err := s.GetOwnerByID(strconv.Itoa(int(ownerID)))
 	if err != nil {
 		s.Logger.WithError(err).Error("failed to get owner by ID")
 		return err
 	}
-		// Enviar email de confirmação
-		err = s.OwnerEmailService.SendOwnerValidationConfirmationEmail(updateOwner)
-		if err != nil {
-			s.Logger.WithError(err).Error("failed to send validation email")
-			return err
-		}
+	// Enviar email de confirmação
+	err = s.OwnerEmailService.SendOwnerValidationConfirmationEmail(updateOwner)
+	if err != nil {
+		s.Logger.WithError(err).Error("failed to send validation email")
+		return err
+	}
 
 	s.Logger.Infof("Service UpdateValidOwner OK")
 	return nil
-}
-
-func (s *OwnerService) Login(loginRequest LoginRequest) (*Owner, error) {
-	s.Logger.Info("Service Login")
-
-	user, err := s.OwnerRepo.Login(loginRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	s.Logger.Info("Service Login OK")
-	return user, nil
 }
