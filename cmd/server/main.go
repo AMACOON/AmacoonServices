@@ -1,13 +1,12 @@
 package main
 
 import (
-	"github.com/scuba13/AmacoonServices/cmd/server/setup"
-	"github.com/scuba13/AmacoonServices/cmd/server/initialize"
-	"github.com/scuba13/AmacoonServices/cmd/server/migrate"
-	"github.com/scuba13/AmacoonServices/config"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	
+	"github.com/scuba13/AmacoonServices/cmd/server/initialize"
+	"github.com/scuba13/AmacoonServices/cmd/server/migrate"
+	"github.com/scuba13/AmacoonServices/cmd/server/setup"
+	"github.com/scuba13/AmacoonServices/config"
 )
 
 func main() {
@@ -25,20 +24,19 @@ func main() {
 	// Load configuration data
 	cfg := config.LoadConfig()
 
-	// Initialize DB
-	db := setup.SetupDatabase(cfg, logger)
-	dbOld:= setup.SetupDatabaseOld(cfg, logger)
-
 	//Initialize S3
 	s3 := setup.SetupS3(cfg, logger)
 
+	// Initialize DB
+	db := setup.SetupDatabase(cfg, logger)
+	dbOld := setup.SetupDatabaseOld(cfg, logger)
+
 	// Migrate data
-	MigrateService:= migrate.NewMigrateService(db, dbOld, logger) 
+	MigrateService := migrate.NewMigrateService(db, dbOld, logger)
 	migrate.SetupRouter(MigrateService, logger, e)
-	
-	
+
 	// Initialize repositories, handlers, and routes
-	initialize.InitializeApp(e, logger, db, s3)
+	initialize.InitializeApp(e, logger, db, s3, cfg)
 
 	// Start server
 	logger.Info("Starting Server")

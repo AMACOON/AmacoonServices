@@ -9,3 +9,8 @@ server:
 aws:
   S3AwsAccessKeyId: AKIA4R4F43U6FT2QGREN
   S3AwsSecretAccessKey: 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
+smtp:
+  host: smtp.kinghost.net
+  port: 587
+  username: sistema@catclubsystem.com
+  password: Sistema@0013

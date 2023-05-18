@@ -21,6 +21,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	
 )
 
 func SetupLogger() *logrus.Logger {
@@ -113,3 +114,4 @@ func SetupS3(cfg *config.Config, logger *logrus.Logger) *s3.S3 {
 	logger.Info("Connected S3")
 	return db
 }
+

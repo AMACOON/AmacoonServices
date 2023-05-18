@@ -133,6 +133,32 @@ func (h *OwnerHandler) DeleteOwnerByID(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
+func (h *OwnerHandler) UpdateValidOwner(c echo.Context) error {
+	h.Logger.Infof("Handler UpdateValidOwner")
+
+	id := c.Param("id")
+	h.Logger.WithFields(logrus.Fields{
+		"id": id,
+	}).Info("Updating Valid Owner")
+
+	validID := c.Param("validId")
+	
+	err := h.OwnerService.UpdateValidOwner(id, validID)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to update owner validation")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update owner validation")
+	}
+
+	h.Logger.Infof("Handler UpdateValidOwner OK")
+	return c.NoContent(http.StatusOK)
+}
+
+
+
+
+
+
+
 func (h *OwnerHandler) Login(c echo.Context) error {
 	h.Logger.Infof("Handler Login")
 	loginRequest:= owner.LoginRequest{}

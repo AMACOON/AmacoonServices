@@ -18,11 +18,13 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/transfer"
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	routes "github.com/scuba13/AmacoonServices/pkg/server"
+	"github.com/scuba13/AmacoonServices/config"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	
 )
 
-func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s3.S3) {
+func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s3.S3, config *config.Config) {
 
 	// Initialize repositories
 	logger.Info("Initialize Repositories")
@@ -45,13 +47,16 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	logger.Info("Initialize Services")
 	filesService := utils.NewFilesService(s3Client, logger)
 	protocolService := utils.NewProtocolService(protocolRepo, logger)
+	smptService:= utils.NewSmtpService(config,logger)
+	ownerEmailService := owner.NewOwnerEmailService(smptService, logger)
+	
 	litterService := litter.NewLitterService(litterRepo, logger, protocolService, filesService)
 	transferService := transfer.NewTransferService(transferepo, logger, protocolService)
 	catService := cat.NewCatService(catRepo, logger)
 	breedService := breed.NewBreedService(breedRepo, logger)
 	colorService := color.NewColorService(colorRepo, logger)
 	countryService := country.NewCountryService(countryRepo, logger)
-	ownerService := owner.NewOwnerService(ownerRepo, logger)
+	ownerService := owner.NewOwnerService(ownerRepo, ownerEmailService,logger)
 	catteryService := cattery.NewCatteryService(catteryRepo, logger)
 	federationService := federation.NewCatteryService(federationRepo, logger)
 	titleService := title.NewTitleService(titleRepo, logger)

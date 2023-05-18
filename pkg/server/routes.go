@@ -94,7 +94,9 @@ func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
 	ownerGroup.POST("", ownerHandler.CreateOwner)
 	ownerGroup.PUT("/:id", ownerHandler.UpdateOwner)
 	ownerGroup.DELETE("/:id", ownerHandler.DeleteOwnerByID)
+	ownerGroup.GET("/:id/:validId/valid", ownerHandler.UpdateValidOwner)
 	ownerGroup.POST("/login", ownerHandler.Login)
+	
 }
 
 func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {

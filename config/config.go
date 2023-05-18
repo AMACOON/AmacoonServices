@@ -15,6 +15,10 @@ type Config struct {
 	ServerPort      string
 	S3AwsAccessKeyId string
 	S3AwsSecretAccessKey string
+	SMTPUsername string
+	SMTPPassword string
+	SMPTHost string
+	SMTPPort string
 }
 
 func LoadConfig() *Config {
@@ -37,5 +41,10 @@ func LoadConfig() *Config {
 		ServerPort:      viper.GetString("server.port"),
 		S3AwsAccessKeyId: viper.GetString("aws.S3AwsAccessKeyId"),
 		S3AwsSecretAccessKey: viper.GetString("aws.S3AwsSecretAccessKey"),
+		SMTPUsername: viper.GetString("smtp.username"),
+		SMTPPassword: viper.GetString("smtp.password"),
+		SMPTHost: viper.GetString("smtp.host"),
+		SMTPPort: viper.GetString("smtp.port"),
 	}
+	
 }
