@@ -67,7 +67,7 @@ func (s *OwnerEmailService) SendOwnerValidationEmail(owner *Owner) error {
 			},
 			Outros: []string{
 				"For more information, please access the CatClubSystem administration page.",
-				"http://www.catclubsystem.com/adm",
+				"http://br.catclubsystem.com/index.php/adm",
 			},
 		},
 	}
@@ -127,7 +127,7 @@ func (s *OwnerEmailService) SendOwnerValidationConfirmationEmail(owner *Owner) e
 					Button: hermes.Button{
 						Color: "#000000", // Cor preta
 						Text:  "Go to site",
-						Link:  fmt.Sprintf("http://www.catclubsystem.com"),
+						Link:  fmt.Sprintf("http://br.catclubsystem.com/"),
 					},
 				},
 			},

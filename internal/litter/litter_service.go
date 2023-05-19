@@ -9,37 +9,49 @@ import (
 type LitterService struct {
 	LitterRepo      *LitterRepository
 	ProtocolService *utils.ProtocolService
+	FilesLitterService *FilesLitterService
 	Logger          *logrus.Logger
-	FilesService    *utils.FilesService // adiciona o campo FilesService
+	
 }
 
-func NewLitterService(litterRepo *LitterRepository, logger *logrus.Logger, protocolService *utils.ProtocolService, filesService *utils.FilesService) *LitterService {
+func NewLitterService(litterRepo *LitterRepository, fileLitterService *FilesLitterService , protocolService *utils.ProtocolService, logger *logrus.Logger) *LitterService {
 	return &LitterService{
 		LitterRepo:      litterRepo,
+		FilesLitterService: fileLitterService,
 		ProtocolService: protocolService,
 		Logger:          logger,
-		FilesService:    filesService, // adiciona a instância de FilesService
+		
 	}
 }
 
-func (s *LitterService) CreateLitter(req Litter) (Litter, error) {
+func (s *LitterService) CreateLitter(req Litter, filesWithDesc []utils.FileWithDescription) (*Litter, error) {
 	s.Logger.Infof("Service CreateLitter")
 
 	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("L")
 	req.ProtocolNumber = protocolNumber
 	if err != nil {
 		s.Logger.Errorf("error generate protocol to  litter: %v", err)
-		return Litter{}, err
+		return nil, err
 	}
 	req.Status = "submitted"
 	litter, err := s.LitterRepo.CreateLitter(req)
 	if err != nil {
 		s.Logger.Errorf("error create litter from repository: %v", err)
-		return Litter{}, err
+		return nil, err
 	}
 
+	// Save the files for this cat
+	filesLitter, err := s.FilesLitterService.SaveLitterFiles(litter.ID, filesWithDesc)
+	if err != nil {
+		s.Logger.Errorf("error saving cat files: %v", err)
+		return nil, err
+	}
+
+	litter.Files = &filesLitter
+
+
 	s.Logger.Infof("Service CreateLitter OK")
-	return litter, nil
+	return &litter, nil
 }
 
 func (s *LitterService) GetLitterByID(id string) (*Litter, error) {

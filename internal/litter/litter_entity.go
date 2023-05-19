@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/scuba13/AmacoonServices/internal/catservice"
+	"github.com/scuba13/AmacoonServices/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -20,7 +21,8 @@ type Litter struct {
 	Status         string
 	ProtocolNumber string
 	RequesterID    uint
-	KittenData     []KittenLitter
+	KittenData     *[]KittenLitter `gorm:"foreignKey:LitterID"`
+	Files          *[]FilesLitter  `gorm:"foreignKey:LitterID"`
 }
 
 func (Litter) TableName() string {
@@ -37,11 +39,19 @@ type KittenLitter struct {
 	ColorNameX string
 	Microchip  string
 	Breeding   bool
-	LitterID   uint 
-
-
+	LitterID   uint
 }
 
 func (KittenLitter) TableName() string {
 	return "service_litters_kittens"
+}
+
+type FilesLitter struct {
+	gorm.Model
+	LitterID  uint 
+	FileData utils.Files `gorm:"embedded"`
+}
+
+func (FilesLitter) TableName() string {
+	return "service_litters_files"
 }

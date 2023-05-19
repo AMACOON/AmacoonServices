@@ -81,6 +81,7 @@ func SetupDatabase(logger *logrus.Logger) *gorm.DB {
 		&cat.FilesCat{},
 		&litter.Litter{},
 		&litter.KittenLitter{},
+		&litter.FilesLitter{},
 		&transfer.Transfer{},
 		&titlerecognition.TitleRecognition{},
 		&titlerecognition.Title{},
