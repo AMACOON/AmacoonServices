@@ -32,6 +32,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	ownerRepo := owner.NewOwnerRepository(db, logger)
 	colorRepo := color.NewColorRepository(db, logger)
 	litterRepo := litter.NewLitterRepository(db, logger)
+	litterFileRepo:= litter.NewFilesLitterRepository(db, logger)
 	breedRepo := breed.NewBreedRepository(db, logger)
 	countryRepo := country.NewCountryRepository(db, logger)
 	transferepo := transfer.NewTransferRepository(db, logger)
@@ -52,8 +53,9 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	smptService:= utils.NewSmtpService(logger)
 	ownerEmailService := owner.NewOwnerEmailService(smptService, logger)
 	catFileService:= cat.NewCatFileService(filesService, catFileRepo, logger)
+	litterFileService:= litter.NewFilesLitterService(filesService, litterFileRepo, logger)
 	
-	litterService := litter.NewLitterService(litterRepo, logger, protocolService)
+	litterService := litter.NewLitterService(litterRepo, litterFileService ,protocolService, logger)
 	transferService := transfer.NewTransferService(transferepo, logger, protocolService)
 	catService := cat.NewCatService(catRepo, catFileService, logger)
 	breedService := breed.NewBreedService(breedRepo, logger)

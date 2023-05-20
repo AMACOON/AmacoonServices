@@ -29,14 +29,16 @@ func (s *CatService) CreateCat(req *Cat, filesWithDesc []utils.FileWithDescripti
 		return nil, err
 	}
 
-	// Save the files for this cat
-	filesCat, err := s.CatFileService.SaveCatFiles(cat.ID, filesWithDesc)
-	if err != nil {
-		s.Logger.Errorf("error saving cat files: %v", err)
-		return nil, err
+	// Check if there are files to save
+	if len(filesWithDesc) > 0 {
+		// Save the files for this cat
+		filesCat, err := s.CatFileService.SaveCatFiles(cat.ID, filesWithDesc)
+		if err != nil {
+			s.Logger.Errorf("error saving cat files: %v", err)
+			return nil, err
+		}
+		cat.Files = &filesCat
 	}
-
-	cat.Files = &filesCat
 
 	s.Logger.Infof("Service CreateCat OK")
 	return cat, nil
@@ -72,7 +74,7 @@ func (s *CatService) UpdateNeuteredStatus(catID string, neutered bool) error {
 	err := s.CatRepo.UpdateNeuteredStatus(catID, neutered)
 	if err != nil {
 		s.Logger.WithError(err).Error("Failed to get cats by Owner from repo")
-		return  err
+		return err
 	}
 	s.Logger.Infof("Service UpdateNeuteredStatus OK")
 	return nil

@@ -13,7 +13,7 @@ type FilesLitterService struct {
 	FilesLitterRepo     *FilesLitterRepository
 }
 
-func NewCatFileService(fileService *utils.FilesService, filesLitterRepo *FilesLitterRepository, logger *logrus.Logger) *FilesLitterService {
+func NewFilesLitterService(fileService *utils.FilesService, filesLitterRepo *FilesLitterRepository, logger *logrus.Logger) *FilesLitterService {
 	return &FilesLitterService{
 		FileService:  fileService,
 		FilesLitterRepo: filesLitterRepo,

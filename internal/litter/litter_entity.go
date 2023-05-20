@@ -10,17 +10,15 @@ import (
 
 type Litter struct {
 	gorm.Model
-	MotherData     catservice.CatService   `gorm:"embedded;embeddedPrefix:mother_"`
-	FatherData     catservice.CatService   `gorm:"embedded;embeddedPrefix:father_"`
-	MotherOwner    catservice.OwnerService `gorm:"embedded;embeddedPrefix:motherOwner_"`
-	FatherOwner    catservice.OwnerService `gorm:"embedded;embeddedPrefix:fatherOwner_"`
-	CatteryName    string
+	MotherData     catservice.CatServiceEntity `gorm:"embedded;embeddedPrefix:mother_"`
+	FatherData     catservice.CatServiceEntity `gorm:"embedded;embeddedPrefix:father_"`
 	NumKittens     int
 	BirthDate      time.Time
-	CountryCode    string
 	Status         string
 	ProtocolNumber string
 	RequesterID    uint
+	CatteryID      uint
+	CountryID      uint
 	KittenData     *[]KittenLitter `gorm:"foreignKey:LitterID"`
 	Files          *[]FilesLitter  `gorm:"foreignKey:LitterID"`
 }
@@ -33,9 +31,8 @@ type KittenLitter struct {
 	gorm.Model
 	Name       string
 	Gender     string
-	BreedName  string
-	ColorName  string
-	EmsCode    string
+	BreedID    uint
+	ColorID    uint
 	ColorNameX string
 	Microchip  string
 	Breeding   bool
@@ -48,7 +45,7 @@ func (KittenLitter) TableName() string {
 
 type FilesLitter struct {
 	gorm.Model
-	LitterID  uint 
+	LitterID uint
 	FileData utils.Files `gorm:"embedded"`
 }
 
