@@ -6,10 +6,11 @@ db:
   name: dbcatclubsystem
 server:
   port: 8080
-  host: localhost
+  host: localhost:8080
 aws:
   S3AwsAccessKeyId: AKIA4R4F43U6FT2QGREN
   S3AwsSecretAccessKey: 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
+  bucket: amacoondocs
 smtp:
   host: smtp.kinghost.net
   port: 587

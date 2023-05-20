@@ -7,6 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/scuba13/AmacoonServices/internal/litter"
+	"github.com/scuba13/AmacoonServices/internal/utils"
+	"encoding/json"
 )
 
 type LitterHandler struct {
@@ -23,20 +25,56 @@ func NewLitterHandler(litterService *litter.LitterService, logger *logrus.Logger
 
 func (h *LitterHandler) CreateLitter(c echo.Context) error {
 	h.Logger.Infof("Handler CreateLitter")
-	var litter litter.Litter
-	err := c.Bind(&litter)
+
+	// Get multipart form
+	form, err := c.MultipartForm()
 	if err != nil {
-		h.Logger.Errorf("error binding request body: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
-	}
-	createdLitter, err := h.LitterService.CreateLitter(litter)
-	if err != nil {
-		h.Logger.WithError(err).Error("failed to create litter")
+		h.Logger.WithError(err).Error("Failed to get multipart form")
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+
+	// Extract litter JSON
+	litterJson := form.Value["litter"][0]
+	litter := &litter.Litter{}
+	err = json.Unmarshal([]byte(litterJson), litter)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to parse litter JSON")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// Validate litter
+	if err := utils.ValidateStruct(litter); err != nil {
+		h.Logger.WithError(err).Error("Failed to validate litter")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	
+	// Extract files
+	files := form.File["file"]
+	descriptions := form.Value["description"]
+
+	var filesWithDesc []utils.FileWithDescription
+	for i, file := range files {
+		description := ""
+		if i < len(descriptions) {
+			description = descriptions[i]
+		}
+		filesWithDesc = append(filesWithDesc, utils.FileWithDescription{
+			File:        file,
+			Description: description,
+		})
+	}
+
+	// Create litter
+	litter, err = h.LitterService.CreateLitter(*litter, filesWithDesc)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to create litter")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
 	h.Logger.Infof("Handler CreateLitter OK")
-	return c.JSON(http.StatusCreated, createdLitter)
+	return c.JSON(http.StatusCreated, litter)
 }
+
 
 func (h *LitterHandler) GetLitterByID(c echo.Context) error {
 	h.Logger.Infof("Handler GetLitterByID")

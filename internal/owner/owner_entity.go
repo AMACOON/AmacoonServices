@@ -22,7 +22,7 @@ type Owner struct {
 	Valid        bool
 	ValidId      string
 	Observation  string
-	Clubs        []OwnerClub
+	Clubs        []OwnerClub `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (Owner) TableName() string {

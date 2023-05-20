@@ -30,7 +30,7 @@ func LoadConfig(logger *logrus.Logger) {
 	viper.SetConfigType("yaml")
 
 	if err := viper.ReadInConfig(); err != nil {
-		logger.Println("Error reading config file, ", err)
+		logger.WithError(err).Fatal("Error reading config file")
 	}
 
 	viper.AutomaticEnv()

@@ -10,18 +10,19 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/federation"
 	"github.com/scuba13/AmacoonServices/internal/owner"
 	"github.com/scuba13/AmacoonServices/internal/title"
+	"github.com/scuba13/AmacoonServices/internal/utils"
 	"gorm.io/gorm"
 )
 
 type Cat struct {
 	gorm.Model
-	Name             string                 `gorm:"column:name"`
-	Registration     string                 `gorm:"column:registration;index"`
-	RegistrationType string                 `gorm:"column:registration_type"`
+	Name             string                 `gorm:"column:name" validate:"required"`
+	Registration     string                 `gorm:"column:registration;index" validate:"required,notzeroes"`
+	RegistrationType string                 `gorm:"column:registration_type;type:enum('LO', 'RX')" validate:"required,oneof=LO RX"`
 	Microchip        string                 `gorm:"column:microchip"`
-	Gender           string                 `gorm:"column:gender;index"`
-	Birthdate        time.Time              `gorm:"column:birthdate"`
-	Neutered         bool                   `gorm:"column:neutered"`
+	Gender           string                 `gorm:"column:gender;index;type:enum('female', 'male')" validate:"required,oneof=female male"`
+	Birthdate        time.Time              `gorm:"column:birthdate" validate:"required"`
+	Neutered         bool                   `gorm:"column:neutered" validate:"required"`
 	Validated        bool                   `gorm:"column:validated"`
 	Observation      string                 `gorm:"column:observation"`
 	Fifecat          bool                   `gorm:"column:fifecat"`
@@ -29,22 +30,22 @@ type Cat struct {
 	MotherName       string                 `gorm:"-"`
 	FatherID         *uint                  `gorm:"column:father_id"`
 	FatherName       string                 `gorm:"-"`
-	FederationID     *uint                  `gorm:"column:federation_id"`
+	FederationID     *uint                  `gorm:"column:federation_id" validate:"required"`
 	Federation       *federation.Federation `gorm:"foreignKey:FederationID"`
-	BreedID          *uint                  `gorm:"column:breed_id"`
+	BreedID          *uint                  `gorm:"column:breed_id" validate:"required"`
 	Breed            *breed.Breed           `gorm:"foreignKey:BreedID"`
-	ColorID          *uint                  `gorm:"column:color_id"`
+	ColorID          *uint                  `gorm:"column:color_id" validate:"required"`
 	Color            *color.Color           `gorm:"foreignKey:ColorID"`
 	CatteryID        *uint                  `gorm:"column:cattery_id"`
 	Cattery          *cattery.Cattery       `gorm:"foreignKey:CatteryID"`
-	OwnerID          *uint                  `gorm:"column:owner_id;index"`
+	OwnerID          *uint                  `gorm:"column:owner_id;index" validate:"required"`
 	Owner            *owner.Owner           `gorm:"foreignKey:OwnerID"`
-	CountryID        *uint                  `gorm:"column:country_id"`
+	CountryID        *uint                  `gorm:"column:country_id" validate:"required"`
 	Country          *country.Country       `gorm:"foreignKey:CountryID"`
-	Titles           []TitlesCat            `gorm:"foreignKey:CatID"`
+	Titles           *[]TitlesCat           `gorm:"foreignKey:CatID"`
+	Files            *[]FilesCat            `gorm:"foreignKey:CatID"`
 	FatherNameTemp   string
 	MotherNameTemp   string
-	//Files            []utils.Files
 }
 
 func (Cat) TableName() string {
@@ -62,4 +63,14 @@ type TitlesCat struct {
 
 func (TitlesCat) TableName() string {
 	return "cats_titles"
+}
+
+type FilesCat struct {
+	gorm.Model
+	CatID    uint
+	FileData utils.Files `gorm:"embedded"`
+}
+
+func (FilesCat) TableName() string {
+	return "cats_files"
 }

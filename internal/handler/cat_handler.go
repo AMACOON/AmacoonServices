@@ -4,10 +4,14 @@ import (
 	"net/http"
 
 	"github.com/scuba13/AmacoonServices/internal/cat"
+	"github.com/scuba13/AmacoonServices/internal/utils"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
+
 	//"github.com/golang-jwt/jwt/v4"
+	"encoding/json"
+	"strconv"
 )
 
 type CatHandler struct {
@@ -22,6 +26,57 @@ func NewCatHandler(catService *cat.CatService, logger *logrus.Logger) *CatHandle
 	}
 }
 
+func (h *CatHandler) CreateCat(c echo.Context) error {
+	h.Logger.Infof("Handler CreateCat")
+
+	// Get multipart form
+	form, err := c.MultipartForm()
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to get multipart form")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	// Extract cat JSON
+	catJson := form.Value["cat"][0]
+	cat := &cat.Cat{}
+	err = json.Unmarshal([]byte(catJson), cat)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to parse cat JSON")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// Validate cat
+	if err := utils.ValidateStruct(cat); err != nil {
+		h.Logger.WithError(err).Error("Failed to validate cat")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	
+	// Extract files
+	files := form.File["file"]
+	descriptions := form.Value["description"]
+
+	var filesWithDesc []utils.FileWithDescription
+	for i, file := range files {
+		description := ""
+		if i < len(descriptions) {
+			description = descriptions[i]
+		}
+		filesWithDesc = append(filesWithDesc, utils.FileWithDescription{
+			File:        file,
+			Description: description,
+		})
+	}
+
+	// Create cat
+	cat, err = h.CatService.CreateCat(cat, filesWithDesc)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to create cat")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	h.Logger.Infof("Handler CreateCat OK")
+	return c.JSON(http.StatusCreated, cat)
+}
 
 func (h *CatHandler) GetCatsCompleteByID(c echo.Context) error {
 
@@ -32,7 +87,7 @@ func (h *CatHandler) GetCatsCompleteByID(c echo.Context) error {
 	// }
 	// claims := userToken.Claims.(jwt.MapClaims)
 	// userID := claims["sub"].(string)
-	
+
 	//h.Logger.Infof("userID: %s", userID)
 	// Log de entrada da função
 	h.Logger.Infof("Handler GetCatsCompleteByID")
@@ -60,18 +115,15 @@ func (h *CatHandler) GetCatsCompleteByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, cat)
 }
 
-
-
-func (h *CatHandler) GetCatCompleteByAllByOwner(c echo.Context) error {
+func (h *CatHandler) GetCatsByOwner(c echo.Context) error {
 	h.Logger.Infof("Handler GetCatCompleteByAllByOwner")
 	ownerId := c.Param("ownerId")
 
 	h.Logger.WithFields(logrus.Fields{
 		"OwnerId": ownerId,
-		
 	}).Info("Getting cat by OwnerID")
 
-	cat, err := h.CatService.GetCatCompleteByAllByOwner(ownerId)
+	cat, err := h.CatService.GetCatsByOwner(ownerId)
 	if err != nil {
 		h.Logger.WithError(err).Error("Failed to get cat by OwnerID")
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
@@ -86,3 +138,31 @@ func (h *CatHandler) GetCatCompleteByAllByOwner(c echo.Context) error {
 	h.Logger.Infof("Handler GetCatCompleteByAllByOwner OK")
 	return c.JSON(http.StatusOK, cat)
 }
+
+
+
+func (h *CatHandler) UpdateNeuteredStatus(c echo.Context) error {
+	h.Logger.Infof("Handler UpdateNeuteredStatus")
+
+	// Get cat ID from path parameter
+	catID := c.Param("id")
+
+	// Get neutered status from query parameter
+	neuteredStr := c.QueryParam("neutered")
+	neutered, err := strconv.ParseBool(neuteredStr)
+	if err != nil {
+		h.Logger.WithError(err).Errorf("Failed to parse neutered status: %s", neuteredStr)
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid neutered status")
+	}
+
+	// Update neutered status
+	if err := h.CatService.UpdateNeuteredStatus(catID, neutered); err != nil {
+		h.Logger.WithError(err).Error("Failed to update neutered status")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to update neutered status")
+	}
+
+	h.Logger.Infof("Handler UpdateNeuteredStatus OK")
+	return c.NoContent(http.StatusOK)
+}
+
+

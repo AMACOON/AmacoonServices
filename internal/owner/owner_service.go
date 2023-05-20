@@ -122,6 +122,22 @@ func (s *OwnerService) UpdateOwner(idStr string, updatedOwner *Owner) error {
 		s.Logger.WithError(err).Errorf("Invalid owner ID: %s", idStr)
 		return err
 	}
+	//Pegar dados do Owener para verificar se a senha mudou, se mudou gerar o hash
+	owner, err := s.OwnerRepo.GetOwnerByID(uint(id))
+	if err != nil {
+		s.Logger.WithError(err).Error("failed to get owner by ID")
+		return err
+	}
+	if owner.PasswordHash != updatedOwner.PasswordHash {
+		// Gerar o hash da senha antes de salvar
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(updatedOwner.PasswordHash), bcrypt.DefaultCost)
+		if err != nil {
+			s.Logger.WithError(err).Error("failed to generate password hash")
+			return err
+		}
+		updatedOwner.PasswordHash = string(hashedPassword)
+	}
+	// Atualizar os campos do proprietário na tabela "owners"
 	err = s.OwnerRepo.UpdateOwner(uint(id), updatedOwner)
 	if err != nil {
 		s.Logger.WithError(err).Error("failed to update owner")

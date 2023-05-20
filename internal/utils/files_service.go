@@ -3,12 +3,13 @@ package utils
 import (
 	"bytes"
 	"io"
-	"mime/multipart"
+	
 	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 )
 
 type FilesService struct {
@@ -23,13 +24,18 @@ func NewFilesService(s3Client *s3.S3, logger *logrus.Logger) *FilesService {
 	}
 }
 
-func (s *FilesService) SaveFiles(protocolNumber string, files []*multipart.FileHeader) ([]Files, error) {
-	s.Logger.Infof("Saving %d files for protocol %s", len(files), protocolNumber)
+
+
+func (s *FilesService) SaveFiles(identifier string, domain string, filesWithDesc []FileWithDescription) ([]Files, error) {
+	s.Logger.Infof("Saving %d files for identifier %s", len(filesWithDesc), identifier)
 	savedFiles := []Files{}
 
-	bucket := "amacoondocs" // Atualize com o nome do seu bucket
+	bucket := viper.GetString("aws.bucket")
 
-	for _, file := range files {
+	for _, fileWithDesc := range filesWithDesc {
+		file := fileWithDesc.File
+		description := fileWithDesc.Description
+
 		src, err := file.Open()
 		if err != nil {
 			s.Logger.Errorf("error opening file: %v", err)
@@ -38,7 +44,7 @@ func (s *FilesService) SaveFiles(protocolNumber string, files []*multipart.FileH
 		defer src.Close()
 
 		fileName := file.Filename
-		filePath := filepath.Join("services", protocolNumber, fileName)
+		filePath := filepath.Join(domain, identifier, fileName)
 
 		buf := new(bytes.Buffer)
 		if _, err := io.Copy(buf, src); err != nil {
@@ -61,9 +67,10 @@ func (s *FilesService) SaveFiles(protocolNumber string, files []*multipart.FileH
 			Name: file.Filename,
 			Type: file.Header.Get("Content-Type"),
 			Path: filePath,
+			Description: description,
 		}
 		savedFiles = append(savedFiles, newFile)
 	}
-	s.Logger.Infof("Saved %d files for protocol %s", len(files), protocolNumber)
+	s.Logger.Infof("Saved %d files for identifier %s", len(filesWithDesc), identifier)
 	return savedFiles, nil
 }

@@ -70,14 +70,15 @@ func (r *LitterRepository) UpdateLitter(id uint, litter Litter) error {
 	}()
 
 	// Atualizar os campos específicos da ninhada na tabela "service_litters"
-	if err := tx.Model(&litter).Where("id = ?", id).Updates(litter).Error; err != nil {
+	if err := tx.Save(&litter).Error; err != nil {
 		tx.Rollback()
 		r.Logger.WithError(err).Errorf("error updating litter with id %v", id)
 		return err
 	}
+	
 
 	// Atualizar os campos específicos dos gatinhos na tabela "service_kittens_litters"
-	for _, updatedKitten := range litter.KittenData {
+	for _, updatedKitten := range *litter.KittenData {
 		if err := tx.Model(&KittenLitter{}).Where("id = ?", updatedKitten.ID).Updates(updatedKitten).Error; err != nil {
 			tx.Rollback()
 			r.Logger.WithError(err).Errorf("error updating kitten litter record with id %v", updatedKitten.ID)

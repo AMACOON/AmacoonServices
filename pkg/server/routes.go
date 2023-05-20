@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -10,7 +11,6 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/handler"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	
 )
 
 
@@ -83,7 +83,7 @@ func getJWTConfig() echojwt.Config {
 
 func setupHealthChecks(e *echo.Echo) {
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
+		return c.String(http.StatusOK, "Beta CatClubSystem")
 	})
 }
 
@@ -91,7 +91,9 @@ func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	catGroup := e.Group("/cats")
 	//catGroup.Use(echojwt.WithConfig(jwtConfig))
 	catGroup.GET("/:id", catHandler.GetCatsCompleteByID)
-	catGroup.GET("/:ownerId/owner", catHandler.GetCatCompleteByAllByOwner)
+	catGroup.GET("/:ownerId/owner", catHandler.GetCatsByOwner)
+	catGroup.POST("", catHandler.CreateCat)
+	catGroup.PUT("/:id/neutered", catHandler.UpdateNeuteredStatus)
 }
 
 func setupCatServiceRoutes(e *echo.Echo, catServiceHandler *handler.CatServiceHandler) {
@@ -168,6 +170,7 @@ func setupFederationRoutes(e *echo.Echo, federationHandler *handler.FederationHa
 }
 
 func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
+	fmt.Println("Rota Country")
 	countryGroup := e.Group("/countries")
 	countryGroup.GET("", countryHandler.GetAllCountry)
 }
@@ -180,13 +183,14 @@ func setupTitlesRoutes(e *echo.Echo, titleHandler *handler.TitleHandler, jwtConf
 
 func setupFilesRoutes(e *echo.Echo, filesHandler *handler.FilesHandler) {
 	fileGroup := e.Group("/files")
-	fileGroup.POST("/:protocolNumber", filesHandler.SaveFiles)
-
+	fileGroup.POST("", filesHandler.SaveFiles)
 }
 
 func setupLoginRoutes(e *echo.Echo, loginHandler *handler.LoginHandler) {
-	ownerGroup := e.Group("/login")
-	ownerGroup.POST("/authenticate", loginHandler.Login)
+	loginGroup := e.Group("/login")
+	loginGroup.POST("/authenticate", loginHandler.Login)
 
 }
+
+
 
