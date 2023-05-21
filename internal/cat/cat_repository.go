@@ -78,6 +78,8 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 		}
 		return nil, result.Error
 	}
+	// Call NomeGato and set the result as the full name of the cat
+	cat.NameFull = GetFullName(&cat, "")
 	r.Logger.Infof("Repository GetCatCompleteByID OK")
 	return &cat, nil
 }

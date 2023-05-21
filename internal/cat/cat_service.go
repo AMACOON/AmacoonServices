@@ -3,6 +3,10 @@ package cat
 import (
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
+	"strconv"
+	"strings"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type CatService struct {
@@ -68,10 +72,16 @@ func (s *CatService) GetCatsByOwner(ownerID string) ([]CatInfo, error) {
 	return cats, nil
 }
 
-func (s *CatService) UpdateNeuteredStatus(catID string, neutered bool) error {
+func (s *CatService) UpdateNeuteredStatus(catID string, neutered string) error {
 	s.Logger.Infof("Service UpdateNeuteredStatus")
 
-	err := s.CatRepo.UpdateNeuteredStatus(catID, neutered)
+	neuteredBool, err := strconv.ParseBool(neutered)
+	if err != nil {
+		s.Logger.WithError(err).Errorf("Failed to parse neutered status: %s", neutered)
+		return  nil
+	}
+
+	err = s.CatRepo.UpdateNeuteredStatus(catID, neuteredBool)
 	if err != nil {
 		s.Logger.WithError(err).Error("Failed to get cats by Owner from repo")
 		return err
@@ -80,20 +90,52 @@ func (s *CatService) UpdateNeuteredStatus(catID string, neutered bool) error {
 	return nil
 }
 
-// func GetFullName(cat *CatComplete) string {
-// 	var prefix, suffix string
+func GetFullName(cat *Cat, tipo string) string {
+	prefix := ""
+	suffix := ""
+	wwYears := make([]string, 0)
 
-// 	for _, titleCat := range cat.Titles {
-// 		title := titleCat.Title
-// 		if title.Type == "Championship/Premiorship Titles" {
-// 			prefix += title.Code + " "
-// 		} else if title.Type == "Winner Titles" {
-// 			prefix += titleCat.Date.Format("06") + " " + title.Code + " "
-// 		} else if title.Type == "Merit Titles" {
-// 			suffix += " " + title.Code
-// 		}
-// 	}
+	for _, titleCat := range *cat.Titles {
+		title := titleCat.Titles
+		if title.Type == "Championship/Premiorship Titles" {
+			prefix += title.Code + " "
+		} else if title.Type == "Winner Titles" {
+			if title.Code == "WW" {
+				wwYears = append(wwYears, titleCat.Date.Format("06"))
+			} else {
+				prefix += titleCat.Date.Format("06") + " " + title.Code + " "
+			}
+		} else if title.Type == "Merit Titles" {
+			suffix += " " + title.Code
+		}
+	}
 
-// 	return prefix + cat.Name + suffix
-// }
-// // WW'Ano se for 2 anos WW'20'21
+	if len(wwYears) > 0 {
+		prefix += "WW'" + strings.Join(wwYears, "'") + " "
+	}
+
+	if tipo == "" {
+		nomeDoGato := strings.ReplaceAll(cat.Name, "'", "&#39;")
+		nomeDoGato = cases.Title(language.English).String(nomeDoGato)
+
+		return prefix + cat.Country.Code + (func() string {
+			if cat.Country.Code != "" {
+				return "* "
+			}
+			return ""
+		}()) + nomeDoGato + suffix
+	}
+
+	if tipo == "1" {
+		return prefix
+	}
+
+	if tipo == "2" {
+		return suffix
+	}
+
+	return ""
+}
+
+
+
