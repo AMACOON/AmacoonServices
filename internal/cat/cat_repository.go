@@ -86,26 +86,21 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 func (r *CatRepository) GetCatsByOwner(ownerId string) ([]CatInfo, error) {
 	r.Logger.Infof("Repository GetCatsByOwner")
 	
-	var cats []Cat
 	var catInfos []CatInfo
 
-	// Make sure to preload the needed fields to avoid lazy loading
-	if err := r.DB.Where("owner_id = ?", ownerId).Preload("Breed").Preload("Color").Find(&cats).Error; err != nil {
+	err := r.DB.Table("cats").
+		Select("cats.name, breeds.breed_name, colors.name").
+		Joins("LEFT JOIN breeds ON breeds.id = cats.breed_id").
+		Joins("LEFT JOIN colors ON colors.id = cats.color_id").
+		Where("cats.owner_id = ?", ownerId).
+		Scan(&catInfos).Error
+
+	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			r.Logger.Errorf("No cats found for owner id: %s", ownerId)
 			return nil, err
 		}
 		return nil, err
-	}
-
-	for _, cat := range cats {
-		catInfo := CatInfo{
-			Name:  cat.Name,
-			Breed: cat.Breed.BreedName, 
-			Color: cat.Color.Name,
-		}
-
-		catInfos = append(catInfos, catInfo)
 	}
 
 	return catInfos, nil

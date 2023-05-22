@@ -165,6 +165,8 @@ func setupCatteryRoutes(e *echo.Echo, catteryHandler *handler.CatteryHandler) {
 	catteryGroup := e.Group("/catteries")
 	catteryGroup.GET("", catteryHandler.GetAllCatteries)
 	catteryGroup.GET("/:id", catteryHandler.GetCatteryByID)
+	catteryGroup.POST("", catteryHandler.CreateCattery)
+	catteryGroup.PUT("/:id", catteryHandler.UpdateCattery)
 }
 
 func setupFederationRoutes(e *echo.Echo, federationHandler *handler.FederationHandler) {
