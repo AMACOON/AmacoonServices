@@ -23,7 +23,7 @@ type Cat struct {
 	Microchip        string                 `gorm:"column:microchip"`
 	Gender           string                 `gorm:"column:gender;index;type:enum('female', 'male')" validate:"required,oneof=female male"`
 	Birthdate        time.Time              `gorm:"column:birthdate" validate:"required"`
-	Neutered         bool                   `gorm:"column:neutered" validate:"required"`
+	Neutered         *bool                   `gorm:"column:neutered" validate:"required"`
 	Validated        bool                   `gorm:"column:validated"`
 	Observation      string                 `gorm:"column:observation"`
 	Fifecat          bool                   `gorm:"column:fifecat"`

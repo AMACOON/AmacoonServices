@@ -7,6 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/scuba13/AmacoonServices/internal/titlerecognition"
+	"encoding/json"
+	"github.com/scuba13/AmacoonServices/internal/utils"
 )
 
 type TitleRecognitionHandler struct {
@@ -23,18 +25,52 @@ func NewTitleRecognitionHandler(titleRecognitionService *titlerecognition.TitleR
 
 func (h *TitleRecognitionHandler) CreateTitleRecognition(c echo.Context) error {
 	h.Logger.Infof("Handler CreateTitleRecognition")
-	var titleRecognitionReq titlerecognition.TitleRecognition
-	err := c.Bind(&titleRecognitionReq)
+	// Get multipart form
+	form, err := c.MultipartForm()
 	if err != nil {
-		h.Logger.Errorf("error binding request body: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
-	}
-	createdTitleRecognition, err := h.TitleRecognitionService.CreateTitleRecognition(titleRecognitionReq)
-	if err != nil {
-		h.Logger.WithError(err).Error("failed to create title recognition")
+		h.Logger.WithError(err).Error("Failed to get multipart form")
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusCreated, createdTitleRecognition)
+
+	// Extract titlerecognition JSON
+	titleRecognitionJson := form.Value["titlerecognition"][0]
+	titleRecognition := &titlerecognition.TitleRecognition{}
+	err = json.Unmarshal([]byte(titleRecognitionJson), titleRecognition)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to parse titleRecognition JSON")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// Validate titlerecognition
+	if err := utils.ValidateStruct(titleRecognition); err != nil {
+		h.Logger.WithError(err).Error("Failed to validate titleRecognition")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	
+	// Extract files
+	files := form.File["file"]
+	descriptions := form.Value["description"]
+
+	var filesWithDesc []utils.FileWithDescription
+	for i, file := range files {
+		description := ""
+		if i < len(descriptions) {
+			description = descriptions[i]
+		}
+		filesWithDesc = append(filesWithDesc, utils.FileWithDescription{
+			File:        file,
+			Description: description,
+		})
+	}
+
+	// Create titleRecognition
+	titleRecognition, err = h.TitleRecognitionService.CreateTitleRecognition(*titleRecognition, filesWithDesc)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to create titleRecognition")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	h.Logger.Infof("Handler CreateTitleRecognition OK")
+	return c.JSON(http.StatusCreated, titleRecognition)
 }
 
 func (h *TitleRecognitionHandler) GetTitleRecognitionByID(c echo.Context) error {

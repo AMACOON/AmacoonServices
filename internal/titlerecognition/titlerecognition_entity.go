@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/scuba13/AmacoonServices/internal/catservice"
+	"github.com/scuba13/AmacoonServices/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -11,10 +12,11 @@ type TitleRecognition struct {
 	gorm.Model
 	CatData        catservice.CatService   `gorm:"embedded;embeddedPrefix:cat_"`
 	OwnerData      catservice.OwnerService `gorm:"embedded;embeddedPrefix:owner_"`
-	Titles         []Title            `gorm:"foreignKey:TitleRecognitionID"`
 	Status         string
 	ProtocolNumber string
 	RequesterID    string
+	Titles         []Title            `gorm:"foreignKey:TitleRecognitionID"`
+	Files          *[]FilesTitleRecognition `gorm:"foreignKey:TitleRecognitionID"`
 }
 
 func (TitleRecognition) TableName() string {
@@ -34,4 +36,14 @@ type Title struct {
 
 func (Title) TableName() string {
 	return "service_title_recognition_titles"
+}
+
+type FilesTitleRecognition struct {
+	gorm.Model
+	TitleRecognitionID uint
+	FileData utils.Files `gorm:"embedded"`
+}
+
+func (FilesTitleRecognition) TableName() string {
+	return "service_title_recognition_files"
 }

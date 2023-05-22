@@ -156,3 +156,38 @@ func (h *CatHandler) UpdateNeuteredStatus(c echo.Context) error {
 	h.Logger.Infof("Handler UpdateNeuteredStatus OK")
 	return c.NoContent(http.StatusOK)
 }
+
+func (h *CatHandler) UpdateCat(c echo.Context) error {
+	h.Logger.Infof("Handler UpdateCat")
+	
+	id := c.Param("id")
+	
+	var catObj cat.Cat
+	err := c.Bind(&catObj)
+	if err != nil {
+		h.Logger.Errorf("error binding request body: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
+	}
+
+	err = h.CatService.UpdateCat(id, &catObj)
+	if err != nil {
+		h.Logger.WithError(err).Errorf("failed to update cat with id %s", id)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	h.Logger.Infof("Handler UpdateCat OK")
+	return c.NoContent(http.StatusOK)
+}
+
+func (h *CatHandler) GetAllCats(c echo.Context) error {
+	h.Logger.Infof("Handler GetAllCats")
+	filter := c.QueryParam("filter")
+	cats, err := h.CatService.GetAllCats(filter)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to get cats")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	h.Logger.Infof("Handler GetAllCats OK")
+	return c.JSON(http.StatusOK, cats)
+}

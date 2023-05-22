@@ -1,10 +1,12 @@
 package cat
 
 import (
-	"github.com/scuba13/AmacoonServices/internal/utils"
-	"github.com/sirupsen/logrus"
+	"errors"
 	"strconv"
 	"strings"
+
+	"github.com/scuba13/AmacoonServices/internal/utils"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -26,6 +28,17 @@ func NewCatService(catRepo *CatRepository, catFileService *CatFileService, logge
 func (s *CatService) CreateCat(req *Cat, filesWithDesc []utils.FileWithDescription) (*Cat, error) {
 	s.Logger.Infof("Service CreateCat")
 
+	// Verify if a cat with the same attributes already exists
+	existingCat, err := s.CatRepo.ValidateCat(req.Name, req.Microchip, req.Registration, req.RegistrationType)
+	if err != nil {
+		s.Logger.Errorf("error finding existing cat from repository: %v", err)
+		return nil, err
+	}
+	if existingCat != nil {
+		s.Logger.Info("A cat with the same attributes already exists '%s'", existingCat.Name)
+		return nil, errors.New("a cat with the same attributes already exists")
+	}
+
 	req.Validated = false
 	cat, err := s.CatRepo.CreateCat(req)
 	if err != nil {
@@ -42,6 +55,9 @@ func (s *CatService) CreateCat(req *Cat, filesWithDesc []utils.FileWithDescripti
 			return nil, err
 		}
 		cat.Files = &filesCat
+
+	} else {
+		s.Logger.Info("No files to save for this cat")
 	}
 
 	s.Logger.Infof("Service CreateCat OK")
@@ -50,14 +66,15 @@ func (s *CatService) CreateCat(req *Cat, filesWithDesc []utils.FileWithDescripti
 
 func (s *CatService) GetCatsCompleteByID(id string) (*Cat, error) {
 	s.Logger.Infof("Service GetCatsCompleteByID")
-	cats, err := s.CatRepo.GetCatCompleteByID(id)
+	cat, err := s.CatRepo.GetCatCompleteByID(id)
 	if err != nil {
 		s.Logger.WithError(err).Error("Failed to get cats by Id from repo")
 		return nil, err
 	}
-
+	// Call NomeGato and set the result as the full name of the cat
+	cat.NameFull = GetFullName(cat)
 	s.Logger.Infof("Service GetCatsCompleteByID OK")
-	return cats, nil
+	return cat, nil
 }
 
 func (s *CatService) GetCatsByOwner(ownerID string) ([]CatInfo, error) {
@@ -78,19 +95,19 @@ func (s *CatService) UpdateNeuteredStatus(catID string, neutered string) error {
 	neuteredBool, err := strconv.ParseBool(neutered)
 	if err != nil {
 		s.Logger.WithError(err).Errorf("Failed to parse neutered status: %s", neutered)
-		return  nil
+		return nil
 	}
 
 	err = s.CatRepo.UpdateNeuteredStatus(catID, neuteredBool)
 	if err != nil {
-		s.Logger.WithError(err).Error("Failed to get cats by Owner from repo")
+		s.Logger.WithError(err).Error("Failed to Update Neutered Status cats from repo")
 		return err
 	}
 	s.Logger.Infof("Service UpdateNeuteredStatus OK")
 	return nil
 }
 
-func GetFullName(cat *Cat, tipo string) string {
+func GetFullName(cat *Cat) string {
 	prefix := ""
 	suffix := ""
 	wwYears := make([]string, 0)
@@ -114,7 +131,7 @@ func GetFullName(cat *Cat, tipo string) string {
 		prefix += "WW'" + strings.Join(wwYears, "'") + " "
 	}
 
-	if tipo == "" {
+	
 		nomeDoGato := strings.ReplaceAll(cat.Name, "'", "&#39;")
 		nomeDoGato = cases.Title(language.English).String(nomeDoGato)
 
@@ -124,18 +141,32 @@ func GetFullName(cat *Cat, tipo string) string {
 			}
 			return ""
 		}()) + nomeDoGato + suffix
-	}
-
-	if tipo == "1" {
-		return prefix
-	}
-
-	if tipo == "2" {
-		return suffix
-	}
-
-	return ""
+	
 }
 
+func (s *CatService) GetAllCats(filter string) ([]CatInfoAdm, error) {
+	s.Logger.Infof("Service GetAllCats")
 
+	cats, err := s.CatRepo.GetAllCats(filter)
+	if err != nil {
+		s.Logger.WithError(err).Error("Failed to get cats from repo")
+		return nil, err
+	}
 
+	s.Logger.Infof("Service GetAllCats OK")
+	return cats, nil
+}
+
+func (s *CatService) UpdateCat(id string, updatedCat *Cat) error {
+
+	s.Logger.Infof("Service UpdateCat")
+
+	err := s.CatRepo.UpdateCat(id, updatedCat)
+	if err != nil {
+		s.Logger.WithError(err).Error("Failed to UpdateCat cat from repo")
+		return err
+	}
+	s.Logger.Infof("Service UpdateCat OK")
+	return nil
+
+}

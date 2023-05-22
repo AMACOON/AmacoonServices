@@ -57,6 +57,7 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 		Preload("Owner.Country").
 		Preload("Federation").
 		Preload("Titles.Titles").
+		Preload("Files").
 		Where("id = ?", id).First(&cat)
 
 	if cat.FatherID != nil {
@@ -78,8 +79,6 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 		}
 		return nil, result.Error
 	}
-	// Call NomeGato and set the result as the full name of the cat
-	cat.NameFull = GetFullName(&cat, "")
 	r.Logger.Infof("Repository GetCatCompleteByID OK")
 	return &cat, nil
 }
@@ -135,5 +134,118 @@ func (r *CatRepository) UpdateNeuteredStatus(catID string, neutered bool) error 
 
 	return nil
 }
+
+func (r *CatRepository) ValidateCat(name string, microchip string, registration string, registrationType string) (*Cat, error) {
+	r.Logger.Infof("Repository FindCat")
+
+	// Locate the record for the cat with the given parameters
+	var cat Cat
+	// Validar Regra com a Kleyne
+	if err := r.DB.Where("name = ? AND microchip = ? AND registration = ? AND registrationType = ?", name, microchip, registration, registrationType).First(&cat).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			r.Logger.Infof("No cat found with name: %s, microchip: %s, registration: %s, registrationType: %s", name, microchip, registration, registrationType)
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	r.Logger.Infof("Repository FindCat OK")
+
+	return &cat, nil
+}
+
+func (r *CatRepository) GetAllCats(filter string) ([]CatInfoAdm, error) {
+	r.Logger.Infof("Repository GetAllCats")
+
+	var results []CatInfoAdm
+
+	db := r.DB.Table("cats").
+		Select("cats.name, breeds.name as breed_name, owners.name as owner_name").
+		Joins("left join breeds on cats.breed_id = breeds.id").
+		Joins("left join owners on cats.owner_id = owners.id")
+
+		switch filter {
+		case "non_validated":
+			db = db.Where("cats.validated = ?", false)
+		case "blank_microchip":
+			db = db.Where("cats.microchip = ?", "")
+		case "blank_register":
+			db = db.Where("cats.register = ?", "")
+		case "blank_cattery":
+			db = db.Where("cats.cattery_id is NULL")
+		default:
+			// do nothing, return all entries
+		}
+	
+
+	result := db.Scan(&results)
+	if result.Error != nil {
+		r.Logger.Errorf("Error getting cats: %v", result.Error)
+		return nil, result.Error
+	}
+
+	r.Logger.Infof("Repository GetAllCats OK")
+	return results, nil
+}
+
+func (r *CatRepository) UpdateCat(id string, updatedCat *Cat) error {
+	r.Logger.Infof("Repository UpdateCat")
+
+	// Locate the record for the cat with the given ID
+	cat := Cat{}
+	if err := r.DB.First(&cat, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			r.Logger.Errorf("No cat found with id: %d", id)
+			return err
+		}
+		return err
+	}
+
+	// Start a new DB transaction
+	tx := r.DB.Begin()
+
+	// Update the Cat's fields
+	if err := tx.Model(&cat).Updates(updatedCat).Error; err != nil {
+		tx.Rollback()
+		r.Logger.Errorf("Update Cat failed: %v", err)
+		return err
+	}
+
+	// If the Titles field of updatedCat is not nil, update the titles
+	if updatedCat.Titles != nil {
+		for _, title := range *updatedCat.Titles {
+			// If title ID is 0, it's a new title, create it
+			if title.ID == 0 {
+				if err := tx.Model(&TitlesCat{}).Create(&title).Error; err != nil {
+					tx.Rollback()
+					r.Logger.Errorf("Create title failed: %v", err)
+					return err
+				}
+			} else { // Otherwise, update existing title
+				if err := tx.Model(&TitlesCat{}).Where("id = ?", title.ID).Updates(&title).Error; err != nil {
+					tx.Rollback()
+					r.Logger.Errorf("Update title failed: %v", err)
+					return err
+				}
+			}
+		}
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		r.Logger.Errorf("Transaction commit failed: %v", err)
+		return err
+	}
+
+	r.Logger.Infof("Repository UpdateCat OK")
+
+	return nil
+}
+
+
+
+
+
+
 
 

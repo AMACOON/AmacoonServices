@@ -28,4 +28,29 @@ func (s *ColorService) GetAllColorsByBreed(breedCode string) ([]Color, error) {
 	return colors, nil
 }
 
+func (r *ColorService) UpdateColor(id string, updatedColor *Color) error {
+	r.Logger.Infof("UpdateColor")
+
+	err := r.ColorRepo.UpdateColor(id, updatedColor)
+	if err != nil {
+		r.Logger.WithError(err).Error("Failed to UpdateColor color from repo")
+		return err
+	}
+	r.Logger.Infof("UpdateColor OK")
+	return nil
+
+}
+
+func (r *ColorService) GetColorById(id string) (*Color, error) {
+	r.Logger.Infof("GetColorById")
+
+	color, err := r.ColorRepo.GetColorById(id)
+	if err != nil {
+		r.Logger.WithError(err).Error("Failed to GetColorById color from repo")
+		return nil, err
+	}
+	r.Logger.Infof("GetColorById OK")
+	return color, nil
+}
+
 
