@@ -48,7 +48,7 @@ func (r *TitleRecognitionRepository) GetTitleRecognitionByID(id uint) (TitleReco
 	r.Logger.Infof("Repository GetTitleRecognitionByID")
 	var titleRecognition TitleRecognition
 	
-	err := r.DB.Preload("Titles").First(&titleRecognition, id).Error
+	err := r.DB.Preload("Titles").Preload("Files").First(&titleRecognition, id).Error
 	if err != nil {
 		return TitleRecognition{}, err
 	}
