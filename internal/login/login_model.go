@@ -13,4 +13,6 @@ type LoginRequest struct {
 type LoginResponse struct {
 	Owner *owner.Owner
 	Token string
+	IsAssociate bool
+
 }

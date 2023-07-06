@@ -3,13 +3,18 @@ package cat
 
 
 type CatInfo struct {
+	ID uint
 	Name  string
 	Breed string
 	Color string
+  EmsCode   string
 }
 
 type CatInfoAdm struct {
-	Name       string
-	BreedName  string
-	OwnerName  string
+	ID uint
+	Name  string
+	Breed string
+	Color string
+  EmsCode   string
+
 }

@@ -19,26 +19,36 @@ func NewLoginRepository(db *gorm.DB, logger *logrus.Logger) *LoginRepository {
 	}
 }
 
-func (r *LoginRepository) Login(loginRequest LoginRequest) (*owner.Owner, error) {
+func (r *LoginRepository) Login(loginRequest LoginRequest) (*owner.Owner, bool, error) {
 	r.Logger.Info("Repository Login")
 
 	user := &owner.Owner{}
 	if err := r.DB.Where("email = ?", loginRequest.Email).First(user).Error; err != nil {
 		r.Logger.WithError(err).Errorf("User not found or password incorrect %v", loginRequest.Email)
-		return nil, err
+		return nil, false, err
 	}
 
 	// Comparar a senha fornecida com a senha armazenada
 	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(loginRequest.Password))
 	if err != nil {
 		r.Logger.WithError(err).Errorf("User not found or password incorrect")
-		return nil, err
+		return nil, false, err
 	}
 
-	// A senha está correta, retornar o usuário
+	// A senha está correta, verificar se o usuário está associado ao clubId = 4
+	var clubCount int64
+	if err := r.DB.Model(&owner.OwnerClub{}).Where("owner_id = ? AND club_id = ?", user.ID, 4).Count(&clubCount).Error; err != nil {
+		r.Logger.WithError(err).Errorf("Failed to check for club association")
+		return nil, false, err
+	}
+
+	isAssociated := clubCount > 0
+
+	// retornar o usuário e se ele está associado
 	r.Logger.Info("Repository Login OK")
-	return user, nil
+	return user, isAssociated, nil
 }
+
 
 func (r *LoginRepository) ResetPassword(email string, newPassword string) error {
 	r.Logger.Info("Repository ResetPassword")

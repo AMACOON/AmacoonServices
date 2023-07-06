@@ -24,7 +24,7 @@ func NewLoginService(loginRepo *LoginRepository, logger *logrus.Logger) *LoginSe
 func (s *LoginService) Login(loginRequest LoginRequest) (*LoginResponse, error) {
 	s.Logger.Info("Service Login")
 
-	user, err := s.LoginRepo.Login(loginRequest)
+	user, isAssociated, err := s.LoginRepo.Login(loginRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -46,5 +46,6 @@ func (s *LoginService) Login(loginRequest LoginRequest) (*LoginResponse, error) 
 	return &LoginResponse{
 		Owner: user,
 		Token: tokenString,
+		IsAssociate: isAssociated,
 	}, nil
 }

@@ -10,7 +10,7 @@ type Club struct {
 	Nickname string
 	Email string
 	Login string
-	PasswordHash string
+	PasswordHash string `gorm:"index" json:"-"`
 	Permission int
 	}
 
