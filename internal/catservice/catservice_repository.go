@@ -54,13 +54,14 @@ func (r *CatServiceRepository) GetAllCatsServiceByOwnerAndGender(ownerID string,
 	var catServicesData []CatServiceData
 
 	rows, err := r.DB.Table("cats").
-		Select("cats.id, cats.name, cats.registration, cats.microchip, breeds.breed_name, colors.name as color_name, colors.ems_code as ems_code, cats.gender, fathers.name as father_name, mothers.name as mother_name, owners.id as owner_id, owners.name as owner_name, owners.cpf, owners.address, owners.city, owners.state, owners.zip_code, countries.name as country_name, owners.phone").
+		Select("cats.id, cats.name, cats.registration, cats.microchip, breeds.breed_name, colors.name as color_name, colors.ems_code as ems_code, cats.gender, fathers.name as father_name, mothers.name as mother_name, owners.id as owner_id, owners.name as owner_name, owners.cpf, owners.address, owners.city, owners.state, owners.zip_code, countries.name as country_name, owners.phone, catteries.id as cattery_id, catteries.name as cattery_name").
 		Joins("left join breeds on cats.breed_id = breeds.id").
 		Joins("left join colors on cats.color_id = colors.id").
 		Joins("left join cats fathers on cats.father_id = fathers.id").
 		Joins("left join cats mothers on cats.mother_id = mothers.id").
 		Joins("left join owners on owners.id = cats.owner_id").
 		Joins("left join countries on owners.country_id = countries.id").
+		Joins("left join catteries on owners.id = catteries.owner_id").
 		Where("cats.owner_id = ? AND cats.gender = ?", ownerID, gender).
 		Rows()
 	if err != nil {
@@ -70,7 +71,7 @@ func (r *CatServiceRepository) GetAllCatsServiceByOwnerAndGender(ownerID string,
 
 	for rows.Next() {
 		var catServiceData CatServiceData
-		err = rows.Scan(&catServiceData.CatData.ID, &catServiceData.CatData.Name, &catServiceData.CatData.Registration, &catServiceData.CatData.Microchip, &catServiceData.CatData.BreedName, &catServiceData.CatData.ColorName, &catServiceData.CatData.EmsCode, &catServiceData.CatData.Gender, &catServiceData.CatData.FatherName, &catServiceData.CatData.MotherName, &catServiceData.OwnerData.ID, &catServiceData.OwnerData.Name, &catServiceData.OwnerData.CPF, &catServiceData.OwnerData.Address, &catServiceData.OwnerData.City, &catServiceData.OwnerData.State, &catServiceData.OwnerData.ZipCode, &catServiceData.OwnerData.CountryName, &catServiceData.OwnerData.Phone)
+		err = rows.Scan(&catServiceData.CatData.ID, &catServiceData.CatData.Name, &catServiceData.CatData.Registration, &catServiceData.CatData.Microchip, &catServiceData.CatData.BreedName, &catServiceData.CatData.ColorName, &catServiceData.CatData.EmsCode, &catServiceData.CatData.Gender, &catServiceData.CatData.FatherName, &catServiceData.CatData.MotherName, &catServiceData.OwnerData.ID, &catServiceData.OwnerData.Name, &catServiceData.OwnerData.CPF, &catServiceData.OwnerData.Address, &catServiceData.OwnerData.City, &catServiceData.OwnerData.State, &catServiceData.OwnerData.ZipCode, &catServiceData.OwnerData.CountryName, &catServiceData.OwnerData.Phone, &catServiceData.OwnerData.CatteryID, &catServiceData.OwnerData.CatteryName)
 		if err != nil {
 			return catServicesData, err
 		}
@@ -79,6 +80,7 @@ func (r *CatServiceRepository) GetAllCatsServiceByOwnerAndGender(ownerID string,
 
 	return catServicesData, nil
 }
+
 
 func (r *CatServiceRepository) GetAllCatsServiceByOwner(ownerID string) ([]CatServiceData, error) {
 	var catServicesData []CatServiceData

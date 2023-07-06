@@ -23,13 +23,15 @@ type CatService struct {
 }
 
 type OwnerService struct {
-	ID          uint `json:"id"`
-	Name        string `json:"name"`
-	CPF         *string `json:"cpf"`
-	Address     *string `json:"address"`
-	City        *string `json:"city"`
-	State       *string `json:"state"`
-	ZipCode     *string `json:"zipCode"`
-	CountryName *string `json:"countryName"`
-	Phone       *string `json:"phone"`
+	ID           uint   `json:"id"`
+	Name         string `json:"name"`
+	CPF          *string `json:"cpf"`
+	Address      *string `json:"address"`
+	City         *string `json:"city"`
+	State        *string `json:"state"`
+	ZipCode      *string `json:"zipCode"`
+	CountryName  *string `json:"countryName"`
+	Phone        *string `json:"phone"`
+	CatteryID    *uint   `json:"catteryId"`
+	CatteryName  *string `json:"catteryName"`
 }

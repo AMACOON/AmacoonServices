@@ -99,9 +99,11 @@ func (r *CatRepository) GetCatsByOwner(ownerId string) ([]CatInfo, error) {
 
 	for _, cat := range cats {
 		catInfo := CatInfo{
+			ID: cat.ID,
 			Name:  cat.Name,
 			Breed: cat.Breed.BreedName, 
 			Color: cat.Color.Name,
+			EmsCode: cat.Color.EmsCode,
 		}
 
 		catInfos = append(catInfos, catInfo)
