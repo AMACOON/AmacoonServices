@@ -63,8 +63,6 @@ func SetupDatabase(logger *logrus.Logger) *gorm.DB {
 		logger.Fatalf("Failed to initialize DB connection: %v", err)
 	}
 
-	//logger.Info("Connected DB")
-
 	logger.Info("AutoMigrate DB")
 	db.AutoMigrate(&breed.Breed{},
 	&breed.BreedCompatibility{},
