@@ -9,7 +9,7 @@ COPY . .
 
 # Compilar o projeto Go dentro do container
 RUN go mod tidy
-RUN go build -o main cmd/server/main.go
+RUN CGO_ENABLED=0 go build -ldflags '-w -s -extldflags "-static"' -o main cmd/server/main.go
 
 # Usar uma imagem menor para a etapa final
 FROM gcr.io/distroless/base
