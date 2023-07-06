@@ -89,11 +89,12 @@ func (r *CatRepository) GetCatsByOwner(ownerId string) ([]CatInfo, error) {
 	var catInfos []CatInfo
 
 	err := r.DB.Table("cats").
-		Select("cats.name, breeds.breed_name, colors.name").
-		Joins("LEFT JOIN breeds ON breeds.id = cats.breed_id").
-		Joins("LEFT JOIN colors ON colors.id = cats.color_id").
-		Where("cats.owner_id = ?", ownerId).
-		Scan(&catInfos).Error
+	Select("cats.id, cats.name, breeds.breed_name, colors.name as color, colors.ems_code").
+	Joins("LEFT JOIN breeds ON breeds.id = cats.breed_id").
+	Joins("LEFT JOIN colors ON colors.id = cats.color_id").
+	Where("cats.owner_id = ?", ownerId).
+	Scan(&catInfos).Error
+
 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -104,13 +105,13 @@ func (r *CatRepository) GetCatsByOwner(ownerId string) ([]CatInfo, error) {
 	}
 
 
-	for _, cat := range cats {
+	for _, cat := range catInfos {
 		catInfo := CatInfo{
 			ID: cat.ID,
 			Name:  cat.Name,
-			Breed: cat.Breed.BreedName, 
-			Color: cat.Color.Name,
-			EmsCode: cat.Color.EmsCode,
+			Breed: cat.Breed, 
+			Color: cat.Color,
+			EmsCode: cat.EmsCode,
 		}
 
 		catInfos = append(catInfos, catInfo)
