@@ -46,8 +46,11 @@ func (r *LitterRepository) CreateLitter(litter Litter) (Litter, error) {
 func (r *LitterRepository) GetLitterByID(id uint) (Litter, error) {
 	r.Logger.Infof("Repository GetLitterByID")
 	var litter Litter
-	
-	err := r.DB.Preload("KittenData").First(&litter, id).Error
+
+	err := r.DB.
+		Preload("KittenData").
+		Preload("Files").
+		First(&litter, id).Error
 	if err != nil {
 		return Litter{}, err
 	}
@@ -75,7 +78,6 @@ func (r *LitterRepository) UpdateLitter(id uint, litter Litter) error {
 		r.Logger.WithError(err).Errorf("error updating litter with id %v", id)
 		return err
 	}
-	
 
 	// Atualizar os campos específicos dos gatinhos na tabela "service_kittens_litters"
 	for _, updatedKitten := range *litter.KittenData {
@@ -97,15 +99,15 @@ func (r *LitterRepository) UpdateLitter(id uint, litter Litter) error {
 }
 
 func (r *LitterRepository) UpdateLitterStatus(id uint, status string) error {
-    r.Logger.Infof("Repository UpdateLitterStatus")
-    
-    err := r.DB.Model(&Litter{}).Where("id = ?", id).Update("status", status).Error
-    if err != nil {
-        return err
-    }
-    
-    r.Logger.Infof("Repository UpdateLitterStatus OK")
-    return nil
+	r.Logger.Infof("Repository UpdateLitterStatus")
+
+	err := r.DB.Model(&Litter{}).Where("id = ?", id).Update("status", status).Error
+	if err != nil {
+		return err
+	}
+
+	r.Logger.Infof("Repository UpdateLitterStatus OK")
+	return nil
 }
 
 func (r *LitterRepository) GetAllLittersByRequesterID(requesterID uint) ([]Litter, error) {
@@ -163,8 +165,3 @@ func (r *LitterRepository) DeleteLitter(id uint) error {
 	r.Logger.Infof("Repository DeleteLitter OK")
 	return nil
 }
-
-
-
-
-

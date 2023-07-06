@@ -7,5 +7,14 @@ type CatInfo struct {
 	Name  string
 	Breed string
 	Color string
-	EmsCode   string
+  EmsCode   string
+}
+
+type CatInfoAdm struct {
+	ID uint
+	Name  string
+	Breed string
+	Color string
+  EmsCode   string
+
 }

@@ -1,26 +1,25 @@
 package litter
 
 import (
+	"strconv"
+
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
-	"strconv"
 )
 
 type LitterService struct {
-	LitterRepo      *LitterRepository
-	ProtocolService *utils.ProtocolService
+	LitterRepo         *LitterRepository
+	ProtocolService    *utils.ProtocolService
 	FilesLitterService *FilesLitterService
-	Logger          *logrus.Logger
-	
+	Logger             *logrus.Logger
 }
 
-func NewLitterService(litterRepo *LitterRepository, fileLitterService *FilesLitterService , protocolService *utils.ProtocolService, logger *logrus.Logger) *LitterService {
+func NewLitterService(litterRepo *LitterRepository, fileLitterService *FilesLitterService, protocolService *utils.ProtocolService, logger *logrus.Logger) *LitterService {
 	return &LitterService{
-		LitterRepo:      litterRepo,
+		LitterRepo:         litterRepo,
 		FilesLitterService: fileLitterService,
-		ProtocolService: protocolService,
-		Logger:          logger,
-		
+		ProtocolService:    protocolService,
+		Logger:             logger,
 	}
 }
 
@@ -39,16 +38,19 @@ func (s *LitterService) CreateLitter(req Litter, filesWithDesc []utils.FileWithD
 		s.Logger.Errorf("error create litter from repository: %v", err)
 		return nil, err
 	}
+	// Check if there are files to save
+	if len(filesWithDesc) > 0 {
+		// Save the files for this cat
+		filesLitter, err := s.FilesLitterService.SaveLitterFiles(litter.ID, filesWithDesc)
+		if err != nil {
+			s.Logger.Errorf("error saving Litter files: %v", err)
+			return nil, err
+		}
 
-	// Save the files for this cat
-	filesLitter, err := s.FilesLitterService.SaveLitterFiles(litter.ID, filesWithDesc)
-	if err != nil {
-		s.Logger.Errorf("error saving cat files: %v", err)
-		return nil, err
+		litter.Files = &filesLitter
+	} else {
+		s.Logger.Info("No files to save for this litter")
 	}
-
-	litter.Files = &filesLitter
-
 
 	s.Logger.Infof("Service CreateLitter OK")
 	return &litter, nil
@@ -138,5 +140,3 @@ func (s *LitterService) DeleteLitter(id string) error {
 	s.Logger.Infof("Service DeleteLitter OK")
 	return nil
 }
-
-

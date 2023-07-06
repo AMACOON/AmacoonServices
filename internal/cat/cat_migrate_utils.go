@@ -53,7 +53,6 @@ func getFederationID(db *gorm.DB, federationName string) (*uint, error) {
 	return &federations.ID, nil
 }
 
-
 func getBreedID(db *gorm.DB, breedName string) (uint, error) {
 
 	if breedName == "" || breedName == "0" {
@@ -139,15 +138,11 @@ func getOwnerID(db *gorm.DB, ownerName string) (uint, error) {
 	return owner.ID, nil
 }
 
-
-
-
 func cleanParentName(name string) string {
 	// Remover a vírgula e o asterisco
 	name = strings.ReplaceAll(name, ",", "")
 	name = strings.ReplaceAll(name, "*", "")
 	name = strings.ReplaceAll(name, "\\", "")
-
 
 	// Converter a string para minúsculas
 	name = strings.ToLower(name)
@@ -167,27 +162,20 @@ func cleanParentName(name string) string {
 		cleanedName = cleanedName[3:]
 	}
 
-	// Se as duas primeiras letras forem "br" ou "gb", remova-as
-	if len(cleanedName) >= 2 && (cleanedName[:2] == "br" || cleanedName[:2] == "gb") {
-		cleanedName = cleanedName[2:]
-	}
+    // Remover combinações de letras e números seguidas por uma apóstrofo e mais números
+	regexPattern2 := `\b[a-z]+\d+'?\d+\b\s*`
+	regex2 := regexp.MustCompile(regexPattern2)
+	cleanedName = regex2.ReplaceAllString(cleanedName, "")
 
-	// Remove um ponto no início da string, se houver
-	if len(cleanedName) > 0 && cleanedName[0] == '.' {
-		cleanedName = cleanedName[1:]
-	}
+    // Remover um ano seguido por um código e uma sigla
+	regexPattern3 := `'\d{2}\s[a-z]+\s[a-z]+\s`
+	regex3 := regexp.MustCompile(regexPattern3)
+	cleanedName = regex3.ReplaceAllString(cleanedName, "")
 
-	// Se o primeiro caractere for um apóstrofo, remova-o e todos os números seguintes até encontrar uma letra
-	if len(cleanedName) > 0 && cleanedName[0] == '\'' {
-		cleanedName = cleanedName[1:]
-		if len(cleanedName) > 0 {
-			cleanedName = strings.TrimLeftFunc(cleanedName, unicode.IsDigit)
-		}
-	}
-	// Se os dois primeiros caracteres são números, remova-os
-	if len(cleanedName) >= 2 && unicode.IsDigit(rune(cleanedName[0])) && unicode.IsDigit(rune(cleanedName[1])) {
-		cleanedName = cleanedName[2:]
-	}
+	// Remover uma sequência de anos concatenados
+	regexPattern4 := `ww\d{2}'\d{2}'\d{2}\s[a-z]+\s[a-z]+\s`
+	regex4 := regexp.MustCompile(regexPattern4)
+	cleanedName = regex4.ReplaceAllString(cleanedName, "")
 
 	// Remover espaços no início e no fim
 	cleanedName = strings.TrimSpace(cleanedName)
@@ -195,11 +183,10 @@ func cleanParentName(name string) string {
 	// Remover espaços extras entre as palavras
 	space := regexp.MustCompile(`\s+`)
 	cleanedName = space.ReplaceAllString(cleanedName, " ")
-	
-
 
 	return cleanedName
 }
+
 
 func insertTitles(db *gorm.DB, catID uint, titleCodes []string) error {
 	log.Println("Entering insertTitles")
@@ -231,4 +218,3 @@ func insertTitles(db *gorm.DB, catID uint, titleCodes []string) error {
 	log.Println("Leaving insertTitles")
 	return nil
 }
-

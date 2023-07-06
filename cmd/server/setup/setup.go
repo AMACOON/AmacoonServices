@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/scuba13/AmacoonServices/config"
+
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
 	"github.com/scuba13/AmacoonServices/internal/cattery"
@@ -21,7 +22,6 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	
 )
 
 func SetupLogger() *logrus.Logger {
@@ -56,7 +56,6 @@ func SetupLogger() *logrus.Logger {
 // 	return logger
 // }
 
-
 func SetupDatabase(logger *logrus.Logger) *gorm.DB {
 	logger.Info("Connecting DB")
 	db, err := config.SetupDB(logger)
@@ -68,28 +67,31 @@ func SetupDatabase(logger *logrus.Logger) *gorm.DB {
 
 	logger.Info("AutoMigrate DB")
 	db.AutoMigrate(&breed.Breed{},
-		&breed.BreedCompatibility{},
-		&color.Color{},
-		&country.Country{},
-		&owner.Owner{},
-		&owner.OwnerClub{},
-		&federation.Federation{},
-		&cattery.Cattery{},
-		&title.Title{},
-		&cat.Cat{},
-		&cat.TitlesCat{},
-		&cat.FilesCat{},
-		&litter.Litter{},
-		&litter.KittenLitter{},
-		&litter.FilesLitter{},
-		&transfer.Transfer{},
-		&titlerecognition.TitleRecognition{},
-		&titlerecognition.Title{},
-		&utils.Protocol{},
-		&club.Club{},
-		&judge.Judge{},
-		
-	 )
+	&breed.BreedCompatibility{},
+	&color.Color{},
+	&country.Country{},
+	&owner.Owner{},
+	&owner.OwnerClub{},
+	&federation.Federation{},
+	&cattery.Cattery{},
+	&cattery.FilesCattery{},
+	&title.Title{},
+	&cat.Cat{},
+	&cat.TitlesCat{},
+	&cat.FilesCat{},
+	&litter.Litter{},
+	&litter.KittenLitter{},
+	&litter.FilesLitter{},
+	&transfer.Transfer{},
+	&transfer.FilesTransfer{},
+	&titlerecognition.TitleRecognition{},
+	&titlerecognition.Title{},
+	&titlerecognition.FilesTitleRecognition{},
+	&utils.Protocol{},
+	&club.Club{},
+	&judge.Judge{},
+
+	)
 	logger.Info("AutoMigrate DB OK")
 	logger.Info("Connected DB OK")
 	return db
@@ -115,4 +117,3 @@ func SetupS3(logger *logrus.Logger) *s3.S3 {
 	logger.Info("Connected S3")
 	return db
 }
-

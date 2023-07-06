@@ -7,6 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/scuba13/AmacoonServices/internal/transfer"
+	"github.com/scuba13/AmacoonServices/internal/utils"
+	"encoding/json"
 	
 )
 
@@ -24,17 +26,49 @@ func NewTransferHandler(transferService *transfer.TransferService, logger *logru
 
 func (h *TransferHandler) CreateTransfer(c echo.Context) error {
 	h.Logger.Infof("Handler CreateTransfer")
-	var transferReq transfer.Transfer
-	err := c.Bind(&transferReq)
+	// Get multipart form
+	form, err := c.MultipartForm()
 	if err != nil {
-		h.Logger.Errorf("error binding request body: %v", err)
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
+		h.Logger.WithError(err).Error("Failed to get multipart form")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
-	createdTransfer, err := h.TransferService.CreateTransfer(transferReq)
+
+	// Extract transfer JSON
+	transferJson := form.Value["transfer"][0]
+	transfer := &transfer.Transfer{}
+	err = json.Unmarshal([]byte(transferJson), transfer)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to parse transfer JSON")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	// Validate transfer
+	if err := utils.ValidateStruct(transfer); err != nil {
+		h.Logger.WithError(err).Error("Failed to validate transfer")
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	
+	// Extract files
+	files := form.File["file"]
+	descriptions := form.Value["description"]
+
+	var filesWithDesc []utils.FileWithDescription
+	for i, file := range files {
+		description := ""
+		if i < len(descriptions) {
+			description = descriptions[i]
+		}
+		filesWithDesc = append(filesWithDesc, utils.FileWithDescription{
+			File:        file,
+			Description: description,
+		})
+	}
+	createdTransfer, err := h.TransferService.CreateTransfer(*transfer, filesWithDesc)
 	if err != nil {
 		h.Logger.WithError(err).Error("failed to create transfer")
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
+	h.Logger.Infof("Handler CreateTransfer OK")
 	return c.JSON(http.StatusCreated, createdTransfer)
 }
 

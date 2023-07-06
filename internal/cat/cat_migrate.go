@@ -132,7 +132,7 @@ func MigrateCats(dbOld *gorm.DB, dbNew *gorm.DB) {
 				Microchip:        cat.Microchip,
 				Gender:           sexString,
 				Birthdate:        cat.BirthDate,
-				Neutered:         neutered,
+				Neutered:         &neutered,
 				Validated:        validated,
 				Observation:      "",
 				Fifecat:          fifecat,

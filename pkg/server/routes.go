@@ -94,6 +94,8 @@ func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	catGroup.GET("/:ownerId/owner", catHandler.GetCatsByOwner)
 	catGroup.POST("", catHandler.CreateCat)
 	catGroup.PUT("/:id/neutered", catHandler.UpdateNeuteredStatus)
+	catGroup.PUT("/:id", catHandler.UpdateCat)
+	catGroup.GET("", catHandler.GetAllCats)
 }
 
 func setupCatServiceRoutes(e *echo.Echo, catServiceHandler *handler.CatServiceHandler) {
@@ -120,6 +122,8 @@ func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
 func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {
 	colorGroup := e.Group("/colors")
 	colorGroup.GET("/:breedCode", colorHandler.GetAllColorsByBreed)
+	colorGroup.GET("/:id", colorHandler.GetColorByID)
+	colorGroup.PUT("/:id", colorHandler.UpdateColor)
 }
 
 func setupLitterRoutes(e *echo.Echo, litterHandler *handler.LitterHandler) {
@@ -161,6 +165,8 @@ func setupCatteryRoutes(e *echo.Echo, catteryHandler *handler.CatteryHandler) {
 	catteryGroup := e.Group("/catteries")
 	catteryGroup.GET("", catteryHandler.GetAllCatteries)
 	catteryGroup.GET("/:id", catteryHandler.GetCatteryByID)
+	catteryGroup.POST("", catteryHandler.CreateCattery)
+	catteryGroup.PUT("/:id", catteryHandler.UpdateCattery)
 }
 
 func setupFederationRoutes(e *echo.Echo, federationHandler *handler.FederationHandler) {

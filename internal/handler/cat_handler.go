@@ -11,7 +11,6 @@ import (
 
 	//"github.com/golang-jwt/jwt/v4"
 	"encoding/json"
-	"strconv"
 )
 
 type CatHandler struct {
@@ -50,7 +49,7 @@ func (h *CatHandler) CreateCat(c echo.Context) error {
 		h.Logger.WithError(err).Error("Failed to validate cat")
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-	
+
 	// Extract files
 	files := form.File["file"]
 	descriptions := form.Value["description"]
@@ -139,8 +138,6 @@ func (h *CatHandler) GetCatsByOwner(c echo.Context) error {
 	return c.JSON(http.StatusOK, cat)
 }
 
-
-
 func (h *CatHandler) UpdateNeuteredStatus(c echo.Context) error {
 	h.Logger.Infof("Handler UpdateNeuteredStatus")
 
@@ -148,12 +145,7 @@ func (h *CatHandler) UpdateNeuteredStatus(c echo.Context) error {
 	catID := c.Param("id")
 
 	// Get neutered status from query parameter
-	neuteredStr := c.QueryParam("neutered")
-	neutered, err := strconv.ParseBool(neuteredStr)
-	if err != nil {
-		h.Logger.WithError(err).Errorf("Failed to parse neutered status: %s", neuteredStr)
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid neutered status")
-	}
+	neutered := c.QueryParam("neutered")
 
 	// Update neutered status
 	if err := h.CatService.UpdateNeuteredStatus(catID, neutered); err != nil {
@@ -165,4 +157,37 @@ func (h *CatHandler) UpdateNeuteredStatus(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
+func (h *CatHandler) UpdateCat(c echo.Context) error {
+	h.Logger.Infof("Handler UpdateCat")
+	
+	id := c.Param("id")
+	
+	var catObj cat.Cat
+	err := c.Bind(&catObj)
+	if err != nil {
+		h.Logger.Errorf("error binding request body: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body")
+	}
 
+	err = h.CatService.UpdateCat(id, &catObj)
+	if err != nil {
+		h.Logger.WithError(err).Errorf("failed to update cat with id %s", id)
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	h.Logger.Infof("Handler UpdateCat OK")
+	return c.NoContent(http.StatusOK)
+}
+
+func (h *CatHandler) GetAllCats(c echo.Context) error {
+	h.Logger.Infof("Handler GetAllCats")
+	filter := c.QueryParam("filter")
+	cats, err := h.CatService.GetAllCats(filter)
+	if err != nil {
+		h.Logger.WithError(err).Error("Failed to get cats")
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	h.Logger.Infof("Handler GetAllCats OK")
+	return c.JSON(http.StatusOK, cats)
+}

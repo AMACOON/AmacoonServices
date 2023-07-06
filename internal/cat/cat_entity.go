@@ -17,12 +17,13 @@ import (
 type Cat struct {
 	gorm.Model
 	Name             string                 `gorm:"column:name" validate:"required"`
+	NameFull		 string                 `gorm:"-"`
 	Registration     string                 `gorm:"column:registration;index" validate:"required,notzeroes"`
 	RegistrationType string                 `gorm:"column:registration_type;type:enum('LO', 'RX')" validate:"required,oneof=LO RX"`
 	Microchip        string                 `gorm:"column:microchip"`
 	Gender           string                 `gorm:"column:gender;index;type:enum('female', 'male')" validate:"required,oneof=female male"`
 	Birthdate        time.Time              `gorm:"column:birthdate" validate:"required"`
-	Neutered         bool                   `gorm:"column:neutered" validate:"required"`
+	Neutered         *bool                   `gorm:"column:neutered" validate:"required"`
 	Validated        bool                   `gorm:"column:validated"`
 	Observation      string                 `gorm:"column:observation"`
 	Fifecat          bool                   `gorm:"column:fifecat"`

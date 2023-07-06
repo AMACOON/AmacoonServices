@@ -9,35 +9,51 @@ import (
 type TransferService struct {
 	TransferRepo    *TransferRepository
 	ProtocolService *utils.ProtocolService
+	FilesTransferService *FilesTransferService
 	Logger          *logrus.Logger
 }
 
-func NewTransferService(transferRepo *TransferRepository, logger *logrus.Logger, protocolService *utils.ProtocolService) *TransferService {
+func NewTransferService(transferRepo *TransferRepository, protocolService *utils.ProtocolService, fileTransferService *FilesTransferService, logger *logrus.Logger) *TransferService {
 	return &TransferService{
 		TransferRepo:    transferRepo,
 		ProtocolService: protocolService,
+		FilesTransferService: fileTransferService,
 		Logger:          logger,
 	}
 }
 
-func (s *TransferService) CreateTransfer(req Transfer) (Transfer, error) {
+func (s *TransferService) CreateTransfer(req Transfer, filesWithDesc []utils.FileWithDescription) (*Transfer, error) {
 	s.Logger.Infof("Service CreateTransfer")
 
 	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("P")
 	req.ProtocolNumber = protocolNumber
 	if err != nil {
 		s.Logger.Errorf("error generating protocol for transfer: %v", err)
-		return Transfer{}, err
+		return nil, err
 	}
 	req.Status = "submitted"
 	transfer, err := s.TransferRepo.CreateTransfer(req)
 	if err != nil {
 		s.Logger.Errorf("error fetching transfer from repository: %v", err)
-		return Transfer{}, err
+		return nil, err
+	}
+	// Check if there are files to save
+	if len(filesWithDesc) > 0 {
+		// Save the files for this cat
+		filesTransfer, err := s.FilesTransferService.SaveTransferFiles(transfer.ID, filesWithDesc)
+		if err != nil {
+			s.Logger.Errorf("error saving Transfer files: %v", err)
+			return nil, err
+		}
+
+		transfer.Files = &filesTransfer
+	} else {
+		s.Logger.Info("No files to save for this Transfer")
 	}
 
+
 	s.Logger.Infof("Service CreateTransfer OK")
-	return transfer, nil
+	return &transfer, nil
 }
 
 func (s *TransferService) GetTransferByID(id string) (*Transfer, error) {

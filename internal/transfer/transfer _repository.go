@@ -47,7 +47,7 @@ func (r *TransferRepository) GetTransferByID(id uint) (Transfer, error) {
 	r.Logger.Infof("Repository GetTransferByID")
 	var transfer Transfer
 	
-	err := r.DB.First(&transfer, id).Error
+	err := r.DB.Preload("Files").First(&transfer, id).Error
 	if err != nil {
 		return Transfer{}, err
 	}

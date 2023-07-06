@@ -9,10 +9,11 @@ import (
 type TitleRecognitionService struct {
 	TitleRecognitionRepo *TitleRecognitionRepository
 	ProtocolService      *utils.ProtocolService
+	FilesTitleRecognitionService *FilesTitleRecognitionService
 	Logger               *logrus.Logger
 }
 
-func NewTitleRecognitionService(titleRecognitionRepo *TitleRecognitionRepository, logger *logrus.Logger, protocolService *utils.ProtocolService) *TitleRecognitionService {
+func NewTitleRecognitionService(titleRecognitionRepo *TitleRecognitionRepository, protocolService *utils.ProtocolService, fileTitleRecognitionService *FilesTitleRecognitionService,logger *logrus.Logger, ) *TitleRecognitionService {
 	return &TitleRecognitionService{
 		TitleRecognitionRepo: titleRecognitionRepo,
 		ProtocolService:      protocolService,
@@ -20,24 +21,38 @@ func NewTitleRecognitionService(titleRecognitionRepo *TitleRecognitionRepository
 	}
 }
 
-func (s *TitleRecognitionService) CreateTitleRecognition(req TitleRecognition) (TitleRecognition, error) {
+func (s *TitleRecognitionService) CreateTitleRecognition(req TitleRecognition, filesWithDesc []utils.FileWithDescription) (*TitleRecognition, error) {
 	s.Logger.Infof("Service CreateTitleRecognition")
 
 	protocolNumber, err := s.ProtocolService.GenerateUniqueProtocolNumber("T")
 	req.ProtocolNumber = protocolNumber
 	if err != nil {
 		s.Logger.Errorf("error generating protocol to titleRecognition: %v", err)
-		return TitleRecognition{}, err
+		return nil, err
 	}
 	req.Status = "submitted"
 	titleRecognition, err := s.TitleRecognitionRepo.CreateTitleRecognition(req)
 	if err != nil {
 		s.Logger.Errorf("error fetching titleRecognition from repository: %v", err)
-		return TitleRecognition{}, err
+		return nil, err
 	}
 
+		// Check if there are files to save
+		if len(filesWithDesc) > 0 {
+			// Save the files for this cat
+			filesTitleRecognition, err := s.FilesTitleRecognitionService.SaveTitleRecognitionFiles(titleRecognition.ID, filesWithDesc)
+			if err != nil {
+				s.Logger.Errorf("error saving titleRecognition files: %v", err)
+				return nil, err
+			}
+	
+			titleRecognition.Files = &filesTitleRecognition
+		} else {
+			s.Logger.Info("No files to save for this TitleRecognition")
+		}
+
 	s.Logger.Infof("Service CreateTitleRecognition OK")
-	return titleRecognition, nil
+	return &titleRecognition, nil
 }
 
 func (s *TitleRecognitionService) GetTitleRecognitionByID(id string) (*TitleRecognition, error) {
