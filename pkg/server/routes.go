@@ -88,7 +88,7 @@ func setupHealthChecks(e *echo.Echo) {
 }
 
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
-	catGroup := e.Group("/cats")
+	catGroup := e.Group("/api/cats")
 	//catGroup.Use(echojwt.WithConfig(jwtConfig))
 	catGroup.GET("/:id", catHandler.GetCatsCompleteByID)
 	catGroup.GET("/:ownerId/owner", catHandler.GetCatsByOwner)
@@ -99,7 +99,7 @@ func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 }
 
 func setupCatServiceRoutes(e *echo.Echo, catServiceHandler *handler.CatServiceHandler) {
-	catServiceGroup := e.Group("/catservice")
+	catServiceGroup := e.Group("/api/catservice")
 	catServiceGroup.GET("/:id", catServiceHandler.GetCatServiceByID)
 	catServiceGroup.GET("/:registration/registration", catServiceHandler.GetCatServiceByRegistration)
 	catServiceGroup.GET("", catServiceHandler.GetAllCatsServiceByOwnerAndGender)
@@ -108,7 +108,7 @@ func setupCatServiceRoutes(e *echo.Echo, catServiceHandler *handler.CatServiceHa
 }
 
 func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
-	ownerGroup := e.Group("/owners")
+	ownerGroup := e.Group("/api/owners")
 	ownerGroup.GET("/:id", ownerHandler.GetOwnerByID)
 	ownerGroup.GET("", ownerHandler.GetAllOwners)
 	ownerGroup.GET("/:cpf/cpf", ownerHandler.GetOwnerByCPF)
@@ -120,14 +120,14 @@ func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
 }
 
 func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {
-	colorGroup := e.Group("/colors")
+	colorGroup := e.Group("/api/colors")
 	colorGroup.GET("/:breedCode", colorHandler.GetAllColorsByBreed)
 	colorGroup.GET("/:id", colorHandler.GetColorByID)
 	colorGroup.PUT("/:id", colorHandler.UpdateColor)
 }
 
 func setupLitterRoutes(e *echo.Echo, litterHandler *handler.LitterHandler) {
-	litterGroup := e.Group("/litters")
+	litterGroup := e.Group("/api/litters")
 	litterGroup.POST("", litterHandler.CreateLitter)
 	litterGroup.GET("/:id", litterHandler.GetLitterByID)
 	litterGroup.PUT("/:id", litterHandler.UpdateLitter)
@@ -137,7 +137,7 @@ func setupLitterRoutes(e *echo.Echo, litterHandler *handler.LitterHandler) {
 }
 
 func setupTransferRoutes(e *echo.Echo, transferHandler *handler.TransferHandler) {
-	transferGroup := e.Group("/transfers")
+	transferGroup := e.Group("/api/transfers")
 	transferGroup.POST("", transferHandler.CreateTransfer)
 	transferGroup.GET("/:id", transferHandler.GetTransferByID)
 	transferGroup.PUT("/:id", transferHandler.UpdateTransfer)
@@ -146,7 +146,7 @@ func setupTransferRoutes(e *echo.Echo, transferHandler *handler.TransferHandler)
 }
 
 func setupTitleRecognitionRoutes(e *echo.Echo, titleRecognitionHandler *handler.TitleRecognitionHandler) {
-	titleRecognitionGroup := e.Group("/titles-recognition")
+	titleRecognitionGroup := e.Group("/api/titles-recognition")
 	titleRecognitionGroup.POST("", titleRecognitionHandler.CreateTitleRecognition)
 	titleRecognitionGroup.GET("/:id", titleRecognitionHandler.GetTitleRecognitionByID)
 	titleRecognitionGroup.PUT("/:id", titleRecognitionHandler.UpdateTitlesRecognition)
@@ -156,13 +156,13 @@ func setupTitleRecognitionRoutes(e *echo.Echo, titleRecognitionHandler *handler.
 }
 
 func setupBreedRoutes(e *echo.Echo, breedHandler *handler.BreedHandler) {
-	breedGroup := e.Group("/breeds")
+	breedGroup := e.Group("/api/breeds")
 	breedGroup.GET("", breedHandler.GetAllBreeds)
 	breedGroup.GET("/:id", breedHandler.GetBreedByID)
 }
 
 func setupCatteryRoutes(e *echo.Echo, catteryHandler *handler.CatteryHandler) {
-	catteryGroup := e.Group("/catteries")
+	catteryGroup := e.Group("/api/catteries")
 	catteryGroup.GET("", catteryHandler.GetAllCatteries)
 	catteryGroup.GET("/:id", catteryHandler.GetCatteryByID)
 	catteryGroup.POST("", catteryHandler.CreateCattery)
@@ -170,25 +170,25 @@ func setupCatteryRoutes(e *echo.Echo, catteryHandler *handler.CatteryHandler) {
 }
 
 func setupFederationRoutes(e *echo.Echo, federationHandler *handler.FederationHandler) {
-	federationGroup := e.Group("/federations")
+	federationGroup := e.Group("/api/federations")
 	federationGroup.GET("", federationHandler.GetAllFederations)
 	federationGroup.GET("/:id", federationHandler.GetFederationByID)
 }
 
 func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
 	fmt.Println("Rota Country")
-	countryGroup := e.Group("/countries")
+	countryGroup := e.Group("/api/countries")
 	countryGroup.GET("", countryHandler.GetAllCountry)
 }
 
 func setupTitlesRoutes(e *echo.Echo, titleHandler *handler.TitleHandler, jwtConfig echojwt.Config) {
-	titleGroup := e.Group("/titles")
+	titleGroup := e.Group("/api/titles")
 	titleGroup.Use(echojwt.WithConfig(jwtConfig))
 	titleGroup.GET("", titleHandler.GetAllTitles)
 }
 
 func setupFilesRoutes(e *echo.Echo, filesHandler *handler.FilesHandler) {
-	fileGroup := e.Group("/files")
+	fileGroup := e.Group("/api/files")
 	fileGroup.POST("", filesHandler.SaveFiles)
 }
 
