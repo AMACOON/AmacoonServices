@@ -193,7 +193,7 @@ func setupFilesRoutes(e *echo.Echo, filesHandler *handler.FilesHandler) {
 }
 
 func setupLoginRoutes(e *echo.Echo, loginHandler *handler.LoginHandler) {
-	loginGroup := e.Group("/login")
+	loginGroup := e.Group("/api/login")
 	loginGroup.POST("/authenticate", loginHandler.Login)
 
 }
