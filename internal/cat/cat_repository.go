@@ -89,7 +89,7 @@ func (r *CatRepository) GetCatsByOwner(ownerId string) ([]CatInfo, error) {
 	var catInfos []CatInfo
 
 	err := r.DB.Table("cats").
-		Select("cats.id, cats.name, breeds.breed_name as breed, colors.name as color, colors.ems_code").
+		Select("cats.id, cats.name, breeds.breed_name as breed, colors.name as color, colors.ems_code, cats.neutered"). // Adicionando cats.neutered ao SELECT
 		Joins("LEFT JOIN breeds ON breeds.id = cats.breed_id").
 		Joins("LEFT JOIN colors ON colors.id = cats.color_id").
 		Where("cats.owner_id = ?", ownerId).
@@ -101,6 +101,7 @@ func (r *CatRepository) GetCatsByOwner(ownerId string) ([]CatInfo, error) {
 
 	return catInfos, nil
 }
+
 
 func (r *CatRepository) UpdateNeuteredStatus(catID string, neutered bool) error {
 	r.Logger.Infof("Repository UpdateNeuteredStatus")
@@ -116,7 +117,7 @@ func (r *CatRepository) UpdateNeuteredStatus(catID string, neutered bool) error 
 	}
 
 	// Update the Neutered status
-	if err := r.DB.Model(&cat).Update("Neutered", neutered).Error; err != nil {
+	if err := r.DB.Model(&cat).Update("neutered", neutered).Error; err != nil {
 		r.Logger.Errorf("Update Cat Neutered status failed: %v", err)
 		return err
 	}
