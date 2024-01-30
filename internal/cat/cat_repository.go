@@ -55,6 +55,9 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 		Preload("Cattery").
 		Preload("Country").
 		Preload("Owner.Country").
+		Preload("Federation.Country").
+		Preload("Cattery.Owner").
+		Preload("Cattery.Country").
 		Preload("Federation").
 		Preload("Titles.Titles").
 		Preload("Files").
@@ -110,7 +113,7 @@ func (r *CatRepository) UpdateNeuteredStatus(catID string, neutered bool) error 
 	cat := Cat{}
 	if err := r.DB.First(&cat, catID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			r.Logger.Errorf("No cat found with id: %d", catID)
+			r.Logger.Errorf("No cat found with id: %s", catID)
 			return err
 		}
 		return err
@@ -187,7 +190,8 @@ func (r *CatRepository) UpdateCat(id string, updatedCat *Cat) error {
 	cat := Cat{}
 	if err := r.DB.First(&cat, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			r.Logger.Errorf("No cat found with id: %d", id)
+			r.Logger.Errorf("No cat found with id: %s", id)
+
 			return err
 		}
 		return err

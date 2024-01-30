@@ -1,0 +1,18 @@
+version: '3.1'
+
+services:
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: senha123
+      MYSQL_DATABASE: dbcatclubsystem
+      MYSQL_USER: catclubsystem
+      MYSQL_PASSWORD: 2010mainecoon2010
+    ports:
+      - "3306:3306"
+    volumes:
+      - meu-db-volume:/var/lib/mysql
+
+volumes:
+  meu-db-volume:

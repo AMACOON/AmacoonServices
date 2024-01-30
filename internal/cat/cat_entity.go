@@ -19,9 +19,9 @@ type Cat struct {
 	Name             string                 `gorm:"column:name" validate:"required"`
 	NameFull		 string                 `gorm:"-"`
 	Registration     string                 `gorm:"column:registration;index" validate:"required,notzeroes"`
-	RegistrationType string                 `gorm:"column:registration_type;type:enum('LO', 'RX')" validate:"required,oneof=LO RX"`
+	RegistrationType string                 `gorm:"column:registration_type`
 	Microchip        string                 `gorm:"column:microchip"`
-	Gender           string                 `gorm:"column:gender;index;type:enum('female', 'male')" validate:"required,oneof=female male"`
+	Gender           string                 `gorm:"column:gender;index`
 	Birthdate        time.Time              `gorm:"column:birthdate" validate:"required"`
 	Neutered         *bool                   `gorm:"column:neutered" validate:"required"`
 	Validated        bool                   `gorm:"column:validated"`

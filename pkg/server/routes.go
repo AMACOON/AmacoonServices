@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -12,7 +11,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
-
 
 func NewRouter(catHandler *handler.CatHandler,
 	ownerHandler *handler.OwnerHandler,
@@ -36,7 +34,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	e.Use(middleware.AddTrailingSlash())
 
 	e.HTTPErrorHandler = customHTTPErrorHandler
-	
+
 	jwtConfig := getJWTConfig()
 	setupHealthChecks(e)
 	setupCatRoutes(e, catHandler)
@@ -53,7 +51,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupCatServiceRoutes(e, catServiceHandler)
 	setupFilesRoutes(e, filesHandler)
 	setupLoginRoutes(e, loginHandler)
-	
+
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -79,7 +77,6 @@ func getJWTConfig() echojwt.Config {
 		SigningKey: []byte(secret),
 	}
 }
-
 
 func setupHealthChecks(e *echo.Echo) {
 	e.GET("/", func(c echo.Context) error {
@@ -176,7 +173,6 @@ func setupFederationRoutes(e *echo.Echo, federationHandler *handler.FederationHa
 }
 
 func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
-	fmt.Println("Rota Country")
 	countryGroup := e.Group("/api/countries")
 	countryGroup.GET("", countryHandler.GetAllCountry)
 }
@@ -197,6 +193,3 @@ func setupLoginRoutes(e *echo.Echo, loginHandler *handler.LoginHandler) {
 	loginGroup.POST("/authenticate", loginHandler.Login)
 
 }
-
-
-

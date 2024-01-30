@@ -93,7 +93,7 @@ func MigrateOwners(dbOld, dbNew *gorm.DB, logger *logrus.Logger) error {
 				Phone:        owner.Phone,
 				Valid:        owner.Valid == "s",
 				ValidId:      owner.ValidationID,
-				Observation:  string(owner.Observation),
+				//Observation:  string(owner.Observation),
 				
 			}
 

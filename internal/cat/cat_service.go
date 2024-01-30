@@ -35,7 +35,7 @@ func (s *CatService) CreateCat(req *Cat, filesWithDesc []utils.FileWithDescripti
 		return nil, err
 	}
 	if existingCat != nil {
-		s.Logger.Info("A cat with the same attributes already exists '%s'", existingCat.Name)
+		s.Logger.Info("A cat with the same attributes already exists '" + existingCat.Name + "'")
 		return nil, errors.New("a cat with the same attributes already exists")
 	}
 

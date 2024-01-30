@@ -1,7 +1,7 @@
 package migrate
 
 import (
-	"time"
+	 "time"
 
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"

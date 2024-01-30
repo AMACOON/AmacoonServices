@@ -9,23 +9,25 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func SetupDB(logger *logrus.Logger) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		viper.GetString("db.username"),
-		viper.GetString("db.password"),
-		viper.GetString("db.host"),
-		viper.GetString("db.port"),
-		viper.GetString("db.name"),
-	)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
+	viper.GetString("db.host"),
+	viper.GetString("db.port"),
+	viper.GetString("db.username"),
+	viper.GetString("db.name"),
+	viper.GetString("db.password"),
+)
+
 
 	var db *gorm.DB
 	var err error
 
 	for retries := 5; retries >= 0; retries-- {
-		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err == nil {
 			break
 		}
@@ -61,7 +63,7 @@ func SetupDBOld() (*gorm.DB, error) {
 		"amacoon001_add1",
 		"armin013",
 		"mysql.catclubsystem.com",
-		viper.GetString("db.port"),
+		"3306",
 		"amacoon01",
 	)
 

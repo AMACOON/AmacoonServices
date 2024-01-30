@@ -1,0 +1,17 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: dbcatclubsystem
+      POSTGRES_USER: catclubsystem
+      POSTGRES_PASSWORD: 2010mainecoon2010
+    ports:
+      - "5432:5432"
+    volumes:
+      - meu-novo-db-volume:/var/lib/postgresql/data  # Nome do volume atualizado
+
+volumes:
+  meu-novo-db-volume:  # Nome do volume atualizado
