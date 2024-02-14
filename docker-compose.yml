@@ -2,17 +2,27 @@ version: '3.1'
 
 services:
   db:
-    image: mysql:latest
+    image: postgres:latest
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: senha123
-      MYSQL_DATABASE: dbcatclubsystem
-      MYSQL_USER: catclubsystem
-      MYSQL_PASSWORD: 2010mainecoon2010
+      POSTGRES_DB: dbcatclubsystem
+      POSTGRES_USER: catclubsystem
+      POSTGRES_PASSWORD: 2010mainecoon2010
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - meu-db-volume:/var/lib/mysql
+      - meu-novo-db-volume:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .  # Diretório atual onde o Dockerfile está localizado
+      dockerfile: Dockerfile  # Especificar o nome do Dockerfile se não for o padrão
+    ports:
+      - "8080:8080"  # Mapear a porta do container para a porta do host
+    depends_on:
+      - db  # Garantir que o serviço db seja iniciado antes da aplicação
+    # environment:
+    #   - DATABASE_URL=postgres://catclubsystem:2010mainecoon2010@db/dbcatclubsystem  # Exemplo de variável de ambiente
 
 volumes:
-  meu-db-volume:
+  meu-novo-db-volume:
