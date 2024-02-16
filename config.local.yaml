@@ -1,14 +1,13 @@
 db:
   username: catclubsystem
   password: 2010mainecoon2010
-  host: db
-  # host: 127.0.0.1
+  host: localhost
   port: 5432
   name: dbcatclubsystem
 
 server:
   port: 8080
-  host: localhost:8080
+  host: http://localhost:8080
 aws:
   S3AwsAccessKeyId: AKIA4R4F43U6FT2QGREN
   S3AwsSecretAccessKey: 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
@@ -19,6 +18,6 @@ smtp:
   username: sistema@catclubsystem.com
   password: Sistema@0013
   systemEmail: sistema@catclubsystem.com
-  adminEmail: scuba13@hotmail.com
+  adminEmail: amacoon@gmail.com
 jwt:
-  secret: RagnarPitoco
+  secret: RagnarPi

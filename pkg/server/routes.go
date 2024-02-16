@@ -86,7 +86,6 @@ func setupHealthChecks(e *echo.Echo) {
 
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	catGroup := e.Group("/api/cats")
-	//catGroup.Use(echojwt.WithConfig(jwtConfig))
 	catGroup.GET("/:id", catHandler.GetCatsCompleteByID)
 	catGroup.GET("/:ownerId/owner", catHandler.GetCatsByOwner)
 	catGroup.POST("", catHandler.CreateCat)

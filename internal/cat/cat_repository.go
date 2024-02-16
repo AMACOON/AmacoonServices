@@ -32,10 +32,11 @@ func (r *CatRepository) CreateCat(cat *Cat) (*Cat, error) {
 	}()
 
 	// Create the Cat record
-	if err := tx.Create(&cat).Error; err != nil {
+	if err := tx.Create(cat).Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
+	
 
 	// If everything goes well, commit the transaction
 	tx.Commit()

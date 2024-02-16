@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - meu-novo-db-volume:/var/lib/postgresql/data  # Nome do volume atualizado
+      - postgress:/var/lib/postgresql/data
 
 volumes:
-  meu-novo-db-volume:  # Nome do volume atualizado
+  postgress:

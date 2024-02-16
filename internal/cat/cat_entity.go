@@ -19,7 +19,7 @@ type Cat struct {
 	Name             string                 `gorm:"column:name" validate:"required"`
 	NameFull         string                 `gorm:"-"`
 	Registration     string                 `gorm:"column:registration;index" validate:"required,notzeroes"`
-	RegistrationType string                 `gorm:"column:registration_type"`
+	RegistrationType string                 `gorm:"column:registrationtype"`
 	Microchip        string                 `gorm:"column:microchip"`
 	Gender           string                 `gorm:"column:gender;index"`
 	Birthdate        time.Time              `gorm:"column:birthdate" validate:"required"`
