@@ -185,23 +185,44 @@ func UpdateCatParents(db *gorm.DB) error {
     for _, cat := range cats {
         // Busque o ID do pai e da mãe na tabela cats usando os nomes limpos
         var fatherID, motherID *uint
-        if cat.FatherNameTemp != "" {
-            var father Cat
-            result := db.Where("name LIKE ?", "%" + cat.FatherNameTemp + "%").First(&father)
-            if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
-                return result.Error
-            }
-            fatherID = &father.ID
-        }
+		
+		// Se o nome do pai/mãe temporário não estiver vazio, tente buscar o registro correspondente
+		if cat.FatherNameTemp != "" {
+			var father Cat
+			result := db.Where("name LIKE ?", "%" + cat.FatherNameTemp + "%").First(&father)
+			if result.Error != nil {
+				if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+					// Se o erro for diferente de 'não encontrado', retorne o erro
+					return result.Error
+				}
+				// Se não encontrar o pai, deixe fatherID como nil
+				fatherID = nil
+			} else {
+				// Se encontrar, use o ID do pai
+				fatherID = &father.ID
+			}
+		}
 
-        if cat.MotherNameTemp != "" {
-            var mother Cat
-            result := db.Where("name LIKE ?", "%" + cat.MotherNameTemp + "%").First(&mother)
-            if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
-                return result.Error
-            }
-            motherID = &mother.ID
-        }
+// Repita a lógica similar para motherID
+
+
+		if cat.MotherNameTemp != "" {
+			var mother Cat
+			result := db.Where("name LIKE ?", "%" + cat.MotherNameTemp + "%").First(&mother)
+			if result.Error != nil {
+				if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+					// Se ocorrer um erro diferente de "não encontrado", retorne o erro
+					return result.Error
+				}
+				// Se não encontrar a mãe, deixe motherID como nil
+				// Isso é crucial para assegurar que motherID possa ser definido como nil
+				motherID = nil
+			} else {
+				// Se encontrar a mãe, atribua o ID dela ao motherID
+				motherID = &mother.ID
+			}
+		}
+
 
         // Atualize o registro correspondente na tabela cats com os IDs dos pais
         if fatherID != nil || motherID != nil {

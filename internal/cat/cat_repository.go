@@ -65,17 +65,23 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 		Preload("Files").
 		Where("id = ?", id).First(&cat)
 
-	if cat.FatherID != nil {
-		var father Cat
-		r.DB.Select("name").Where("id = ?", cat.FatherID).First(&father)
-		cat.FatherName = father.Name
-	}
+		if cat.FatherID != nil && *cat.FatherID != 0 {
+			var father Cat
+			r.DB.Select("name").Where("id = ?", *cat.FatherID).First(&father)
+			if father.ID != 0 { // Verifique se um registro foi encontrado antes de atribuir o nome
+				cat.FatherName = father.Name
+			}
+		}
+		
 
-	if cat.MotherID != nil {
-		var mother Cat
-		r.DB.Select("name").Where("id = ?", cat.MotherID).First(&mother)
-		cat.MotherName = mother.Name
-	}
+		if cat.MotherID != nil && *cat.MotherID != 0 {
+			var mother Cat
+			r.DB.Select("name").Where("id = ?", *cat.MotherID).First(&mother)
+			if mother.ID != 0 { // Verifique se um registro foi encontrado antes de atribuir o nome
+				cat.MotherName = mother.Name
+			}
+		}
+		
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
