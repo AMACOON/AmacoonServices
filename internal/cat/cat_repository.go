@@ -17,7 +17,6 @@ func NewCatRepository(db *gorm.DB, logger *logrus.Logger) *CatRepository {
 	}
 }
 
-
 func (r *CatRepository) CreateCat(cat *Cat) (*Cat, error) {
 	r.Logger.Infof("Repository CreateCat")
 
@@ -36,7 +35,6 @@ func (r *CatRepository) CreateCat(cat *Cat) (*Cat, error) {
 		tx.Rollback()
 		return nil, err
 	}
-	
 
 	// If everything goes well, commit the transaction
 	tx.Commit()
@@ -65,23 +63,25 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 		Preload("Files").
 		Where("id = ?", id).First(&cat)
 
-		if cat.FatherID != nil && *cat.FatherID != 0 {
-			var father Cat
-			r.DB.Select("name").Where("id = ?", *cat.FatherID).First(&father)
-			if father.ID != 0 { // Verifique se um registro foi encontrado antes de atribuir o nome
-				cat.FatherName = father.Name
-			}
+	if cat.FatherID != nil {
+		var father Cat
+		r.Logger.Infof("Repository GetCatCompleteByID - FatherID")
+		result := r.DB.Select("name").Where("id = ?", *cat.FatherID).First(&father)
+		if result.Error == nil {
+			cat.FatherName = father.Name
 		}
-		
+		// Não loga erros inesperados e continua a execução
+	}
 
-		if cat.MotherID != nil && *cat.MotherID != 0 {
-			var mother Cat
-			r.DB.Select("name").Where("id = ?", *cat.MotherID).First(&mother)
-			if mother.ID != 0 { // Verifique se um registro foi encontrado antes de atribuir o nome
-				cat.MotherName = mother.Name
-			}
+	if cat.MotherID != nil {
+		var mother Cat
+		r.Logger.Infof("Repository GetCatCompleteByID - MotherID")
+		result := r.DB.Select("name").Where("id = ?", *cat.MotherID).First(&mother)
+		if result.Error == nil {
+			cat.MotherName = mother.Name
 		}
-		
+		// Não loga erros inesperados e continua a execução
+	}
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
@@ -96,7 +96,7 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 
 func (r *CatRepository) GetCatsByOwner(ownerId string) ([]CatInfo, error) {
 	r.Logger.Infof("Repository GetCatsByOwner")
-	
+
 	var catInfos []CatInfo
 
 	err := r.DB.Table("cats").
@@ -112,7 +112,6 @@ func (r *CatRepository) GetCatsByOwner(ownerId string) ([]CatInfo, error) {
 
 	return catInfos, nil
 }
-
 
 func (r *CatRepository) UpdateNeuteredStatus(catID string, neutered bool) error {
 	r.Logger.Infof("Repository UpdateNeuteredStatus")
@@ -167,19 +166,18 @@ func (r *CatRepository) GetAllCats(filter string) ([]CatInfoAdm, error) {
 		Joins("left join breeds on cats.breed_id = breeds.id").
 		Joins("left join owners on cats.owner_id = owners.id")
 
-		switch filter {
-		case "non_validated":
-			db = db.Where("cats.validated = ?", false)
-		case "blank_microchip":
-			db = db.Where("cats.microchip = ?", "")
-		case "blank_register":
-			db = db.Where("cats.register = ?", "")
-		case "blank_cattery":
-			db = db.Where("cats.cattery_id is NULL")
-		default:
-			// do nothing, return all entries
-		}
-	
+	switch filter {
+	case "non_validated":
+		db = db.Where("cats.validated = ?", false)
+	case "blank_microchip":
+		db = db.Where("cats.microchip = ?", "")
+	case "blank_register":
+		db = db.Where("cats.register = ?", "")
+	case "blank_cattery":
+		db = db.Where("cats.cattery_id is NULL")
+	default:
+		// do nothing, return all entries
+	}
 
 	result := db.Scan(&results)
 	if result.Error != nil {
@@ -245,11 +243,3 @@ func (r *CatRepository) UpdateCat(id string, updatedCat *Cat) error {
 
 	return nil
 }
-
-
-
-
-
-
-
-
