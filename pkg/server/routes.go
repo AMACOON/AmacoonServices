@@ -117,7 +117,7 @@ func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
 
 func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {
 	colorGroup := e.Group("/api/colors")
-	colorGroup.GET("/:breedCode", colorHandler.GetAllColorsByBreed)
+	colorGroup.GET("/breed/:breedCode", colorHandler.GetAllColorsByBreed)
 	colorGroup.GET("/:id", colorHandler.GetColorByID)
 	colorGroup.PUT("/:id", colorHandler.UpdateColor)
 }
