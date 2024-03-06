@@ -53,9 +53,9 @@ func getFederationID(db *gorm.DB, federationName string) (*uint, error) {
 	return &federations.ID, nil
 }
 
-func getBreedID(db *gorm.DB, breedName string) (uint, error) {
+func getBreedID(db *gorm.DB, breedCode string) (uint, error) {
 
-	if breedName == "" || breedName == "0" {
+	if breedCode == "" || breedCode == "0" {
 		return 0, nil
 	}
 
@@ -63,7 +63,7 @@ func getBreedID(db *gorm.DB, breedName string) (uint, error) {
 		ID        uint `gorm:"primaryKey"`
 		BreedName string
 	}
-	err := db.Table("breeds").Where("breed_name = ?", breedName).First(&breeds).Error
+	err := db.Table("breeds").Where("breed_code = ?", breedCode).First(&breeds).Error
 	if err != nil {
 		return 0, err
 	}
