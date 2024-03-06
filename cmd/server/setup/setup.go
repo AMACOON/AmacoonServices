@@ -19,6 +19,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/title"
 	"github.com/scuba13/AmacoonServices/internal/titlerecognition"
 	"github.com/scuba13/AmacoonServices/internal/transfer"
+	"github.com/scuba13/AmacoonServices/internal/catshow"
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -91,6 +92,9 @@ func SetupDatabase(logger *logrus.Logger) (*gorm.DB, error) {
         &utils.Protocol{},
         &club.Club{},
         &judge.Judge{},
+		&catshow.CatShow{},
+		&catshow.CatShowSub{},
+		&catshow.CatShowJudge{},
     )
     if err != nil {
         logger.Errorf("AutoMigrate failed: %v", err)

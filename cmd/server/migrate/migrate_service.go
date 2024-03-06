@@ -13,6 +13,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/owner"
 	"github.com/scuba13/AmacoonServices/internal/title"
 	"github.com/scuba13/AmacoonServices/internal/judge"
+	"github.com/scuba13/AmacoonServices/internal/catshow"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -84,6 +85,10 @@ func (s *MigrateService) MigrateData(db *gorm.DB, dbOld *gorm.DB, logger *logrus
 	logger.Info("Inicio Migração Cat Parents")
 	cat.UpdateCatParents(db)
 	logger.Info("Fim Migração Cat Parents")
+
+	logger.Info("Inicio Migração Cat Show")
+	catshow.MigrateCatShows(dbOld, db, &catshow.CatShowService{})
+	logger.Info("Fim Migração Cat Show")
 
 	logger.Info("Fim Migração")
 }

@@ -26,6 +26,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	catServiceHandler *handler.CatServiceHandler,
 	filesHandler *handler.FilesHandler,
 	loginHandler *handler.LoginHandler,
+	catShowHandler *handler.CatShowHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -51,6 +52,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupCatServiceRoutes(e, catServiceHandler)
 	setupFilesRoutes(e, filesHandler)
 	setupLoginRoutes(e, loginHandler)
+	setupCatShowRoutes(e, catShowHandler)
 
 }
 
@@ -191,4 +193,11 @@ func setupLoginRoutes(e *echo.Echo, loginHandler *handler.LoginHandler) {
 	loginGroup := e.Group("/api/login")
 	loginGroup.POST("/authenticate", loginHandler.Login)
 
+}
+
+func setupCatShowRoutes(e *echo.Echo, catShowHandler *handler.CatShowHandler) {
+	catShowGroup := e.Group("/api/catshows")
+	catShowGroup.POST("", catShowHandler.CreateCatShow)
+	catShowGroup.GET("/:id", catShowHandler.GetCatShowByID)
+	catShowGroup.PUT("/:id", catShowHandler.UpdateCatShow)
 }

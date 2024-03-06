@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
+	"github.com/scuba13/AmacoonServices/internal/catshow"
 	"github.com/scuba13/AmacoonServices/internal/catservice"
 	"github.com/scuba13/AmacoonServices/internal/cattery"
 	"github.com/scuba13/AmacoonServices/internal/color"
@@ -12,16 +13,15 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/federation"
 	"github.com/scuba13/AmacoonServices/internal/handler"
 	"github.com/scuba13/AmacoonServices/internal/litter"
+	"github.com/scuba13/AmacoonServices/internal/login"
 	"github.com/scuba13/AmacoonServices/internal/owner"
 	"github.com/scuba13/AmacoonServices/internal/title"
 	"github.com/scuba13/AmacoonServices/internal/titlerecognition"
 	"github.com/scuba13/AmacoonServices/internal/transfer"
 	"github.com/scuba13/AmacoonServices/internal/utils"
-	"github.com/scuba13/AmacoonServices/internal/login"
 	routes "github.com/scuba13/AmacoonServices/pkg/server"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	
 )
 
 func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s3.S3) {
@@ -47,6 +47,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	catServiceRepo := catservice.NewCatServiceRepository(db, logger)
 	catFileRepo:= cat.NewFilesCatRepository(db, logger)
 	loginRepo := login.NewLoginRepository(db, logger)
+	catshowRepo := catshow.NewCatShowRepository(db, logger)
 	logger.Info("Initialize Repositories OK")
 
 	// Initialize services
@@ -74,6 +75,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	titleRecognitionService := titlerecognition.NewTitleRecognitionService(titleRecognitionRepo, protocolService, titleRecognitionFileService, logger)
 	catServiceService := catservice.NewCatServiceService(catServiceRepo, logger)
 	loginService := login.NewLoginService(loginRepo, logger)
+	catshowService := catshow.NewCatShowService(catshowRepo, logger)
 	logger.Info("Initialize Services OK")
 
 	// Initialize handlers
@@ -92,6 +94,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	catServiceHandler := handler.NewCatServiceHandler(catServiceService, logger)
 	filesHandler := handler.NewFilesHandler(filesService, logger)
 	loginHandler := handler.NewLoginHandler(loginService, logger)
+	catshowHandler := handler.NewCatShowHandler(catshowService, logger)
 	logger.Info("Initialize Handlers OK")
 
 	// Initialize router and routes
@@ -100,7 +103,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 		litterHandler, breedHandler, countryHandler,
 		transferHandler, catteryHandler, federationHandler,
 		titleHandler, titleRecognitionHandler, catServiceHandler,
-		filesHandler, loginHandler,
+		filesHandler, loginHandler,catshowHandler,
 		logger, e)
 	logger.Info("Initialize Router and Routes OK")
 

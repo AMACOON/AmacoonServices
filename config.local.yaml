@@ -18,6 +18,6 @@ smtp:
   username: sistema@catclubsystem.com
   password: Sistema@0013
   systemEmail: sistema@catclubsystem.com
-  adminEmail: amacoon@gmail.com
+  adminEmail: scuba13@hotmail.com
 jwt:
   secret: RagnarPi
