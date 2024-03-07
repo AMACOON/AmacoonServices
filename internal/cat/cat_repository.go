@@ -2,6 +2,8 @@ package cat
 
 import (
 	"github.com/sirupsen/logrus"
+	"github.com/scuba13/AmacoonServices/internal/color"
+	"github.com/scuba13/AmacoonServices/internal/breed"
 	"gorm.io/gorm"
 )
 
@@ -44,55 +46,127 @@ func (r *CatRepository) CreateCat(cat *Cat) (*Cat, error) {
 }
 
 func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
+    r.Logger.Infof("Repository GetCatCompleteByID")
+    var cat Cat
 
-	r.Logger.Infof("Repository GetCatCompleteByID")
-	var cat Cat
+    result := r.DB.Where("id = ?", id).First(&cat)
+    if result.Error != nil {
+        if result.Error == gorm.ErrRecordNotFound {
+            r.Logger.Errorf("Cat not found")
+            return nil, nil
+        }
+        return nil, result.Error
+    }
 
-	result := r.DB.
-		Preload("Breed").
-		Preload("Color").
-		Preload("Cattery").
-		Preload("Country").
-		Preload("Owner.Country").
-		Preload("Federation.Country").
-		Preload("Cattery.Owner.Country").
-		Preload("Cattery.Owner").
-		Preload("Cattery.Country").
-		Preload("Federation").
-		Preload("Titles.Titles").
-		Preload("Files").
-		Where("id = ?", id).First(&cat)
+    // Tratando o pai
+    if cat.FatherID != nil {
+        var father Cat
+        r.Logger.Infof("Fetching father details")
+        result := r.DB.Where("id = ?", *cat.FatherID).First(&father)
+        if result.Error == nil {
+            cat.FatherName = father.Name
+            cat.FatherBreedId = father.BreedID
+            cat.FatherColorID = father.ColorID
+            fetchBreedAndColor(r, &father)
+            cat.FatherBreed = father.Breed
+            cat.FatherColor = father.Color
+        }
+    } else {
+        fetchManualBreedAndColor(r, &cat, "father")
+    }
 
-	if cat.FatherID != nil {
-		var father Cat
-		r.Logger.Infof("Repository GetCatCompleteByID - FatherID")
-		result := r.DB.Select("name").Where("id = ?", *cat.FatherID).First(&father)
-		if result.Error == nil {
-			cat.FatherName = father.Name
-		}
-		// Não loga erros inesperados e continua a execução
-	}
+    // Tratando a mãe
+    if cat.MotherID != nil {
+        var mother Cat
+        r.Logger.Infof("Fetching mother details")
+        result := r.DB.Where("id = ?", *cat.MotherID).First(&mother)
+        if result.Error == nil {
+            cat.MotherName = mother.Name
+            cat.MotherBreedID = mother.BreedID
+            cat.MotherColorId = mother.ColorID
+            fetchBreedAndColor(r, &mother)
+            cat.MotherBreed = mother.Breed
+            cat.MotherColor = mother.Color
+        }
+    } else {
+        // Aqui, considere que você define MotherName, MotherBreedID, e MotherColorId com valores pré-definidos ou manuais
+        cat.MotherName = *cat.MotherNameManual
+        fetchManualBreedAndColor(r, &cat, "mother")
+    }
 
-	if cat.MotherID != nil {
-		var mother Cat
-		r.Logger.Infof("Repository GetCatCompleteByID - MotherID")
-		result := r.DB.Select("name").Where("id = ?", *cat.MotherID).First(&mother)
-		if result.Error == nil {
-			cat.MotherName = mother.Name
-		}
-		// Não loga erros inesperados e continua a execução
-	}
-
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			r.Logger.Errorf("Repository GetCatCompleteByID not found")
-			return nil, nil
-		}
-		return nil, result.Error
-	}
-	r.Logger.Infof("Repository GetCatCompleteByID OK")
-	return &cat, nil
+    r.Logger.Infof("Complete cat details fetched successfully")
+    return &cat, nil
 }
+
+func  fetchBreedAndColor(r *CatRepository, cat *Cat) {
+    if cat.BreedID != nil {
+        var breed breed.Breed
+        result := r.DB.Where("id = ?", *cat.BreedID).First(&breed)
+        if result.Error == nil {
+            cat.Breed = &breed
+        }
+    }
+    if cat.ColorID != nil {
+        var color color.Color
+        result := r.DB.Where("id = ?", *cat.ColorID).First(&color)
+        if result.Error == nil {
+            cat.Color = &color
+        }
+    }
+}
+
+func fetchManualBreedAndColor(r *CatRepository, cat *Cat, relation string) {
+    if relation == "father" {
+        // Define o FatherName a partir do valor manual, se disponível.
+        if cat.FatherNameManual != nil {
+            cat.FatherName = *cat.FatherNameManual
+        }
+        // Busca manual para Breed e Color baseada nos IDs manuais.
+        if cat.FatherBreedIDManual != nil {
+            var breed breed.Breed
+            result := r.DB.Where("id = ?", *cat.FatherBreedIDManual).First(&breed)
+            if result.Error == nil {
+                cat.FatherBreed = &breed
+                cat.FatherBreedId = &breed.ID // Atualizando FatherBreedId
+            }
+        }
+        if cat.FatherColorIDManual != nil {
+            var color color.Color
+            result := r.DB.Where("id = ?", *cat.FatherColorIDManual).First(&color)
+            if result.Error == nil {
+                cat.FatherColor = &color
+                cat.FatherColorID = &color.ID // Atualizando FatherColorID
+            }
+        }
+    } else if relation == "mother" {
+        // Define o MotherName a partir do valor manual, se disponível.
+        if cat.MotherNameManual != nil {
+            cat.MotherName = *cat.MotherNameManual
+        }
+        // Busca manual para Breed e Color baseada nos IDs manuais.
+        if cat.MotherBreedIDManual != nil {
+            var breed breed.Breed
+            result := r.DB.Where("id = ?", *cat.MotherBreedIDManual).First(&breed)
+            if result.Error == nil {
+                cat.MotherBreed = &breed
+                cat.MotherBreedID = &breed.ID // Atualizando MotherBreedID
+            }
+        }
+        if cat.MotherColorIDManual != nil {
+            var color color.Color
+            result := r.DB.Where("id = ?", *cat.MotherColorIDManual).First(&color)
+            if result.Error == nil {
+                cat.MotherColor = &color
+                cat.MotherColorId = &color.ID // Atualizando MotherColorId
+            }
+        }
+    }
+}
+
+
+
+
+
 
 func (r *CatRepository) GetCatsByOwner(ownerId string) ([]CatInfo, error) {
 	r.Logger.Infof("Repository GetCatsByOwner")
