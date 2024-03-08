@@ -144,6 +144,9 @@ func MigrateCats(dbOld *gorm.DB, dbNew *gorm.DB) {
 				log.Printf("Error getting getBreedID for cat %d: %v\n", i, err)
 				continue
 			}
+			catIDUint := uint(cat.CatID)
+			catIDOldPointer := &catIDUint
+	
 
 			catGorm := Cat{
 				Name:                cat.Name,
@@ -172,6 +175,7 @@ func MigrateCats(dbOld *gorm.DB, dbNew *gorm.DB) {
 				MotherNameManual:    &cat.MotherName,
 				MotherBreedIDManual: &motherBreedID,
 				MotherColorIDManual: &motherColorID,
+				CatIDOld:            catIDOldPointer,
 			}
 
 			result = dbNew.Create(&catGorm)

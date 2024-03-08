@@ -27,6 +27,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	filesHandler *handler.FilesHandler,
 	loginHandler *handler.LoginHandler,
 	catShowHandler *handler.CatShowHandler,
+	catShowRegistrationHandler *handler.CatShowRegistrationHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -53,6 +54,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupFilesRoutes(e, filesHandler)
 	setupLoginRoutes(e, loginHandler)
 	setupCatShowRoutes(e, catShowHandler)
+	setupCatShowRegistrationRoutes(e, catShowRegistrationHandler)
 
 }
 
@@ -200,4 +202,11 @@ func setupCatShowRoutes(e *echo.Echo, catShowHandler *handler.CatShowHandler) {
 	catShowGroup.POST("", catShowHandler.CreateCatShow)
 	catShowGroup.GET("/:id", catShowHandler.GetCatShowByID)
 	catShowGroup.PUT("/:id", catShowHandler.UpdateCatShow)
+}
+
+func setupCatShowRegistrationRoutes(e *echo.Echo, catShowRegistrationHandler *handler.CatShowRegistrationHandler) {
+	catShowRegistrationGroup := e.Group("/api/catshowregistrations")
+	catShowRegistrationGroup.POST("", catShowRegistrationHandler.CreateCatShowRegistration)
+	//catShowRegistrationGroup.GET("/:id", catShowRegistrationHandler.GetCatShowRegistrationByID)
+	//catShowRegistrationGroup.PUT("/:id", catShowRegistrationHandler.UpdateCatShowRegistration)
 }

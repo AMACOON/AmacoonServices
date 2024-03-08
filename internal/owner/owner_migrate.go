@@ -31,6 +31,9 @@ type OwnerS struct {
 	CPF          string    `gorm:"column:cpf;default:0"`
 	ClubID       uint      `gorm:"column:id_clube"`
 }
+func (OwnerS) TableName() string {
+	return "expositores"
+}
 
 type OwnerClubS struct {
 	gorm.Model
