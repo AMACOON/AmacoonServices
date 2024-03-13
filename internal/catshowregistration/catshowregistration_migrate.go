@@ -4,6 +4,8 @@ import (
 	"log"
 	"time"
 
+	"errors"
+
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/scuba13/AmacoonServices/internal/cat"
 	"github.com/scuba13/AmacoonServices/internal/catshow"
@@ -15,7 +17,6 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"errors"
 )
 
 type Inscricao struct {
@@ -210,8 +211,6 @@ func MigrateInscricoesUpdate(dbOld, dbNew *gorm.DB) error {
 	for _, inscricaoUpdate := range inscricoesUpdate {
 		log.Printf("Iniciando processamento da inscriçãoUpdate")
 
-
-
 		//Busca  Exposicao pelo ID DB Old
 		var exposicao catshow.Exposicao
 		if err := dbOld.Where("id_exposicoes = ?", inscricaoUpdate.IDExposicao).First(&exposicao).Error; err != nil {
@@ -305,15 +304,14 @@ func MigrateInscricoesUpdate(dbOld, dbNew *gorm.DB) error {
 			JudgeID:        &judge.ID,
 			Birthdate:      inscricaoUpdate.Nascimento,
 			Gender:         sexString,
-											
 		}
 
 		var existingRegistration RegistrationUpdated
 		err := dbNew.Where(
 			"class_id = ? AND color_id = ? AND judge_id = ? AND birthdate = ? AND gender = ?",
-			 class.ID, color.ID, judge.ID, inscricaoUpdate.Nascimento, sexString,
+			class.ID, color.ID, judge.ID, inscricaoUpdate.Nascimento, sexString,
 		).First(&existingRegistration).Error
-		
+
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				// Registro não encontrado, criar novo
@@ -331,7 +329,6 @@ func MigrateInscricoesUpdate(dbOld, dbNew *gorm.DB) error {
 			log.Println("Um registro com as características especificadas já existe.")
 			// Aqui você pode decidir atualizar o registro existente ou simplesmente pular a criação
 		}
-		
 
 		log.Printf("Iniciando processamento da inscriçãoUpdate OK")
 
