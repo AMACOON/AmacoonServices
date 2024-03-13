@@ -1,6 +1,6 @@
 db:
   username: catclubsystem
-  password: 2010mainecoon2010
+  password: teste
   host: localhost
   port: 5432
   name: dbcatclubsystem

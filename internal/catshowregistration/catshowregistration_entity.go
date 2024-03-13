@@ -32,6 +32,7 @@ type Registration struct {
 	Observations     string `gorm:"type:varchar(255)"`
 	Updated          bool
 	Active           bool
+	CatIDOld         *uint `json:"-"` // Campo para migração
 }
 
 func (Registration) TableName() string {

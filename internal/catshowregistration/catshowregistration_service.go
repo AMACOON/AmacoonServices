@@ -160,5 +160,6 @@ func createCatShowCatFromCat(cat *cat.Cat, convertedTitles []catshowcat.TitlesCa
 		MotherColorIDManual: cat.MotherColorIDManual,
 		FatherNameTemp:      cat.FatherNameTemp,
 		MotherNameTemp:      cat.MotherNameTemp,
+		CatIDOld:            cat.CatIDOld,
 	}, nil
 }

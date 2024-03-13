@@ -65,6 +65,8 @@ type CatShowCat struct {
 
 	FatherNameTemp string `json:"-"`
 	MotherNameTemp string `json:"-"`
+	CatIDOld       *uint  `json:"-"`
+
 }
 
 func (CatShowCat) TableName() string {
