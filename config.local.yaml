@@ -1,7 +1,7 @@
 db:
   username: catclubsystem
-  password: teste
-  host: localhost
+  password: 2010amacoon2010
+  host: dbcatclubsystem.c1o2yissukzs.sa-east-1.rds.amazonaws.com
   port: 5432
   name: dbcatclubsystem
 
@@ -9,8 +9,8 @@ server:
   port: 8080
   host: http://localhost:8080
 aws:
-  S3AwsAccessKeyId: AKIA4R4F43U6FT2QGREN
-  S3AwsSecretAccessKey: 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
+  S3AwsAccessKeyId: AKIAVRUVP7BCRAJZLKOT
+  S3AwsSecretAccessKey: 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
   bucket: amacoondocs
 smtp:
   host: smtp.kinghost.net

@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"errors"
+	//"errors"
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/scuba13/AmacoonServices/internal/cat"
@@ -306,29 +306,35 @@ func MigrateInscricoesUpdate(dbOld, dbNew *gorm.DB) error {
 			Gender:         sexString,
 		}
 
-		var existingRegistration RegistrationUpdated
-		err := dbNew.Where(
-			"class_id = ? AND color_id = ? AND judge_id = ? AND birthdate = ? AND gender = ?",
-			class.ID, color.ID, judge.ID, inscricaoUpdate.Nascimento, sexString,
-		).First(&existingRegistration).Error
-
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// Registro não encontrado, criar novo
-				if err := dbNew.Create(&registrationUpdate).Error; err != nil {
-					log.Printf("Erro ao criar registro de atualização para a inscrição ID: %d: %v", registration.ID, err)
-					// Considerar a inclusão de uma instrução 'continue' ou tratamento de erro aqui
-				} else {
-					log.Println("Registro criado com sucesso.")
-				}
-			} else {
-				// Tratar outros erros que não o de "não encontrado"
-				log.Printf("Erro ao buscar registro existente: %v", err)
-			}
+		if err := dbNew.Create(&registrationUpdate).Error; err != nil {
+			log.Printf("Erro ao criar registro de atualização para a inscrição ID: %d: %v", registration.ID, err)
+			// Considerar a inclusão de uma instrução 'continue' ou tratamento de erro aqui
 		} else {
-			log.Println("Um registro com as características especificadas já existe.")
-			// Aqui você pode decidir atualizar o registro existente ou simplesmente pular a criação
+			log.Println("Registro criado com sucesso.")
 		}
+		// var existingRegistration RegistrationUpdated
+		// err := dbNew.Where(
+		// 	"class_id = ? AND color_id = ? AND judge_id = ? AND birthdate = ? AND gender = ?",
+		// 	class.ID, color.ID, judge.ID, inscricaoUpdate.Nascimento, sexString,
+		// ).First(&existingRegistration).Error
+
+		// if err != nil {
+		// 	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// 		// Registro não encontrado, criar novo
+		// 		if err := dbNew.Create(&registrationUpdate).Error; err != nil {
+		// 			log.Printf("Erro ao criar registro de atualização para a inscrição ID: %d: %v", registration.ID, err)
+		// 			// Considerar a inclusão de uma instrução 'continue' ou tratamento de erro aqui
+		// 		} else {
+		// 			log.Println("Registro criado com sucesso.")
+		// 		}
+		// 	} else {
+		// 		// Tratar outros erros que não o de "não encontrado"
+		// 		log.Printf("Erro ao buscar registro existente: %v", err)
+		// 	}
+		// } else {
+		// 	log.Println("Um registro com as características especificadas já existe.")
+		// 	// Aqui você pode decidir atualizar o registro existente ou simplesmente pular a criação
+		// }
 
 		log.Printf("Iniciando processamento da inscriçãoUpdate OK")
 

@@ -14,13 +14,13 @@ import (
 )
 
 func SetupDB(logger *logrus.Logger) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable",
-	viper.GetString("db.host"),
-	viper.GetString("db.port"),
-	viper.GetString("db.username"),
-	viper.GetString("db.name"),
-	viper.GetString("db.password"),
-)
+    dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=require",
+        viper.GetString("db.host"),
+        viper.GetString("db.port"),
+        viper.GetString("db.username"),
+        viper.GetString("db.name"),
+        viper.GetString("db.password"),
+    )
 
 
 	var db *gorm.DB
