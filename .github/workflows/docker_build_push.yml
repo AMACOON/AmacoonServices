@@ -25,19 +25,18 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
       
       - name: Set environment variables
-        id: vars
         run: |
-          echo "::set-output name=ecr_registry::${{ steps.login-ecr.outputs.registry }}"
-          echo "::set-output name=image_repo::amacconservice"
-          echo "::set-output name=image_tag::latest"
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+          echo "IMAGE_REPO=catclubsystem" >> $GITHUB_ENV
+          echo "IMAGE_TAG=latest" >> $GITHUB_ENV
       
       - name: Build and tag Docker image
-        run: docker build -t ${{ steps.vars.outputs.ecr_registry }}/${{ steps.vars.outputs.image_repo }}:${{ steps.vars.outputs.image_tag }} .
+        run: docker build -t ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }} .
               
       - name: Push Docker image to ECR
-        run: docker push ${{ steps.vars.outputs.ecr_registry }}/${{ steps.vars.outputs.image_repo }}:${{ steps.vars.outputs.image_tag }}
+        run: docker push ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}
       
-      # Adicione os passos abaixo
+      # Passos subsequentes permanecem iguais
 
       - name: Install kubectl
         run: |
