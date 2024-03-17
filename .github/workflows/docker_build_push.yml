@@ -28,7 +28,7 @@ jobs:
         id: vars
         run: |
           echo "::set-output name=ecr_registry::${{ steps.login-ecr.outputs.registry }}"
-          echo "::set-output name=image_repo::amacconService"
+          echo "::set-output name=image_repo::amacconservice"
           echo "::set-output name=image_tag::latest"
       
       - name: Build and tag Docker image
