@@ -1,16 +1,7 @@
-db:
-  username: catclubsystem
-  password: 2010amacoon2010
-  host: dbcatclubsystem.c1o2yissukzs.sa-east-1.rds.amazonaws.com
-  port: 5432
-  name: dbcatclubsystem
-
 server:
   port: 8080
   host: http://localhost:8080
 aws:
-  S3AwsAccessKeyId: 
-  S3AwsSecretAccessKey: 
   bucket: amacoondocs
 smtp:
   host: smtp.kinghost.net
@@ -19,5 +10,3 @@ smtp:
   password: Sistema@0013
   systemEmail: sistema@catclubsystem.com
   adminEmail: scuba13@hotmail.com
-jwt:
-  secret: RagnarPi

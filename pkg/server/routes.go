@@ -76,7 +76,7 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 	}
 }
 func getJWTConfig() echojwt.Config {
-	secret := viper.GetString("jwt.secret")
+	secret := viper.GetString("AppJwtSecret")
 	return echojwt.Config{
 		SigningKey: []byte(secret),
 	}

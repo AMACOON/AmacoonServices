@@ -20,3 +20,6 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO catclubsystem;
 
 -- Para permitir que o usuário crie novas tabelas no futuro
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO catclubsystem;
+
+
+--amacoon013  postgres   

@@ -32,10 +32,10 @@ func main() {
 	// Initialize DB
 	dbOld := setup.SetupDatabaseOld(logger)
 	db, err := setup.SetupDatabase(logger)
-if err != nil {
-    // Lidar com o erro aqui, por exemplo, registrar e encerrar o programa
-    logger.Fatalf("Database setup failed: %v", err)
-}
+	if err != nil {
+		// Lidar com o erro aqui, por exemplo, registrar e encerrar o programa
+		logger.Fatalf("Database setup failed: %v", err)
+	}
 
 	// Migrate data
 	MigrateService := migrate.NewMigrateService(db, dbOld, logger)
