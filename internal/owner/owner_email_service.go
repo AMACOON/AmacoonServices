@@ -61,13 +61,14 @@ func (s *OwnerEmailService) SendOwnerValidationEmail(owner *Owner) error {
 					Button: hermes.Button{
 						Color: "#000000", // Cor preta
 						Text:  "Validate New Owner",
-						Link:  fmt.Sprintf("%s/owners/%d/%s/valid", url, owner.ID, owner.ValidId),
+						Link:  fmt.Sprintf("%s/api/owners/%d/%s/valid", url, owner.ID, owner.ValidId),
 					},
 				},
 			},
 			Outros: []string{
 				"For more information, please access the CatClubSystem administration page.",
 				"http://br.catclubsystem.com/index.php/adm",
+				fmt.Sprintf("%s/api/owners/%d/%s/valid", url, owner.ID, owner.ValidId),
 			},
 		},
 	}

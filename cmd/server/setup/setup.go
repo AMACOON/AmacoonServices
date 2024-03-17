@@ -19,9 +19,14 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/title"
 	"github.com/scuba13/AmacoonServices/internal/titlerecognition"
 	"github.com/scuba13/AmacoonServices/internal/transfer"
+	"github.com/scuba13/AmacoonServices/internal/catshow"
+	"github.com/scuba13/AmacoonServices/internal/catshowclass"
+	"github.com/scuba13/AmacoonServices/internal/catshowregistration"
+	"github.com/scuba13/AmacoonServices/internal/catshowcat"
 	"github.com/scuba13/AmacoonServices/internal/utils"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"fmt"
 )
 
 func SetupLogger() *logrus.Logger {
@@ -56,44 +61,61 @@ func SetupLogger() *logrus.Logger {
 // 	return logger
 // }
 
-func SetupDatabase(logger *logrus.Logger) *gorm.DB {
-	logger.Info("Connecting DB")
-	db, err := config.SetupDB(logger)
-	if err != nil {
-		logger.Fatalf("Failed to initialize DB connection: %v", err)
-	}
+func SetupDatabase(logger *logrus.Logger) (*gorm.DB, error) {
+    logger.Info("Connecting DB")
+    db, err := config.SetupDB(logger)
+    if err != nil {
+        logger.Errorf("Failed to initialize DB connection: %v", err)
+        return nil, fmt.Errorf("failed to initialize DB connection: %w", err)
+    }
 
-	logger.Info("AutoMigrate DB")
-	db.AutoMigrate(&breed.Breed{},
-	&breed.BreedCompatibility{},
-	&color.Color{},
-	&country.Country{},
-	&owner.Owner{},
-	&owner.OwnerClub{},
-	&federation.Federation{},
-	&cattery.Cattery{},
-	&cattery.FilesCattery{},
-	&title.Title{},
-	&cat.Cat{},
-	&cat.TitlesCat{},
-	&cat.FilesCat{},
-	&litter.Litter{},
-	&litter.KittenLitter{},
-	&litter.FilesLitter{},
-	&transfer.Transfer{},
-	&transfer.FilesTransfer{},
-	&titlerecognition.TitleRecognition{},
-	&titlerecognition.Title{},
-	&titlerecognition.FilesTitleRecognition{},
-	&utils.Protocol{},
-	&club.Club{},
-	&judge.Judge{},
+    logger.Info("AutoMigrate DB")
+    err = db.AutoMigrate(
+        &breed.Breed{},
+        &breed.BreedCompatibility{},
+        &color.Color{},
+        &country.Country{},
+        &owner.Owner{},
+        &owner.OwnerClub{},
+        &federation.Federation{},
+        &cattery.Cattery{},
+        &cattery.FilesCattery{},
+        &title.Title{},
+        &cat.Cat{},
+        &cat.TitlesCat{},
+        &cat.FilesCat{},
+        &litter.Litter{},
+        &litter.KittenLitter{},
+        &litter.FilesLitter{},
+        &transfer.Transfer{},
+        &transfer.FilesTransfer{},
+        &titlerecognition.TitleRecognition{},
+        &titlerecognition.Title{},
+        &titlerecognition.FilesTitleRecognition{},
+        &utils.Protocol{},
+        &club.Club{},
+        &judge.Judge{},
+		&catshow.CatShow{},
+		&catshow.CatShowSub{},
+		&catshow.CatShowJudge{},
+		&catshowclass.Class{},
+		&catshowregistration.Registration{},
+		&catshowregistration.RegistrationUpdated{},
+		&catshowcat.CatShowCat{},
+		&catshowcat.FilesCatShowCat{},
+		&catshowcat.TitlesCatShowCat{},
 
-	)
-	logger.Info("AutoMigrate DB OK")
-	logger.Info("Connected DB OK")
-	return db
+    )
+    if err != nil {
+        logger.Errorf("AutoMigrate failed: %v", err)
+        return nil, fmt.Errorf("AutoMigrate failed: %w", err)
+    }
+
+    logger.Info("AutoMigrate DB OK")
+    logger.Info("Connected DB OK")
+    return db, nil
 }
+
 
 func SetupDatabaseOld(logger *logrus.Logger) *gorm.DB {
 	logger.Info("Connecting DB Old")

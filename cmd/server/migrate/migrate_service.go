@@ -1,7 +1,7 @@
 package migrate
 
 import (
-	"time"
+	  "time"
 
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
@@ -13,6 +13,9 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/owner"
 	"github.com/scuba13/AmacoonServices/internal/title"
 	"github.com/scuba13/AmacoonServices/internal/judge"
+	"github.com/scuba13/AmacoonServices/internal/catshow"
+	"github.com/scuba13/AmacoonServices/internal/catshowclass"
+	 "github.com/scuba13/AmacoonServices/internal/catshowregistration"							
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -84,6 +87,23 @@ func (s *MigrateService) MigrateData(db *gorm.DB, dbOld *gorm.DB, logger *logrus
 	logger.Info("Inicio Migração Cat Parents")
 	cat.UpdateCatParents(db)
 	logger.Info("Fim Migração Cat Parents")
+
+	logger.Info("Inicio Migração Cat Show")
+	catshow.MigrateCatShows(dbOld, db, &catshow.CatShowService{})
+	logger.Info("Fim Migração Cat Show")
+
+	logger.Info("Inicio Migração Class")
+	catshowclass.MigrateClasses(dbOld, db, logger)
+	logger.Info("Fim Migração Class")
+
+	logger.Info("Inicio Migração Cat Show Registration")
+	catshowregistration.MigrateInscricoes(dbOld, db)
+	logger.Info("Fim Migração Cat Show Registration")
+
+	logger.Info("Inicio Migração Cat Show Registration Updated")
+	catshowregistration.MigrateInscricoesUpdate(dbOld, db)
+	logger.Info("Fim Migração Cat Show Registration Updated")
+
 
 	logger.Info("Fim Migração")
 }

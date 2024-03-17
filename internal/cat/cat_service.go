@@ -35,7 +35,7 @@ func (s *CatService) CreateCat(req *Cat, filesWithDesc []utils.FileWithDescripti
 		return nil, err
 	}
 	if existingCat != nil {
-		s.Logger.Info("A cat with the same attributes already exists '%s'", existingCat.Name)
+		s.Logger.Info("A cat with the same attributes already exists '" + existingCat.Name + "'")
 		return nil, errors.New("a cat with the same attributes already exists")
 	}
 
@@ -108,41 +108,50 @@ func (s *CatService) UpdateNeuteredStatus(catID string, neutered string) error {
 }
 
 func GetFullName(cat *Cat) string {
-	prefix := ""
-	suffix := ""
-	wwYears := make([]string, 0)
+    if cat == nil {
+        return "" // Retorna uma string vazia se cat for nil
+    }
 
-	for _, titleCat := range *cat.Titles {
-		title := titleCat.Titles
-		if title.Type == "Championship/Premiorship Titles" {
-			prefix += title.Code + " "
-		} else if title.Type == "Winner Titles" {
-			if title.Code == "WW" {
-				wwYears = append(wwYears, titleCat.Date.Format("06"))
-			} else {
-				prefix += titleCat.Date.Format("06") + " " + title.Code + " "
-			}
-		} else if title.Type == "Merit Titles" {
-			suffix += " " + title.Code
-		}
-	}
+    prefix := ""
+    suffix := ""
+    wwYears := make([]string, 0)
 
-	if len(wwYears) > 0 {
-		prefix += "WW'" + strings.Join(wwYears, "'") + " "
-	}
+    // Verifica se cat.Titles é nil antes de iterar
+    if cat.Titles != nil {
+        for _, titleCat := range *cat.Titles {
+            title := titleCat.Titles
+            if title != nil { // Adiciona verificação para title não ser nil
+                if title.Type == "Championship/Premiorship Titles" {
+                    prefix += title.Code + " "
+                } else if title.Type == "Winner Titles" {
+                    if title.Code == "WW" {
+                        wwYears = append(wwYears, titleCat.Date.Format("06"))
+                    } else {
+                        prefix += titleCat.Date.Format("06") + " " + title.Code + " "
+                    }
+                } else if title.Type == "Merit Titles" {
+                    suffix += " " + title.Code
+                }
+            }
+        }
+    }
 
-	
-		nomeDoGato := strings.ReplaceAll(cat.Name, "'", "&#39;")
-		nomeDoGato = cases.Title(language.English).String(nomeDoGato)
+    if len(wwYears) > 0 {
+        prefix += "WW'" + strings.Join(wwYears, "'") + " "
+    }
 
-		return prefix + cat.Country.Code + (func() string {
-			if cat.Country.Code != "" {
-				return "* "
-			}
-			return ""
-		}()) + nomeDoGato + suffix
-	
+    nomeDoGato := strings.ReplaceAll(cat.Name, "'", "&#39;")
+    // Supondo que cases.Title e language.English estejam corretamente importados e utilizados
+    nomeDoGato = cases.Title(language.English).String(nomeDoGato)
+
+    countryPrefix := ""
+    if cat.Country != nil && cat.Country.Code != "" { // Verifica se cat.Country não é nil antes de acessar Code
+        countryPrefix = cat.Country.Code + "* "
+    }
+
+    return prefix + countryPrefix + nomeDoGato + suffix
 }
+
 
 func (s *CatService) GetAllCats(filter string) ([]CatInfoAdm, error) {
 	s.Logger.Infof("Service GetAllCats")

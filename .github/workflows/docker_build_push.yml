@@ -1,4 +1,4 @@
-name: Docker Build and Push
+name: Docker Build and Push and Deploy to EKS
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: sa-east-1
             
       - name: Login to Amazon ECR
         id: login-ecr
@@ -28,8 +28,8 @@ jobs:
         id: vars
         run: |
           echo "::set-output name=ecr_registry::${{ steps.login-ecr.outputs.registry }}"
-          echo "::set-output name=image_repo::amacoon"
-          echo "::set-output name=image_tag::service"
+          echo "::set-output name=image_repo::amacconService"
+          echo "::set-output name=image_tag::latest"
       
       - name: Build and tag Docker image
         run: docker build -t ${{ steps.vars.outputs.ecr_registry }}/${{ steps.vars.outputs.image_repo }}:${{ steps.vars.outputs.image_tag }} .
@@ -37,9 +37,16 @@ jobs:
       - name: Push Docker image to ECR
         run: docker push ${{ steps.vars.outputs.ecr_registry }}/${{ steps.vars.outputs.image_repo }}:${{ steps.vars.outputs.image_tag }}
       
-      - name: Trigger Deploy to AWS Lightsail
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          repository: scuba13/AmacoonDocker
-          event-type: new_docker_image
+      # Adicione os passos abaixo
+
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          sudo mv ./kubectl /usr/local/bin/kubectl
+
+      - name: Update kubeconfig
+        run: aws eks --region sa-east-1 update-kubeconfig --name EKS_Edu
+      
+      - name: Apply Kubernetes manifests
+        run: kubectl apply -f k8s/

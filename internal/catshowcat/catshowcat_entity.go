@@ -1,4 +1,4 @@
-package cat
+package catshowcat
 
 import (
 	"time"
@@ -14,8 +14,9 @@ import (
 	"gorm.io/gorm"
 )
 
-type Cat struct {
+type CatShowCat struct {
 	gorm.Model
+	RegistrationID   *uint                   `gorm:"column:registration_id"`
 	Name             string                 `gorm:"column:name" validate:"required"`
 	NameFull         string                 `gorm:"-"`
 	Registration     string                 `gorm:"column:registration;index" validate:"required,notzeroes"`
@@ -39,8 +40,8 @@ type Cat struct {
 	Owner            *owner.Owner           `gorm:"foreignKey:OwnerID"`
 	CountryID        *uint                  `gorm:"column:country_id" validate:"required"`
 	Country          *country.Country       `gorm:"foreignKey:CountryID"`
-	Titles           *[]TitlesCat           `gorm:"foreignKey:CatID"`
-	Files            *[]FilesCat            `gorm:"foreignKey:CatID"`
+	Titles           *[]TitlesCatShowCat    `gorm:"foreignKey:CatShowCatID"`
+	Files            *[]FilesCatShowCat     `gorm:"foreignKey:CatShowCatID"`
 
 	FatherID            *uint        `gorm:"column:father_id"`
 	FatherName          string       `gorm:"-"`
@@ -65,31 +66,32 @@ type Cat struct {
 	FatherNameTemp string `json:"-"`
 	MotherNameTemp string `json:"-"`
 	CatIDOld       *uint  `json:"-"`
+
 }
 
-func (Cat) TableName() string {
-	return "cats"
+func (CatShowCat) TableName() string {
+	return "cat_show_cats"
 }
 
-type TitlesCat struct {
+type TitlesCatShowCat struct {
 	gorm.Model
-	CatID        uint
+	CatShowCatID        uint
 	TitleID      uint
 	Titles       *title.Title `gorm:"foreignkey:TitleID"`
 	Date         time.Time
 	FederationID uint `gorm:"foreignkey:FederationID"`
 }
 
-func (TitlesCat) TableName() string {
-	return "cats_titles"
+func (TitlesCatShowCat) TableName() string {
+	return "cat_show_cats_titles"
 }
 
-type FilesCat struct {
+type FilesCatShowCat struct {
 	gorm.Model
-	CatID    uint
+	CatShowCatID    uint
 	FileData utils.Files `gorm:"embedded"`
 }
 
-func (FilesCat) TableName() string {
-	return "cats_files"
+func (FilesCatShowCat) TableName() string {
+	return "cat_show_cats_files"
 }

@@ -26,6 +26,7 @@ func (h *ColorHandler) GetAllColorsByBreed(c echo.Context) error {
 	// Log de entrada da função
 	h.Logger.Infof("Handler GetAllColorsByBreed")
 	breedCode := c.Param("breedCode")
+	h.Logger.Infof("breedCode: %s", breedCode)
 	
 	h.Logger.WithFields(logrus.Fields{
 		"breedCode": breedCode,

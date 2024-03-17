@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -12,7 +11,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
-
 
 func NewRouter(catHandler *handler.CatHandler,
 	ownerHandler *handler.OwnerHandler,
@@ -28,6 +26,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	catServiceHandler *handler.CatServiceHandler,
 	filesHandler *handler.FilesHandler,
 	loginHandler *handler.LoginHandler,
+	catShowHandler *handler.CatShowHandler,
+	catShowRegistrationHandler *handler.CatShowRegistrationHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -36,7 +36,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	e.Use(middleware.AddTrailingSlash())
 
 	e.HTTPErrorHandler = customHTTPErrorHandler
-	
+
 	jwtConfig := getJWTConfig()
 	setupHealthChecks(e)
 	setupCatRoutes(e, catHandler)
@@ -53,7 +53,9 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupCatServiceRoutes(e, catServiceHandler)
 	setupFilesRoutes(e, filesHandler)
 	setupLoginRoutes(e, loginHandler)
-	
+	setupCatShowRoutes(e, catShowHandler)
+	setupCatShowRegistrationRoutes(e, catShowRegistrationHandler)
+
 }
 
 func customHTTPErrorHandler(err error, c echo.Context) {
@@ -74,12 +76,11 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 	}
 }
 func getJWTConfig() echojwt.Config {
-	secret := viper.GetString("jwt.secret")
+	secret := viper.GetString("AppJwtSecret")
 	return echojwt.Config{
 		SigningKey: []byte(secret),
 	}
 }
-
 
 func setupHealthChecks(e *echo.Echo) {
 	e.GET("/", func(c echo.Context) error {
@@ -89,7 +90,6 @@ func setupHealthChecks(e *echo.Echo) {
 
 func setupCatRoutes(e *echo.Echo, catHandler *handler.CatHandler) {
 	catGroup := e.Group("/api/cats")
-	//catGroup.Use(echojwt.WithConfig(jwtConfig))
 	catGroup.GET("/:id", catHandler.GetCatsCompleteByID)
 	catGroup.GET("/:ownerId/owner", catHandler.GetCatsByOwner)
 	catGroup.POST("", catHandler.CreateCat)
@@ -121,7 +121,7 @@ func setupOwnerRoutes(e *echo.Echo, ownerHandler *handler.OwnerHandler) {
 
 func setupColorRoutes(e *echo.Echo, colorHandler *handler.ColorHandler) {
 	colorGroup := e.Group("/api/colors")
-	colorGroup.GET("/:breedCode", colorHandler.GetAllColorsByBreed)
+	colorGroup.GET("/breed/:breedCode", colorHandler.GetAllColorsByBreed)
 	colorGroup.GET("/:id", colorHandler.GetColorByID)
 	colorGroup.PUT("/:id", colorHandler.UpdateColor)
 }
@@ -176,7 +176,6 @@ func setupFederationRoutes(e *echo.Echo, federationHandler *handler.FederationHa
 }
 
 func setupCountryRoutes(e *echo.Echo, countryHandler *handler.CountryHandler) {
-	fmt.Println("Rota Country")
 	countryGroup := e.Group("/api/countries")
 	countryGroup.GET("", countryHandler.GetAllCountry)
 }
@@ -198,5 +197,16 @@ func setupLoginRoutes(e *echo.Echo, loginHandler *handler.LoginHandler) {
 
 }
 
+func setupCatShowRoutes(e *echo.Echo, catShowHandler *handler.CatShowHandler) {
+	catShowGroup := e.Group("/api/catshows")
+	catShowGroup.POST("", catShowHandler.CreateCatShow)
+	catShowGroup.GET("/:id", catShowHandler.GetCatShowByID)
+	catShowGroup.PUT("/:id", catShowHandler.UpdateCatShow)
+}
 
-
+func setupCatShowRegistrationRoutes(e *echo.Echo, catShowRegistrationHandler *handler.CatShowRegistrationHandler) {
+	catShowRegistrationGroup := e.Group("/api/catshowregistrations")
+	catShowRegistrationGroup.POST("", catShowRegistrationHandler.CreateCatShowRegistration)
+	//catShowRegistrationGroup.GET("/:id", catShowRegistrationHandler.GetCatShowRegistrationByID)
+	//catShowRegistrationGroup.PUT("/:id", catShowRegistrationHandler.UpdateCatShowRegistration)
+}

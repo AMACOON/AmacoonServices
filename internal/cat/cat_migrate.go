@@ -4,9 +4,9 @@ import (
 	"log"
 	//"github.com/scuba13/AmacoonServices/internal/utils"
 
-	"gorm.io/gorm"
-	"errors"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 const batchSize = 200
@@ -20,7 +20,7 @@ func MigrateCats(dbOld *gorm.DB, dbNew *gorm.DB) {
 	noTitleCats := []string{}
 
 	for {
-		catMigrations, err = GetCatsMigrate(dbOld, offset, batchSize)
+		catMigrations, err = GetCatsMigrate(dbOld, offset, batchSize) //
 		if err != nil {
 			log.Printf("Error getting cats to migrate: %v\n", err)
 		}
@@ -76,17 +76,15 @@ func MigrateCats(dbOld *gorm.DB, dbNew *gorm.DB) {
 			if cat.DM == "1" {
 				titles = append(titles, "DM")
 			}
-			
-			
-			
-			
+
 			federationID, err := getFederationID(dbNew, cat.FedName)
 			if err != nil {
 				log.Printf("Error getting federation ID for cat %d: %v\n", i, err)
 				continue
 			}
 
-			breedID, err := getBreedID(dbNew, cat.BreedName)
+			breedID, err := getBreedID(dbNew, cat.BreedID)
+			log.Printf("Cor Gato")
 			if err != nil {
 				log.Printf("Error getting getBreedID for cat %d: %v\n", i, err)
 				continue
@@ -123,30 +121,61 @@ func MigrateCats(dbOld *gorm.DB, dbNew *gorm.DB) {
 				sexString = "female"
 			}
 
-		
+			fatherColorID, err := getColorID(dbNew, cat.FatherIdEmscode, cat.FatherBreed)
+			if err != nil {
+				log.Printf("Error getting getColorID for cat %d: %v\n", i, err)
+				continue
+			}
+
+			motherColorID, err := getColorID(dbNew, cat.MotherIdEmscode, cat.MotherBreed)
+			if err != nil {
+				log.Printf("Error getting getColorID for cat %d: %v\n", i, err)
+				continue
+			}
+
+			fatherBreedID, err := getBreedID(dbNew, cat.FatherBreed)
+			if err != nil {
+				log.Printf("Error getting getBreedID for cat %d: %v\n", i, err)
+				continue
+			}
+
+			motherBreedID, err := getBreedID(dbNew, cat.MotherBreed)
+			if err != nil {
+				log.Printf("Error getting getBreedID for cat %d: %v\n", i, err)
+				continue
+			}
+			catIDUint := uint(cat.CatID)
+			catIDOldPointer := &catIDUint
+	
 
 			catGorm := Cat{
-				Name:             cat.Name,
-				Registration:     cat.Registration,
-				RegistrationType: cat.RegType,
-				Microchip:        cat.Microchip,
-				Gender:           sexString,
-				Birthdate:        cat.BirthDate,
-				Neutered:         &neutered,
-				Validated:        validated,
-				Observation:      "",
-				Fifecat:          fifecat,
-				FederationID:     federationID,
-				BreedID:          uintPtr(breedID),
-				ColorID:          uintPtr(colorID),
-				FatherID:         nil,
-				MotherID:         nil,
-				CatteryID:        catteryID,
-				OwnerID:          uintPtr(ownerID),
-				CountryID:        countryID,
-				FatherNameTemp:   cleanParentName(cat.FatherName),
-				MotherNameTemp:   cleanParentName(cat.MotherName),
-
+				Name:                cat.Name,
+				Registration:        cat.Registration,
+				RegistrationType:    cat.RegType,
+				Microchip:           cat.Microchip,
+				Gender:              sexString,
+				Birthdate:           cat.BirthDate,
+				Neutered:            &neutered,
+				Validated:           validated,
+				Observation:         "",
+				Fifecat:             fifecat,
+				FederationID:        federationID,
+				BreedID:             uintPtr(breedID),
+				ColorID:             uintPtr(colorID),
+				FatherID:            nil,
+				MotherID:            nil,
+				CatteryID:           catteryID,
+				OwnerID:             uintPtr(ownerID),
+				CountryID:           countryID,
+				FatherNameTemp:      cleanParentName(cat.FatherName),
+				MotherNameTemp:      cleanParentName(cat.MotherName),
+				FatherNameManual:    &cat.FatherName,
+				FatherBreedIDManual: &fatherBreedID,
+				FatherColorIDManual: &fatherColorID,
+				MotherNameManual:    &cat.MotherName,
+				MotherBreedIDManual: &motherBreedID,
+				MotherColorIDManual: &motherColorID,
+				CatIDOld:            catIDOldPointer,
 			}
 
 			result = dbNew.Create(&catGorm)
@@ -172,64 +201,64 @@ func MigrateCats(dbOld *gorm.DB, dbNew *gorm.DB) {
 }
 
 func UpdateCatParents(db *gorm.DB) error {
-    // 1. Consulte todos os gatos na tabela
-    var cats []Cat
-    result := db.Find(&cats)
-    if result.Error != nil {
-        return result.Error
-    }
+	// 1. Consulte todos os gatos na tabela
+	var cats []Cat
+	result := db.Find(&cats)
+	if result.Error != nil {
+		return result.Error
+	}
 
-    count := 0 // Inicialize o contador
+	count := 0 // Inicialize o contador
 
-    // 2. Itere sobre todos os gatos e atualize os IDs dos pais na tabela
-    for _, cat := range cats {
-        // Busque o ID do pai e da mãe na tabela cats usando os nomes limpos
-        var fatherID, motherID *uint
-        if cat.FatherNameTemp != "" {
-            var father Cat
-            result := db.Where("name LIKE ?", "%" + cat.FatherNameTemp + "%").First(&father)
-            if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
-                return result.Error
-            }
-            fatherID = &father.ID
-        }
+	// 2. Itere sobre todos os gatos e atualize os IDs dos pais na tabela
+	for _, cat := range cats {
+		var fatherUpdated, motherUpdated bool
 
-        if cat.MotherNameTemp != "" {
-            var mother Cat
-            result := db.Where("name LIKE ?", "%" + cat.MotherNameTemp + "%").First(&mother)
-            if result.Error != nil && !errors.Is(result.Error, gorm.ErrRecordNotFound) {
-                return result.Error
-            }
-            motherID = &mother.ID
-        }
+		// Busque e atualize o ID do pai se necessário
+		if cat.FatherNameTemp != "" {
+			var father Cat
+			result := db.Where("name LIKE ?", "%"+cat.FatherNameTemp+"%").First(&father)
+			if result.Error != nil {
+				// Se não encontrar o pai, deixe fatherID como nil
+				cat.FatherID = nil
+			} else {
+				// Se encontrar, use o ID do pai e limpa os campos temporários
+				cat.FatherID = &father.ID
+				cat.FatherNameManual = nil
+				cat.FatherBreedIDManual = nil
+				cat.FatherColorIDManual = nil
+				fatherUpdated = true
+			}
+		}
 
-        // Atualize o registro correspondente na tabela cats com os IDs dos pais
-        if fatherID != nil || motherID != nil {
-            if fatherID != nil {
-                cat.FatherID = fatherID
-            }
-            if motherID != nil {
-                cat.MotherID = motherID
-            }
-            result = db.Save(&cat)
-            if result.Error != nil {
-                return result.Error
-            }
+		// Busque e atualize o ID da mãe se necessário
+		if cat.MotherNameTemp != "" {
+			var mother Cat
+			result := db.Where("name LIKE ?", "%"+cat.MotherNameTemp+"%").First(&mother)
+			if result.Error != nil {
+				// Se não encontrar a mãe, deixe motherID como nil
+				cat.MotherID = nil
+			} else {
+				// Se encontrar, use o ID da mãe e limpa os campos temporários
+				cat.MotherID = &mother.ID
+				cat.MotherNameManual = nil
+				cat.MotherBreedIDManual = nil
+				cat.MotherColorIDManual = nil
+				motherUpdated = true
+			}
+		}
 
-            count++ // Incremente o contador
-        }
-    }
+		// Salva as alterações se houve alguma atualização
+		if fatherUpdated || motherUpdated {
+			result = db.Save(&cat)
+			if result.Error != nil {
+				return result.Error
+			}
+			count++
+		}
+	}
 
-    fmt.Printf("Número de gatos atualizados: %d\n", count) // Imprime o contador
+	fmt.Printf("Número de gatos atualizados: %d\n", count) // Imprime o contador
 
-    return nil
+	return nil
 }
-
-
-
-
-
-
-
-
-

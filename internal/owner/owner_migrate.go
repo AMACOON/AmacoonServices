@@ -31,6 +31,9 @@ type OwnerS struct {
 	CPF          string    `gorm:"column:cpf;default:0"`
 	ClubID       uint      `gorm:"column:id_clube"`
 }
+func (OwnerS) TableName() string {
+	return "expositores"
+}
 
 type OwnerClubS struct {
 	gorm.Model
@@ -93,7 +96,7 @@ func MigrateOwners(dbOld, dbNew *gorm.DB, logger *logrus.Logger) error {
 				Phone:        owner.Phone,
 				Valid:        owner.Valid == "s",
 				ValidId:      owner.ValidationID,
-				Observation:  string(owner.Observation),
+				//Observation:  string(owner.Observation),
 				
 			}
 

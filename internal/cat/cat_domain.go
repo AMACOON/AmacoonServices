@@ -6,6 +6,7 @@ type CatInfo struct {
 	Breed   string
 	Color   string
 	EmsCode string
+	Neutered bool
 }
 
 type CatInfoAdm struct {
@@ -14,4 +15,5 @@ type CatInfoAdm struct {
 	Breed   string
 	Color   string
 	EmsCode string
+
 }

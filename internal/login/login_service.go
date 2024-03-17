@@ -35,7 +35,7 @@ func (s *LoginService) Login(loginRequest LoginRequest) (*LoginResponse, error) 
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24)), // Token válido por 24 horas
 	})
-	secret := viper.GetString("jwt.secret")
+	secret := viper.GetString("AppJwtSecret")
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
 		s.Logger.WithError(err).Error("failed to sign token")

@@ -1,0 +1,26 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: dbcatclubsystem
+      POSTGRES_USER: catclubsystem
+      POSTGRES_PASSWORD: 2010mainecoon2010
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgress:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .  # Diretório atual onde o Dockerfile está localizado
+      dockerfile: Dockerfile  # Especificar o nome do Dockerfile se não for o padrão
+    ports:
+      - "8080:8080"  # Mapear a porta do container para a porta do host
+    depends_on:
+      - db  # Garantir que o serviço db seja iniciado antes da aplicação
+
+volumes:
+  postgress:
