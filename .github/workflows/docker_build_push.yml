@@ -41,7 +41,8 @@ jobs:
 
       - name: Set image tag in Kubernetes deployment
         run: |
-         sed -i "s|image: .*\?\/catclubsystem\/amacconservice:.*|image: ${ECR_REGISTRY}/${IMAGE_REPO}/${IMAGE_TAG}|g" k8s/deployment.yaml
+         sed -i "s|image: .*/catclubsystem/amacconservice-.*|image: ${ECR_REGISTRY}/${IMAGE_REPO}/${IMAGE_TAG}|g" k8s/deployment.yaml
+
 
 
       # Debug: Print IMAGE_TAG
