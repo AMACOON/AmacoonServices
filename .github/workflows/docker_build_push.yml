@@ -41,7 +41,8 @@ jobs:
 
       - name: Set image tag in Kubernetes deployment
         run: |
-         sed -i "s|IMAGE_TAG_PLACEHOLDER|${{ env.IMAGE_TAG }}|g" k8s/deployment.yaml
+          awk -v tag="${{ env.IMAGE_TAG }}" '{gsub("IMAGE_TAG_PLACEHOLDER", tag); print}' k8s/deployment.yaml > temp.yaml && mv temp.yaml k8s/deployment.yaml
+      
       
       
       # Debug: Print IMAGE_TAG
