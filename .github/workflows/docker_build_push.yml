@@ -42,6 +42,14 @@ jobs:
       - name: Set image tag in Kubernetes deployment
         run: |
           sed -i "s|image: ${ECR_REGISTRY}/${IMAGE_REPO}/amacconservice:IMAGE_TAG_PLACEHOLDER|image: ${ECR_REGISTRY}/${IMAGE_REPO}/${IMAGE_TAG}|g" k8s/deployment.yaml
+
+      # Debug: Print IMAGE_TAG
+      - name: Debug IMAGE_TAG
+        run: echo "IMAGE_TAG=${IMAGE_TAG}"
+      
+      # Debug: Print deployment.yaml content
+      - name: Debug deployment.yaml content
+        run: cat k8s/deployment.yaml
       
       - name: Install kubectl
         run: |
