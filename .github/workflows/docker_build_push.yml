@@ -39,9 +39,13 @@ jobs:
       - name: Push Docker image to ECR
         run: docker push ${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}
 
-      - name: Set image tag in Kubernetes deployment
+      - name: Replace IMAGE_URL_PLACEHOLDER in deployment.yaml
         run: |
-          sed -i "s|IMAGE_URL_PLACEHOLDER|${{ env.ECR_REGISTRY }}/${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}|g" k8s/deployment.yaml
+          python -c "import sys; import os; data = open('k8s/deployment.yaml').read(); data = data.replace('IMAGE_URL_PLACEHOLDER', os.environ['ECR_REGISTRY'] + '/' + os.environ['IMAGE_REPO'] + ':' + os.environ['IMAGE_TAG']); open('k8s/deployment.yaml', 'w').write(data)"
+        env:
+          ECR_REGISTRY: ${{ env.ECR_REGISTRY }}
+          IMAGE_REPO: ${{ env.IMAGE_REPO }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
       
       
       # Debug: Print IMAGE_TAG
