@@ -14,9 +14,11 @@ func main() {
 	// Initialize Logger
 	logger := setup.SetupLogger()
 
-	// Initialize Echo
-	e := echo.New()
+	
 
+	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(setup.LogMiddleware(logger))
 	e.Use(middleware.Recover())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "${time_rfc3339} ${remote_ip} ${method} ${uri} ${status} ${error}\n",
