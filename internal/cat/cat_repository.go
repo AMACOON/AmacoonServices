@@ -196,28 +196,22 @@ func (r *CatRepository) GetCatsByOwner(ownerId string) ([]CatInfo, error) {
 }
 
 func (r *CatRepository) UpdateNeuteredStatus(catID string, neutered bool) error {
-	r.Logger.Infof("Repository UpdateNeuteredStatus")
+    r.Logger.Infof("Repository UpdateNeuteredStatus")
 
-	// Locate the record for the cat with the given ID
-	cat := Cat{}
-	if err := r.DB.First(&cat, catID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			r.Logger.Errorf("No cat found with id: %s", catID)
-			return err
-		}
-		return err
-	}
+    // Atualiza o status Neutered diretamente sem carregar o registro primeiro
+    if err := r.DB.Model(&Cat{}).Where("id = ?", catID).Update("neutered", neutered).Error; err != nil {
+        if err == gorm.ErrRecordNotFound {
+            r.Logger.Errorf("No cat found with id: %s", catID)
+            return err
+        }
+        r.Logger.Errorf("Update Cat Neutered status failed: %v", err)
+        return err
+    }
 
-	// Update the Neutered status
-	if err := r.DB.Model(&cat).Update("neutered", neutered).Error; err != nil {
-		r.Logger.Errorf("Update Cat Neutered status failed: %v", err)
-		return err
-	}
-
-	r.Logger.Infof("Repository UpdateNeuteredStatus OK")
-
-	return nil
+    r.Logger.Infof("Repository UpdateNeuteredStatus OK")
+    return nil
 }
+
 
 func (r *CatRepository) ValidateCat(name string, microchip string, registration string, registrationType string) (*Cat, error) {
 	r.Logger.Infof("Repository FindCat")
