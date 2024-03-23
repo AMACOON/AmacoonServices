@@ -53,3 +53,13 @@ func (s *CatShowCompleteService) GetCatShowCompleteByCatShowIDs(catShowID uint, 
 	}
 	return catShowCompletes, nil
 }
+
+func (s *CatShowCompleteService) GetCatShowCompleteByYear(catID uint) ([]CatShowYearGroup, error) {
+	s.Logger.Infof("Service GetCatShowCompleteByYear")
+	catShowYearGroups, err := s.Repo.GetCatShowCompleteByYear(catID)
+	if err != nil {
+		s.Logger.Errorf("Failed to get CatShowComplete by year: %v", err)
+		return nil, err
+	}
+	return catShowYearGroups, nil
+}

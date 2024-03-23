@@ -232,6 +232,7 @@ func setupCatShowCompleteRoutes(e *echo.Echo, catShowCompleteHandler *handler.Ca
 	catShowCompleteGroup.GET("/catshow/:catShowID", catShowCompleteHandler.GetCatShowCompleteByCatShowIDs)
     // Para catShowID e catShowSubID
 	catShowCompleteGroup.GET("/catshow/:catShowID/sub/:catShowSubID", catShowCompleteHandler.GetCatShowCompleteByCatShowIDs)
+	catShowCompleteGroup.GET("/year/:catID", catShowCompleteHandler.GetCatShowCompleteByYear)
 }
 
 
