@@ -36,7 +36,7 @@ type Registration struct {
 }
 
 func (Registration) TableName() string {
-	return "cat_shows_registration"
+	return "cat_shows_registration" // arrumar nome tabela
 }
 
 // Inscricao representa uma inscrição de gato em exposição.
@@ -51,5 +51,5 @@ type RegistrationUpdated struct {
 }
 
 func (RegistrationUpdated) TableName() string {
-	return "cat_shows_registration_updated"
+	return "cat_shows_registration_updated"  // arrumar nome tabela
 }
