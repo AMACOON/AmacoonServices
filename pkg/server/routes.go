@@ -28,6 +28,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	loginHandler *handler.LoginHandler,
 	catShowHandler *handler.CatShowHandler,
 	catShowRegistrationHandler *handler.CatShowRegistrationHandler,
+	catShowResultHandler *handler.CatShowResultHandler,
+	catShowCompleteHandler *handler.CatShowCompleteHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -55,6 +57,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupLoginRoutes(e, loginHandler)
 	setupCatShowRoutes(e, catShowHandler)
 	setupCatShowRegistrationRoutes(e, catShowRegistrationHandler)
+	setupCatShowResultRoutes(e, catShowResultHandler)
+	setupCatShowCompleteRoutes(e, catShowCompleteHandler)
 
 }
 
@@ -210,3 +214,25 @@ func setupCatShowRegistrationRoutes(e *echo.Echo, catShowRegistrationHandler *ha
 	//catShowRegistrationGroup.GET("/:id", catShowRegistrationHandler.GetCatShowRegistrationByID)
 	//catShowRegistrationGroup.PUT("/:id", catShowRegistrationHandler.UpdateCatShowRegistration)
 }
+
+func setupCatShowResultRoutes(e *echo.Echo, catShowResultHandler *handler.CatShowResultHandler) {
+	catShowResultGroup := e.Group("/api/catshowresults")
+	catShowResultGroup.POST("", catShowResultHandler.CreateCatShowResult)
+	catShowResultGroup.GET("/:id", catShowResultHandler.GetCatShowResultByID)
+	catShowResultGroup.GET("/registration/:registrationID", catShowResultHandler.GetCatShowResultByRegistrationID)
+	catShowResultGroup.PUT("/:id", catShowResultHandler.UpdateCatShowResult)
+	catShowResultGroup.DELETE("/:id", catShowResultHandler.DeleteCatShowResult)
+}
+
+func setupCatShowCompleteRoutes(e *echo.Echo, catShowCompleteHandler *handler.CatShowCompleteHandler) {
+	catShowCompleteGroup := e.Group("/api/catshowcompletes")
+	//catShowCompleteGroup.GET("/registration/:registrationID", catShowCompleteHandler.GetCatShowCompleteByRegistrationID)
+	catShowCompleteGroup.GET("/cat/:catID", catShowCompleteHandler.GetCatShowCompleteByCatID)
+    // Para catShowID somente
+	catShowCompleteGroup.GET("/catshow/:catShowID", catShowCompleteHandler.GetCatShowCompleteByCatShowIDs)
+    // Para catShowID e catShowSubID
+	catShowCompleteGroup.GET("/catshow/:catShowID/sub/:catShowSubID", catShowCompleteHandler.GetCatShowCompleteByCatShowIDs)
+}
+
+
+

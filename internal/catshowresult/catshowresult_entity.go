@@ -6,10 +6,10 @@ import (
 
 type CatShowResult struct {
 	gorm.Model
-	RegistrationID        *uint `gorm:"not null"`
-	CatShowID             *uint `gorm:"not null"`
-	CatShowSubID          *uint `gorm:"not null"`
-	Number                int
+	RegistrationID        *uint                `gorm:"not null"`
+	CatShowID             *uint                `gorm:"not null"`
+	CatShowSubID          *uint                `gorm:"not null"`
+	Number                int                  `gorm:"not null"`
 	CatShowResultMatrixID *uint                `gorm:"not null"`
 	CatShowResultMatrix   *CatShowResultMatrix `gorm:"foreignKey:CatShowResultMatrixID"`
 }
@@ -22,7 +22,7 @@ type CatShowResultMatrix struct {
 	gorm.Model
 	CatShowID   *uint  `gorm:"not null"`
 	Description string `gorm:"not null"`
-	Score       int
+	Score       int    `gorm:"not null"`
 }
 
 func (CatShowResultMatrix) TableName() string {

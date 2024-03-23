@@ -6,6 +6,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/catshow"
 	"github.com/scuba13/AmacoonServices/internal/catshowcat"
 	"github.com/scuba13/AmacoonServices/internal/catshowclass"
+	//"github.com/scuba13/AmacoonServices/internal/catshowresult"
 	"github.com/scuba13/AmacoonServices/internal/judge"
 	"github.com/scuba13/AmacoonServices/internal/owner"
 
@@ -32,8 +33,10 @@ type Registration struct {
 	Observations     string `gorm:"type:varchar(255)"`
 	Updated          bool
 	Active           bool
-	CatIDOld         *uint `json:"-"` // Campo para migração
+	CatIDOld         *uint                       `json:"-"` // Campo para migração      
+	//CatShowResult    *catshowresult.CatShowResult `gorm:"foreignKey:RegistrationID;references:ID"` // Add this line
 }
+
 
 func (Registration) TableName() string {
 	return "cat_shows_registration" // arrumar nome tabela
@@ -51,5 +54,5 @@ type RegistrationUpdated struct {
 }
 
 func (RegistrationUpdated) TableName() string {
-	return "cat_shows_registration_updated"  // arrumar nome tabela
+	return "cat_shows_registration_updated" // arrumar nome tabela
 }
