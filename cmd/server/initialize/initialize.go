@@ -6,7 +6,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
 	"github.com/scuba13/AmacoonServices/internal/catshow"
-	"github.com/scuba13/AmacoonServices/internal/catshowcomplete"
+	"github.com/scuba13/AmacoonServices/internal/catshowyear"
 	"github.com/scuba13/AmacoonServices/internal/catshowcat"
     "github.com/scuba13/AmacoonServices/internal/catshowregistration"
 	"github.com/scuba13/AmacoonServices/internal/catshowresult"
@@ -56,7 +56,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	catShowCatFileRepo := catshowcat.NewFilesCatShowCatRepository(db, logger)
 	catShowRegistrationRepo:= catshowregistration.NewCatShowRegistrationRepository(db, logger)
 	catShowResultRepo := catshowresult.NewCatShowResultRepository(db, logger)
-	catShowCompleteRepo := catshowcomplete.NewCatShowCompleteRepository(db, logger)
+	catShowYearRepo := catshowyear.NewCatShowYearRepository(db, logger)
 	
 	logger.Info("Initialize Repositories OK")
 
@@ -90,7 +90,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	catShowCatService := catshowcat.NewCCatShowtService(catShowCatRepo, catShowCatFileService,logger)
 	catShowRegistrationService := catshowregistration.NewCatShowRegistrationService(logger, catShowCatService, catService, catShowRegistrationRepo)
 	catShowResultService := catshowresult.NewCatShowResultService(logger,catShowResultRepo)
-	catShowCompleteService := catshowcomplete.NewCatShowCompleteService(logger, catShowCompleteRepo)
+	catShowYearService := catshowyear.NewCatShowYearService(logger, catShowYearRepo)
 	logger.Info("Initialize Services OK")
 
 	// Initialize handlers
@@ -112,7 +112,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 	catshowHandler := handler.NewCatShowHandler(catshowService, logger)
 	catShowRegistrationHandler := handler.NewCatShowRegistrationHandler(catShowRegistrationService, logger)
 	catShowResultHandler := handler.NewCatShowResultHandler(catShowResultService, logger)
-	catShowCompleteHandler := handler.NewCatShowCompleteHandler(catShowCompleteService, logger)
+	catShowYearHandler := handler.NewCatShowYearHandler(catShowYearService, logger)
 	logger.Info("Initialize Handlers OK")
 
 	// Initialize router and routes
@@ -122,7 +122,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 		transferHandler, catteryHandler, federationHandler,
 		titleHandler, titleRecognitionHandler, catServiceHandler,
 		filesHandler, loginHandler,catshowHandler, catShowRegistrationHandler,
-		catShowResultHandler, catShowCompleteHandler,
+		catShowResultHandler, catShowYearHandler,
 		logger, e)
 	logger.Info("Initialize Router and Routes OK")
 

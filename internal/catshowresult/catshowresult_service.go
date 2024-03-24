@@ -49,6 +49,17 @@ func (s *CatShowResultService) GetCatShowResultByRegistrationID(registrationID u
 	return result, nil
 }
 
+func (s *CatShowResultService) GetCatShowResultByCatID(catID uint) (*[]CatShowResult, error) {
+	s.Logger.Infof("Service GetCatShowResultByCatID")
+	result, err := s.Repo.GetByCatID(catID)
+	if err != nil {
+		s.Logger.WithError(err).Errorf("Failed to fetch CatShowResult with RegistrationID: %d", catID)
+		return nil, err
+	}
+	s.Logger.Infof("Service GetCatShowResultByCatID OK")
+	return &result, nil
+}
+
 func (s *CatShowResultService) UpdateCatShowResult(id uint, result *CatShowResult) error {
 	s.Logger.Infof("Service UpdateCatShowResult")
 	err := s.Repo.Update(id, result)

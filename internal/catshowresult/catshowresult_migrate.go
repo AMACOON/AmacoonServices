@@ -178,6 +178,7 @@ func MigrateExposicoesRanking(dbOld, dbNew *gorm.DB) error {
 
 		catShowResult := CatShowResult{
 			RegistrationID:        &registration.ID,
+			CatID:                 registration.CatID,
 			CatShowID:             &catShow.ID,
 			CatShowSubID:          &catShowSub.ID,
 			Number:                exposicoesRanking.Numero,

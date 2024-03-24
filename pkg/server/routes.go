@@ -29,7 +29,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	catShowHandler *handler.CatShowHandler,
 	catShowRegistrationHandler *handler.CatShowRegistrationHandler,
 	catShowResultHandler *handler.CatShowResultHandler,
-	catShowCompleteHandler *handler.CatShowCompleteHandler,
+	catShowYearHandler *handler.CatShowYearHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -58,7 +58,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupCatShowRoutes(e, catShowHandler)
 	setupCatShowRegistrationRoutes(e, catShowRegistrationHandler)
 	setupCatShowResultRoutes(e, catShowResultHandler)
-	setupCatShowCompleteRoutes(e, catShowCompleteHandler)
+	setupCatShowYearRoutes(e, catShowYearHandler)
 
 }
 
@@ -220,19 +220,14 @@ func setupCatShowResultRoutes(e *echo.Echo, catShowResultHandler *handler.CatSho
 	catShowResultGroup.POST("", catShowResultHandler.CreateCatShowResult)
 	catShowResultGroup.GET("/:id", catShowResultHandler.GetCatShowResultByID)
 	catShowResultGroup.GET("/registration/:registrationID", catShowResultHandler.GetCatShowResultByRegistrationID)
+	catShowResultGroup.GET("/cat/:catID", catShowResultHandler.GetCatShowResultByCatID)
 	catShowResultGroup.PUT("/:id", catShowResultHandler.UpdateCatShowResult)
 	catShowResultGroup.DELETE("/:id", catShowResultHandler.DeleteCatShowResult)
 }
 
-func setupCatShowCompleteRoutes(e *echo.Echo, catShowCompleteHandler *handler.CatShowCompleteHandler) {
+func setupCatShowYearRoutes(e *echo.Echo, catShowYearHandler *handler.CatShowYearHandler) {
 	catShowCompleteGroup := e.Group("/api/catshowcompletes")
-	//catShowCompleteGroup.GET("/registration/:registrationID", catShowCompleteHandler.GetCatShowCompleteByRegistrationID)
-	catShowCompleteGroup.GET("/cat/:catID", catShowCompleteHandler.GetCatShowCompleteByCatID)
-    // Para catShowID somente
-	catShowCompleteGroup.GET("/catshow/:catShowID", catShowCompleteHandler.GetCatShowCompleteByCatShowIDs)
-    // Para catShowID e catShowSubID
-	catShowCompleteGroup.GET("/catshow/:catShowID/sub/:catShowSubID", catShowCompleteHandler.GetCatShowCompleteByCatShowIDs)
-	catShowCompleteGroup.GET("/year/:catID", catShowCompleteHandler.GetCatShowCompleteByYear)
+	catShowCompleteGroup.GET("/year/:catID", catShowYearHandler.GetCatShowCompleteByYear)
 }
 
 

@@ -3,6 +3,7 @@ package catshowresult
 import (
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"errors"
 )
 
 type CatShowResultRepository struct {
@@ -53,6 +54,33 @@ func (repo *CatShowResultRepository) GetByRegistrationID(registrationID uint) (*
         return nil, err
     }
     return &catShowResult, nil
+}
+
+func (repo *CatShowResultRepository) GetByCatID(catID uint) ([]CatShowResult, error) {
+    repo.Logger.Infof("Fetching CatShowResults with CatID: %d", catID)
+    var catShowResults []CatShowResult
+    if err := repo.DB.Where("cat_id = ?", catID).
+					  Preload("CatShowResultMatrix").
+					  Preload("CatShow").
+					  Preload("CatShowSub").
+					   Preload("Registration").
+					//   Preload("Registration.CatShowCat").
+					//   Preload("Registration.Owner").
+					//   Preload("Registration.Class").
+					//   Preload("Registration.Judge").
+
+
+					  
+					  Find(&catShowResults).Error; err != nil {
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+            // Note que agora isso indica que não foram encontrados registros, mas pode ser aceitável dependendo do seu caso de uso.
+            repo.Logger.Infof("No CatShowResults found for CatID: %d", catID)
+            return nil, nil
+        }
+        repo.Logger.Errorf("Failed to fetch CatShowResults by CatID: %v", err)
+        return nil, err
+    }
+    return catShowResults, nil
 }
 
 

@@ -77,6 +77,25 @@ func (h *CatShowResultHandler) GetCatShowResultByRegistrationID(c echo.Context) 
 	return c.JSON(http.StatusOK, catShowResult)
 }
 
+func (h *CatShowResultHandler) GetCatShowResultByCatID(c echo.Context) error {
+	h.Logger.Info("Handler GetCatShowResultByCatID")
+
+	catID, err := strconv.ParseUint(c.Param("catID"), 10, 64)
+	if err != nil {
+		h.Logger.Errorf("Invalid CatID format: %v", err)
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid CatID format")
+	}
+
+	catShowResult, err := h.CatShowResultService.GetCatShowResultByCatID(uint(catID))
+	if err != nil {
+		h.Logger.Errorf("Failed to get CatShowResult by CatID: %v", err)
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to get CatShowResult by CatID")
+	}
+
+	h.Logger.Info("Handler GetCatShowResultByCatID OK")
+	return c.JSON(http.StatusOK, catShowResult)
+}
+
 func (h *CatShowResultHandler) UpdateCatShowResult(c echo.Context) error {
 	h.Logger.Info("Handler UpdateCatShowResult")
 
