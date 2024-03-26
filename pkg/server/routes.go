@@ -28,6 +28,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	loginHandler *handler.LoginHandler,
 	catShowHandler *handler.CatShowHandler,
 	catShowRegistrationHandler *handler.CatShowRegistrationHandler,
+	catShowResultHandler *handler.CatShowResultHandler,
+	catShowYearHandler *handler.CatShowYearHandler,
 	logger *logrus.Logger,
 	e *echo.Echo,
 ) {
@@ -55,6 +57,8 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupLoginRoutes(e, loginHandler)
 	setupCatShowRoutes(e, catShowHandler)
 	setupCatShowRegistrationRoutes(e, catShowRegistrationHandler)
+	setupCatShowResultRoutes(e, catShowResultHandler)
+	setupCatShowYearRoutes(e, catShowYearHandler)
 
 }
 
@@ -210,3 +214,21 @@ func setupCatShowRegistrationRoutes(e *echo.Echo, catShowRegistrationHandler *ha
 	//catShowRegistrationGroup.GET("/:id", catShowRegistrationHandler.GetCatShowRegistrationByID)
 	//catShowRegistrationGroup.PUT("/:id", catShowRegistrationHandler.UpdateCatShowRegistration)
 }
+
+func setupCatShowResultRoutes(e *echo.Echo, catShowResultHandler *handler.CatShowResultHandler) {
+	catShowResultGroup := e.Group("/api/catshowresults")
+	catShowResultGroup.POST("", catShowResultHandler.CreateCatShowResult)
+	catShowResultGroup.GET("/:id", catShowResultHandler.GetCatShowResultByID)
+	catShowResultGroup.GET("/registration/:registrationID", catShowResultHandler.GetCatShowResultByRegistrationID)
+	catShowResultGroup.GET("/cat/:catID", catShowResultHandler.GetCatShowResultByCatID)
+	catShowResultGroup.PUT("/:id", catShowResultHandler.UpdateCatShowResult)
+	catShowResultGroup.DELETE("/:id", catShowResultHandler.DeleteCatShowResult)
+}
+
+func setupCatShowYearRoutes(e *echo.Echo, catShowYearHandler *handler.CatShowYearHandler) {
+	catShowCompleteGroup := e.Group("/api/catshowyears")
+	catShowCompleteGroup.GET("/year/:catID", catShowYearHandler.GetCatShowCompleteByYear)
+}
+
+
+

@@ -18,6 +18,7 @@ import (
 	"github.com/scuba13/AmacoonServices/internal/catshowcat"
 	"github.com/scuba13/AmacoonServices/internal/catshowclass"
 	"github.com/scuba13/AmacoonServices/internal/catshowregistration"
+	"github.com/scuba13/AmacoonServices/internal/catshowresult"
 	"github.com/scuba13/AmacoonServices/internal/cattery"
 	"github.com/scuba13/AmacoonServices/internal/club"
 	"github.com/scuba13/AmacoonServices/internal/color"
@@ -147,6 +148,8 @@ func SetupDatabase(logger *logrus.Logger) (*gorm.DB, error) {
 		&catshowcat.CatShowCat{},
 		&catshowcat.FilesCatShowCat{},
 		&catshowcat.TitlesCatShowCat{},
+		&catshowresult.CatShowResult{},
+		&catshowresult.CatShowResultMatrix{},
 	)
 	if err != nil {
 		logger.Errorf("AutoMigrate failed: %v", err)

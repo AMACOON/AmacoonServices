@@ -79,16 +79,7 @@ func (h *CatHandler) CreateCat(c echo.Context) error {
 
 func (h *CatHandler) GetCatsCompleteByID(c echo.Context) error {
 
-	// userToken, ok := c.Get("user").(*jwt.Token)
-	// if !ok {
-	// 	h.Logger.Errorln("Failed to get CatComplete by ID")
-	// 	return echo.NewHTTPError(http.StatusInternalServerError, "Erro ao obter o token")
-	// }
-	// claims := userToken.Claims.(jwt.MapClaims)
-	// userID := claims["sub"].(string)
 
-	//h.Logger.Infof("userID: %s", userID)
-	// Log de entrada da função
 	h.Logger.Infof("Handler GetCatsCompleteByID")
 	id := c.Param("id")
 
