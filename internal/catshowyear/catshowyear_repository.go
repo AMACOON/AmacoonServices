@@ -71,7 +71,7 @@ func (r *CatShowYearRepository) GetCatShowCompleteByYear(catID uint) ([]CatShowY
 			ClassName:             result.Registration.Class.Name,
 			ClassCode:             result.Registration.Class.Code,
 			JudgesName:            result.Registration.Judge.Name,
-			CatShowCatNameFull:    "",
+			CatShowCatNameFull:    GetFullName(result.Registration.CatShowCat),
 			CatShowCatBreedCode:   result.Registration.CatShowCat.Breed.BreedCode,
 			CatShowCatEmsCode:     result.Registration.CatShowCat.Color.EmsCode,
 			CatShowCatGender:      result.Registration.CatShowCat.Gender,
@@ -79,7 +79,6 @@ func (r *CatShowYearRepository) GetCatShowCompleteByYear(catID uint) ([]CatShowY
 			OwnerName:             result.Registration.Owner.Name,
 		}
 
-		catShowSubDetail.CatShowCatNameFull = GetFullName(result.Registration.CatShowCat)
 
 		// Adiciona detalhes do show ao mapeamento, considerando o agrupamento correto
 		found := false
