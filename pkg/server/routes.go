@@ -226,7 +226,7 @@ func setupCatShowResultRoutes(e *echo.Echo, catShowResultHandler *handler.CatSho
 }
 
 func setupCatShowYearRoutes(e *echo.Echo, catShowYearHandler *handler.CatShowYearHandler) {
-	catShowCompleteGroup := e.Group("/api/catshowcompletes")
+	catShowCompleteGroup := e.Group("/api/catshowyears")
 	catShowCompleteGroup.GET("/year/:catID", catShowYearHandler.GetCatShowCompleteByYear)
 }
 

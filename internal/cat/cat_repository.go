@@ -58,6 +58,7 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 		Preload("Owner.Country").
 		Preload("Owner.Clubs").
 		Preload("Cattery.Country").
+		Preload("Cattery.Owner").
 		Preload("Federation.Country").
 		Preload("Federation").
 		Preload("Titles.Titles").
