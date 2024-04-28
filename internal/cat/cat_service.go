@@ -64,6 +64,7 @@ func (s *CatService) CreateCat(req *Cat, filesWithDesc []utils.FileWithDescripti
 	return cat, nil
 }
 
+
 func (s *CatService) GetCatsCompleteByID(id string) (*Cat, error) {
 	s.Logger.Infof("Service GetCatsCompleteByID")
 	cat, err := s.CatRepo.GetCatCompleteByID(id)
