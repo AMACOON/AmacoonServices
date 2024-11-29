@@ -29,7 +29,6 @@ import (
 )
 
 func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s3.S3) {
-
 	// Initialize repositories
 	logger.Info("Initialize Repositories")
 	catRepo := cat.NewCatRepository(db, logger)
