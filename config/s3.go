@@ -12,8 +12,8 @@ import (
 func SetupS3Session(logger *logrus.Logger) (*s3.S3, error) {
 	// Crie uma nova sessão AWS
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(viper.GetString("aws.region")),
-		Credentials: credentials.NewStaticCredentials(viper.GetString("aws.accessKeyId"), viper.GetString("aws.secretAccessKey"), ""),
+		Region:      aws.String(viper.GetString("AWS_REGION")),
+		Credentials: credentials.NewStaticCredentials(viper.GetString("AWS_ACCESSKEYID"), viper.GetString("AWS_SECRETACCESSKEY"), ""),
         
 	})
 	if err != nil {
