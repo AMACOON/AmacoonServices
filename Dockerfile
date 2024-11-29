@@ -19,8 +19,8 @@ WORKDIR /app
 
 # Copiar o binário compilado e quaisquer outros arquivos necessários
 COPY --from=builder /app/main /app/main
-COPY --from=builder /app/config.local.yaml /app/config.local.yaml
-COPY --from=builder /app/config.prod.yaml /app/config.prod.yaml
+# COPY --from=builder /app/config.local.yaml /app/config.local.yaml
+# COPY --from=builder /app/config.prod.yaml /app/config.prod.yaml
 
 # Definir a porta que a aplicação irá utilizar
 EXPOSE 8080
