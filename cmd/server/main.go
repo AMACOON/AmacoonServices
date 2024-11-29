@@ -48,7 +48,7 @@ func main() {
 
 	// Start server
 	logger.Info("Starting Server")
-	if err := e.Start(":" + viper.GetString("server.port")); err != nil {
+	if err := e.Start(":" + viper.GetString("SERVER_PORT")); err != nil {
 		logger.Fatalf("Failed to start server: %v", err)
 	}
 }
