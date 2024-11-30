@@ -14,10 +14,9 @@ func SetupS3Session(logger *logrus.Logger) (*s3.S3, error) {
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String(viper.GetString("AWS_REGION")),
 		Credentials: credentials.NewStaticCredentials(viper.GetString("AWS_ACCESSKEYID"), viper.GetString("AWS_SECRETACCESSKEY"), ""),
-        
 	})
 	if err != nil {
-
+		logger.WithError(err).Error("Failed to create AWS session")
 		return nil, err
 	}
 
@@ -25,13 +24,18 @@ func SetupS3Session(logger *logrus.Logger) (*s3.S3, error) {
 	svc := s3.New(sess)
 
 	// Teste a conexão listando os buckets
-	// logger.Info("Testing S3 connection")
-    // _, err = svc.ListBuckets(nil)
-	// if err != nil {
-	// 	logger.WithError(err).Error("Failed to list S3 buckets")
-	// 	return nil, err
-	// }
+	logger.Info("Testing S3 connection")
+	result, err := svc.ListBuckets(nil)
+	if err != nil {
+		logger.WithError(err).Error("Failed to list S3 buckets")
+		return nil, err
+	}
 
-	logger.Info("Successfully connected to S3 and listed buckets")
+	// Log os buckets encontrados
+	logger.Info("Successfully connected to S3. Buckets found:")
+	for _, bucket := range result.Buckets {
+		logger.Infof("Bucket Name: %s", aws.StringValue(bucket.Name))
+	}
+
 	return svc, nil
 }

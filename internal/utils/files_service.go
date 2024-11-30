@@ -30,7 +30,7 @@ func (s *FilesService) SaveFiles(identifier string, domain string, filesWithDesc
 	s.Logger.Infof("Saving %d files for identifier %s", len(filesWithDesc), identifier)
 	savedFiles := []Files{}
 
-	bucket := viper.GetString("aws.bucket")
+	bucket := viper.GetString("AWS_BUCKET")
 
 	for _, fileWithDesc := range filesWithDesc {
 		file := fileWithDesc.File

@@ -20,10 +20,10 @@ func (s *SmtpService) SendEmail(from string, to []string, subject string, body s
 	s.Logger.Infof("Sending email from %s to %s", from, to)
 	
 	// Configuração do servidor SMTP
-	smtpHost := viper.GetString("smtp.host")
-	smtpPort := viper.GetInt("smtp.port")
-	smtpUsername := viper.GetString("smtp.username")
-	smtpPassword := viper.GetString("smtp.password")
+	smtpHost := viper.GetString("SMTP_HOST")
+	smtpPort := viper.GetInt("SMTP_PORT")
+	smtpUsername := viper.GetString("SMTP_USERNAME")
+	smtpPassword := viper.GetString("SMTP_PASSWORD")
 
 	// Cria uma nova mensagem usando a biblioteca GoMail
 	message := gomail.NewMessage()
