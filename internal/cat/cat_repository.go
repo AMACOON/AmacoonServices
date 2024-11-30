@@ -51,19 +51,20 @@ func (r *CatRepository) GetCatCompleteByID(id string) (*Cat, error) {
 
 	
 	result := r.DB.
-		Preload("Breed").
-		Preload("Color").
-		Preload("Cattery").
-		Preload("Country").
-		Preload("Owner.Country").
-		Preload("Owner.Clubs").
-		Preload("Cattery.Country").
-		Preload("Cattery.Owner").
-		Preload("Federation.Country").
-		Preload("Federation").
-		Preload("Titles.Titles").
-		Preload("Files").
-		Where("id = ?", id).First(&cat)
+    Preload("Breed").
+    Preload("Color").
+    Preload("Cattery").
+    Preload("Cattery.Country").
+    Preload("Cattery.Owner.Clubs.Club").
+    Preload("Country").
+    Preload("Owner.Country").
+    Preload("Owner.Clubs.Club").
+    Preload("Federation.Country").
+    Preload("Federation").
+    Preload("Titles.Titles").
+    Preload("Files").
+    Where("id = ?", id).First(&cat)
+
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			r.Logger.Errorf("Cat not found")
