@@ -8,31 +8,37 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/scuba13/AmacoonServices/internal/handler"
+	"github.com/scuba13/AmacoonServices/internal/membership"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
-func NewRouter(catHandler *handler.CatHandler,
-	ownerHandler *handler.OwnerHandler,
-	colorHandler *handler.ColorHandler,
-	litterHandler *handler.LitterHandler,
-	breedHandler *handler.BreedHandler,
-	countryHandler *handler.CountryHandler,
-	transferHandler *handler.TransferHandler,
-	catteryHandler *handler.CatteryHandler,
-	federationHandler *handler.FederationHandler,
-	titleHandler *handler.TitleHandler,
-	titleRecognitionHandler *handler.TitleRecognitionHandler,
-	catServiceHandler *handler.CatServiceHandler,
-	filesHandler *handler.FilesHandler,
-	loginHandler *handler.LoginHandler,
-	catShowHandler *handler.CatShowHandler,
-	catShowRegistrationHandler *handler.CatShowRegistrationHandler,
-	catShowResultHandler *handler.CatShowResultHandler,
-	catShowYearHandler *handler.CatShowYearHandler,
-	logger *logrus.Logger,
-	e *echo.Echo,
+func NewRouter(
+    catHandler *handler.CatHandler,
+    ownerHandler *handler.OwnerHandler,
+    colorHandler *handler.ColorHandler,
+    litterHandler *handler.LitterHandler,
+    breedHandler *handler.BreedHandler,
+    countryHandler *handler.CountryHandler,
+    transferHandler *handler.TransferHandler,
+    catteryHandler *handler.CatteryHandler,
+    federationHandler *handler.FederationHandler,
+    titleHandler *handler.TitleHandler,
+    titleRecognitionHandler *handler.TitleRecognitionHandler,
+    catServiceHandler *handler.CatServiceHandler,
+    filesHandler *handler.FilesHandler,
+    loginHandler *handler.LoginHandler,
+    catShowHandler *handler.CatShowHandler,
+    catShowRegistrationHandler *handler.CatShowRegistrationHandler,
+    catShowResultHandler *handler.CatShowResultHandler,
+    catShowYearHandler *handler.CatShowYearHandler,
+
+    membershipHandler *membership.Handler, // 👈 NOVO
+
+    logger *logrus.Logger,
+    e *echo.Echo,
 ) {
+
 	e.Use(middleware.Timeout())
 	e.Use(middleware.CORS())
 	e.Use(middleware.AddTrailingSlash())
@@ -59,6 +65,7 @@ func NewRouter(catHandler *handler.CatHandler,
 	setupCatShowRegistrationRoutes(e, catShowRegistrationHandler)
 	setupCatShowResultRoutes(e, catShowResultHandler)
 	setupCatShowYearRoutes(e, catShowYearHandler)
+	setupMembershipRoutes(e, membershipHandler)
 
 }
 
@@ -230,5 +237,9 @@ func setupCatShowYearRoutes(e *echo.Echo, catShowYearHandler *handler.CatShowYea
 	catShowCompleteGroup.GET("/year/:catID", catShowYearHandler.GetCatShowCompleteByYear)
 }
 
+func setupMembershipRoutes(e *echo.Echo, membershipHandler *membership.Handler) {
+	group := e.Group("/api/membership-requests")
+	group.POST("", membershipHandler.Create)
+}
 
 
