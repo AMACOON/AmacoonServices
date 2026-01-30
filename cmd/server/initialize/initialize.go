@@ -3,6 +3,7 @@ package initialize
 import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/labstack/echo/v4"
+	"github.com/scuba13/AmacoonServices/internal/membership"
 	"github.com/scuba13/AmacoonServices/internal/breed"
 	"github.com/scuba13/AmacoonServices/internal/cat"
 	"github.com/scuba13/AmacoonServices/internal/catshow"
@@ -31,6 +32,7 @@ import (
 func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s3.S3) {
 	// Initialize repositories
 	logger.Info("Initialize Repositories")
+	membershipRepo := membership.NewRepository(db, logger)
 	catRepo := cat.NewCatRepository(db, logger)
 	ownerRepo := owner.NewOwnerRepository(db, logger)
 	colorRepo := color.NewColorRepository(db, logger)
@@ -61,6 +63,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 
 	// Initialize services
 	logger.Info("Initialize Services")
+	membershipService := membership.NewService(membershipRepo, logger)
 	filesService := utils.NewFilesService(s3Client, logger)
 	protocolService := utils.NewProtocolService(protocolRepo, logger)
 	smptService:= utils.NewSmtpService(logger)
@@ -94,6 +97,7 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 
 	// Initialize handlers
 	logger.Info("Initialize Handlers")
+	membershipHandler := membership.NewHandler(membershipService)
 	catHandler := handler.NewCatHandler(catService, logger)
 	ownerHandler := handler.NewOwnerHandler(ownerService, logger)
 	colorHandler := handler.NewColorHandler(colorService, logger)
@@ -116,13 +120,18 @@ func InitializeApp(e *echo.Echo, logger *logrus.Logger, db *gorm.DB, s3Client *s
 
 	// Initialize router and routes
 	logger.Info("Initialize Router and Routes")
-	routes.NewRouter(catHandler, ownerHandler, colorHandler,
-		litterHandler, breedHandler, countryHandler,
-		transferHandler, catteryHandler, federationHandler,
-		titleHandler, titleRecognitionHandler, catServiceHandler,
-		filesHandler, loginHandler,catshowHandler, catShowRegistrationHandler,
-		catShowResultHandler, catShowYearHandler,
-		logger, e)
+	routes.NewRouter(
+	catHandler, ownerHandler, colorHandler,
+	litterHandler, breedHandler, countryHandler,
+	transferHandler, catteryHandler, federationHandler,
+	titleHandler, titleRecognitionHandler, catServiceHandler,
+	filesHandler, loginHandler, catshowHandler, catShowRegistrationHandler,
+	catShowResultHandler, catShowYearHandler,
+
+	membershipHandler, // 👈 NOVO
+
+	logger, e)
+
 	logger.Info("Initialize Router and Routes OK")
 
 }
