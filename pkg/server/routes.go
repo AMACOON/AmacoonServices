@@ -1,16 +1,16 @@
 package routes
 
 import (
-	"net/http"
+    "net/http"
 
-	echojwt "github.com/labstack/echo-jwt/v4"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+    echojwt "github.com/labstack/echo-jwt/v4"
+    "github.com/labstack/echo/v4"
+    "github.com/labstack/echo/v4/middleware"
 
-	"github.com/scuba13/AmacoonServices/internal/handler"
-	"github.com/scuba13/AmacoonServices/internal/membership"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
+    "github.com/scuba13/AmacoonServices/internal/handler"
+    "github.com/scuba13/AmacoonServices/internal/membership" // 👈 NOVO
+    "github.com/sirupsen/logrus"
+    "github.com/spf13/viper"
 )
 
 func NewRouter(
